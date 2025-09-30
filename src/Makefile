@@ -116,6 +116,15 @@ parser.c	: parser.y
 		  -$(YACC) parser.y
 		  mv y.tab.c parser.c
 
+unitable.c: mkunitable UnicodeData-4.0.0.txt
+	./mkunitable UnicodeData-4.0.0.txt > unitable.c
+
+UnicodeData-4.0.0.txt:
+	wget https://www.unicode.org/Public/4.0-Update/UnicodeData-4.0.0.txt -o 
+
+UnicodeData-License.txt:
+	wget https://www.unicode.org/license.txt -O UnicodeData-License.txt
+
 ################################################################
 # Generating object dependencies (requires gcc)
 ################################################################

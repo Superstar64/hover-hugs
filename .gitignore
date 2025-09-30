@@ -1,6 +1,7 @@
 src/options.h
 src/platform.h
 src/parser.c
+src/unitable.c
 *.o
 src/hugs
 src/runhugs
