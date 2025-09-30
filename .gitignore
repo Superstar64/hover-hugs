@@ -1,0 +1,7 @@
+src/options.h
+src/platform.h
+src/parser.c
+*.o
+src/hugs
+src/runhugs
+src/ffihugs

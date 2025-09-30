@@ -1,4 +1,3 @@
-# @configure_input@
 # --------------------------------------------------------------------------
 # Makefile for Hugs interpreter
 # (this should be a POSIX 1003.2-1992 Makefile)
@@ -12,45 +11,22 @@
 
 # Targets:
 #
-# <default>:   	  make hugs@EXEEXT@ and runhugs@EXEEXT@
+# <default>:   	  make hugs and runhugs
 # install:	  make and install programs
-# hugs@EXEEXT@:	  make minimal working system
-# runhugs@EXEEXT@: make batch-mode version of Hugs
+# hugs:	  make minimal working system
+# runhugs: make batch-mode version of Hugs
 # clean:       	  delete files not required in running system
 # distclean:      delete files that can be regenerated using C compiler
 # veryclean:      delete all machine generated files 
 #                   (you need perl, bison/yacc, etc to rebuild these files)
 # TAGS:           build emacs TAGS table
 
-CC		= @CC@
-CFLAGS		= @CFLAGS@ @DEBUGFLAGS@
-OPTFLAGS	= @OPTFLAGS@
+OPTFLAGS	= -O2
 
-LD		= @LD@
-LDFLAGS    	= @LDFLAGS@  @LDDEBUGFLAGS@
-LIBS		= @LIBS@
-
-YACC		= @YACC@
-RM		= @RM@
-CP		= @CP@
-EXEEXT		= @EXEEXT@
-OBJEXT		= @OBJEXT@
-STRIP		= @STRIP@
-
-# These variables determine where various parts of the Hugs system are
-# installed.  (They are ignored in Windows or DOS.)
-# Binaries are installed in $(bindir); libraries go in $(hugsdir)/libraries
-prefix		= @prefix@
-exec_prefix	= @exec_prefix@
-bindir		= @bindir@
-libdir		= @libdir@
-datarootdir	= @datarootdir@
-datadir		= @datadir@
-mandir          = @mandir@
-hugsdir		= @hugsdir@
+LIBS		= -lreadline -lncurses -lm -ldl 
 
 .SUFFIXES	:
-.SUFFIXES	: .c .h .$(OBJEXT)
+.SUFFIXES	: .c .h .o
 
 HFILES		= HsFFI.h builtin.h char.h command.h config.h connect.h \
 		  errors.h evaluator.h goal.h machdep.h module.h observe.h \
@@ -65,94 +41,53 @@ INCFILES	= array.c bignums.c dirprim.c interns.c iomonad.c \
 		  preds.c printer.c scc.c timeprim.c timer.c
 YFILES		= parser.y
 SOURCES		= $(HFILES) $(CFILES) $(INCFILES) $(YFILES) 
-OBJECTS		= builtin.$(OBJEXT) char.$(OBJEXT) compiler.$(OBJEXT) \
-		  errors.$(OBJEXT) evaluator.$(OBJEXT) ffi.$(OBJEXT) \
-		  goal.$(OBJEXT) input.$(OBJEXT) machdep.$(OBJEXT) \
-		  machine.$(OBJEXT) module.$(OBJEXT) opts.$(OBJEXT) \
-		  output.$(OBJEXT) plugin.$(OBJEXT) script.$(OBJEXT) \
-		  static.$(OBJEXT) storage.$(OBJEXT) strutil.$(OBJEXT) \
-		  subst.$(OBJEXT) type.$(OBJEXT) version.$(OBJEXT)
-IOBJECTS	= hugs.$(OBJEXT) edit.$(OBJEXT) observe.$(OBJEXT) $(OBJECTS)
-WOBJECTS	= @WOBJECTS@
-RC_FILES	= @RC_FILES@
+OBJECTS		= builtin.o char.o compiler.o \
+		  errors.o evaluator.o ffi.o \
+		  goal.o input.o machdep.o \
+		  machine.o module.o opts.o \
+		  output.o plugin.o script.o \
+		  static.o storage.o strutil.o \
+		  subst.o type.o version.o
+IOBJECTS	= hugs.o edit.o observe.o $(OBJECTS)
 
 ################################################################
 # Default target
 ################################################################
 
 # This rule goes first to make it the default choice
-default		:: all
+default		: all
 
-all		:: hugs$(EXEEXT) runhugs$(EXEEXT) ffihugs$(EXEEXT)
+all		: hugs runhugs ffihugs
 
 ################################################################
 # Hugs interpreter and standalone evaluator
 ################################################################
 
-hugs$(EXEEXT)	: $(IOBJECTS) $(WOBJECTS) $(RC_FILES)
-		  $(CC) $(LDFLAGS) $(IOBJECTS) $(WOBJECTS) $(LIBS) -o hugs$(EXEEXT) 
-		  $(STRIP)
+hugs	: $(IOBJECTS)
+		  $(CC) $(LDFLAGS) $(IOBJECTS) $(LIBS) -o hugs
 
-version.$(OBJEXT) : version.c $(SOURCES)
+version.o : version.c $(SOURCES)
 		  @$(CC) \
 		      -DMONTH_YEAR='"'"`date +'%B %Y' 2> /dev/null`"'"' \
 		      -DYYYYMMDD='"'"`date +'%Y%m%d' 2> /dev/null`"'"' \
 		      -c $(CFLAGS) $(OPTFLAGS) $<
 
-SERVER_OBJECTS	= server.$(OBJEXT) $(OBJECTS) 
-runhugs$(EXEEXT) : runhugs.$(OBJEXT) $(SERVER_OBJECTS)
-		  $(CC) $(LDFLAGS) runhugs.$(OBJEXT) $(SERVER_OBJECTS) $(LIBS) -o runhugs$(EXEEXT)
+SERVER_OBJECTS	= server.o $(OBJECTS) 
+runhugs : runhugs.o $(SERVER_OBJECTS)
+		  $(CC) $(LDFLAGS) runhugs.o $(SERVER_OBJECTS) $(LIBS) -o runhugs
 
-ffihugs$(EXEEXT) : ffihugs.$(OBJEXT) $(SERVER_OBJECTS)
-		  $(CC) $(LDFLAGS) ffihugs.$(OBJEXT) $(SERVER_OBJECTS) $(LIBS) -o ffihugs$(EXEEXT)
+ffihugs : ffihugs.o $(SERVER_OBJECTS)
+		  $(CC) $(LDFLAGS) ffihugs.o $(SERVER_OBJECTS) $(LIBS) -o ffihugs
 
-ffihugs.$(OBJEXT) : runhugs.$(OBJEXT)
-		  $(CC) -c $(CFLAGS) $(OPTFLAGS) -DFFI_COMPILER runhugs.c -o ffihugs.$(OBJEXT)
+ffihugs.o : runhugs.o
+		  $(CC) -c $(CFLAGS) $(OPTFLAGS) -DFFI_COMPILER runhugs.c -o ffihugs.o
 
-################################################################
-# Clean, distclean, veryclean, TAGS
-################################################################
-
-clean		::
-		  $(RM) *.o
-		  $(RM) *.O
-		  $(RM) *.obj
-		  $(RM) *.OBJ
-		  $(RM) *.LIB
-		  $(RM) *.DEF
-		  $(RM) *.RES
-		  $(RM) *.EXP
-		  $(RM) *.ILK
-		  $(RM) *.PDB
-		  $(RM) *.TD2
-		  $(RM) *.MAP
-		  $(RM) *.CSM
-		  $(RM) *.TR2
-		  $(RM) *.DSW
-		  $(RM) *.aux
-		  $(RM) *.hp
-distclean	:: clean
-distclean	::
-		  $(RM) hugs$(EXEEXT)
-		  $(RM) runhugs$(EXEEXT)
-		  $(RM) ffihugs$(EXEEXT)
-		  $(RM) Makefile
-		  $(RM) config.h
-		  $(RM) options.h
-		  $(RM) platform.h
-		  $(RM) *.pdf
-		  $(RM) TAGS tags
-		  $(RM) *~
-veryclean	:: distclean
-veryclean	::
-TAGS		::
-		  etags *.[ych]
 
 ################################################################
 # C and Yacc rules
 ################################################################
 
-.c.$(OBJEXT)	:
+.c.o	:
 		  $(CC) -c $(CFLAGS) $(OPTFLAGS) $<
 
 # Modules to be compiled without optimization.
@@ -166,22 +101,20 @@ TAGS		::
 # conservative garbage collector's simplistic scan of the C stack.
 # Modules associated with evaluation are safe because they don't assume
 # conservative GC (see IMPORTANT NOTICE in builtin.c).
-compiler.$(OBJEXT) : compiler.c
+compiler.o : compiler.c
 		  $(CC) -c $(CFLAGS) compiler.c
-module.$(OBJEXT) : module.c
+module.o : module.c
 		  $(CC) -c $(CFLAGS) module.c
-subst.$(OBJEXT)	: subst.c
+subst.o	: subst.c
 		  $(CC) -c $(CFLAGS) subst.c
-static.$(OBJEXT) : static.c
+static.o : static.c
 		  $(CC) -c $(CFLAGS) static.c
-type.$(OBJEXT)	: type.c
+type.o	: type.c
 		  $(CC) -c $(CFLAGS) type.c
 
 parser.c	: parser.y
 		  -$(YACC) parser.y
 		  mv y.tab.c parser.c
-# veryclean	::
-# 		  $(RM) parser.c
 
 ################################################################
 # Generating object dependencies (requires gcc)
@@ -193,7 +126,7 @@ HUGS_MAKEFILES = Makefile dotnet/Makefile msc/Makefile winhugs/Makefile
 EXTRA_DEFINES = -DINTERNAL_PRIMS -DUNICODE_CHARS -DWANT_TIMER
 
 depend: $(SOURCES) parser.c
-	gcc -MM $(EXTRA_DEFINES) $(CFILES) | sed 's/\.o:/.$$(OBJEXT):/' >TMP
+	gcc -MM $(EXTRA_DEFINES) $(CFILES) | sed 's/\.o:/.$o:/' >TMP
 	if cmp -s TMP MkDepend.in; then : ; else \
 		$(CP) TMP MkDepend.in; \
 		for mfile in $(HUGS_MAKEFILES);\
@@ -205,16 +138,10 @@ depend: $(SOURCES) parser.c
 	rm TMP
 
 ################################################################
-# Generated object dependencies (Don't change or delete this line)
+# Object dependencies
 ################################################################
 
-@MkDepend@
-
-################################################################
-# End of generated object dependencies (Don't change or delete this line)
-################################################################
-
-@MkInstall@
+include MkDepend.mk
 
 ################################################################
 # End of Makefile
