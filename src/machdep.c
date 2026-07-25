@@ -50,18 +50,7 @@
 #  include <dirent.h>
 #  include <locale.h>
 
-/* Hack for systems with unlimited path length (e.g. the Hurd), which
- * will not define PATH_MAX or MAXPATHLEN.  The Right Thing would be
- * to dynamically allocate these buffers, and use functions like
- * get_current_dir_name() and canonicalize_file_name().
- */
-#if HAVE_REALPATH && !defined(MAXPATHLEN)
-#ifdef PATH_MAX
 #define MAXPATHLEN PATH_MAX
-#else
-#define MAXPATHLEN 4096
-#endif
-#endif
 
 /* Windows/DOS include files */
 #if HAVE_DOS_H
@@ -333,10 +322,6 @@ static void hscriptSuffixes() {
 
 String local RealPath(s)         /* Find absolute pathname of file  */
 String s; {
-#if HAVE__FULLPATH  /* eg DOS */
-    static char path[FILENAME_MAX+1];
-    _fullpath(path,s,FILENAME_MAX+1);
-#elif HAVE_REALPATH /* eg Unix */
     static char path[MAXPATHLEN+1];
     path[sizeof(path)-1] = '\0';
     if (strlen(s) <= (sizeof(path)-1)) {
@@ -344,16 +329,6 @@ String s; {
     } else {
 	return s;
     }
-#else
-    static char path[FILENAME_MAX+1];
-
-    path[sizeof(path)-1] = '\0';
-    if (strlen(s) <= (sizeof(path)-1)) {
-        strcpy(path,s);
-    } else {
-	return s;
-    }
-#endif
     return path;
 }
 
@@ -1724,11 +1699,7 @@ void* dll; {
 
 static void* local getModDLL(file)		/* load DLL for module     */
 String file; {
-#if HAVE_REALPATH && !HAVE__FULLPATH
     char dllPath[MAXPATHLEN+1];
-#else
-    char dllPath[FILENAME_MAX+1];
-#endif
     String dot;
     String s;
     for (s = file; *s && !isSLASH(*s); s++)
@@ -1747,11 +1718,7 @@ String file; {
 
 String mkFFIFilename2(file)    
 String file; {
-#if HAVE_REALPATH && !HAVE__FULLPATH
     static char path[MAXPATHLEN+1];
-#else
-    static char path[FILENAME_MAX+1];
-#endif
     String dot = strrchr(file,'.');             /* patch file extension    */
     if (isNull(dot))
         dot = file + strlen(file);
@@ -1762,11 +1729,7 @@ String file; {
 
 String mkFFIFilename(file)                      /* get DLL path for module */
 String file; {
-#if HAVE_REALPATH && !HAVE__FULLPATH
     static char path[MAXPATHLEN+1];
-#else
-    static char path[FILENAME_MAX+1];
-#endif
     String dot = strrchr(file,'.');             /* patch file extension    */
     if (isNull(dot))
         dot = file + strlen(file);
