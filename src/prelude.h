@@ -436,7 +436,6 @@ extern int vsnprintf  Args((char*, size_t, const char*, va_list));
 /* Can we fit floats into ints? */
 #define BREAK_FLOATS (SIZEOF_FLOAT > SIZEOF_INT)
 
-#if  FLOATS_SUPPORTED
 
 #define FloatImpType	   float
 #define FloatPro	   double  /* type to use in prototypes		   */
@@ -507,17 +506,6 @@ extern int vsnprintf  Args((char*, size_t, const char*, va_list));
 #define HUGS_DBL_MIN_EXP  -1021
 #define HUGS_DBL_MAX_EXP   1024
 #endif
-
-#else /* !FLOATS_SUPPORTED */
-
-#define FloatImpType	   int     /*dummy*/
-#define FloatPro	   int
-#define FloatFMT	   "%d"
-#define DoubleImpType	   int     /*dummy*/
-#define DoublePro	   int
-#define DoubleFMT	   "%d"
-
-#endif /* !FLOATS_SUPPORTED */
 
 /*---------------------------------------------------------------------------
  * Memory allocation

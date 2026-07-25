@@ -1593,7 +1593,6 @@ int chdir(char *s) {                    /* RISCOS PRM p. 885    -- JBS     */
  * Floating point support:
  * ------------------------------------------------------------------------*/
 
-#if FLOATS_SUPPORTED
 #if BREAK_FLOATS
 static union {
     Float  flVal;
@@ -1733,61 +1732,6 @@ DoublePro stringToDouble(s)
 String s; {
     return atof(s);
 }
-#else /* !FLOATS_SUPPORTED */
-Cell mkFloat(fl)
-FloatPro fl; {
-    internal("mkFloat");
-    return 0;/*NOTREACHED*/
-}
-
-FloatPro floatOf(c)
-Cell c; {
-    internal("floatOf");
-    return 0;/*NOTREACHED*/
-}
-
-String floatToString(fl)
-FloatPro fl; {
-    internal("floatToString");
-    return "";/*NOTREACHED*/
-}
-
-Cell part1Double(dbl)
-DoublePro dbl; {
-    internal("part1Double");
-    return 0;/*NOTREACHED*/
-}
-
-Cell part2Double(dbl)
-DoublePro dbl; {
-    internal("part2Double");
-    return 0;/*NOTREACHED*/
-}
-
-DoublePro doubleFromParts(c1,c2)
-Cell c1, c2; {
-    internal("doubleFromParts");
-    return 0;/*NOTREACHED*/
-}
-
-Cell mkDouble(fl)
-DoublePro fl; {
-    internal("mkDouble");
-    return 0;/*NOTREACHED*/
-}
-
-DoublePro doubleOf(c)
-Cell c; {
-    internal("doubleOf");
-    return 0;/*NOTREACHED*/
-}
-
-String doubleToString(fl)
-DoublePro fl; {
-    internal("doubleToString");
-    return "";/*NOTREACHED*/
-}
-#endif /* !FLOATS_SUPPORTED */
 
 /*---------------------------------------------------------------------------
  * Int64-related operations:
@@ -2558,22 +2502,18 @@ Void machdep(what)                      /* Handle machine specific         */
 Int what; {                             /* initialisation etc..            */
     switch (what) {
 	case MARK    :
-#if FLOATS_SUPPORTED
 #if BREAK_FLOATS
 		       mark(bfTemp);
 #endif
 		       mark(bdTemp);
-#endif
 		       break;
 	case INSTALL : installHandlers();
 		       break;
 	case RESET   :
-#if FLOATS_SUPPORTED
 #if BREAK_FLOATS
 		       bfTemp = NIL;
 #endif
 		       bdTemp = NIL;
-#endif
 	case BREAK   :
 	case EXIT    : normalTerminal();
 #if HUGS_FOR_WINDOWS

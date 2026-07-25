@@ -784,13 +784,7 @@ static Cell local readNumber() {        /* read numeric constant           */
     endToken();
 
     if (floatingPt) {
-#if FLOATS_SUPPORTED
 	return mkDouble(stringToDouble(tokenStr));
-#else
-	ERRMSG(row) "No floating point numbers in this implementation"
-	EEND;
-	return NIL;
-#endif
     } else if (intTooLarge) {
 #if BIGNUMS
 	return bigStr(tokenStr);
