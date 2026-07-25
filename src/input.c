@@ -209,15 +209,12 @@ static FILE   *inputStream = 0;
 static Bool   thisLiterate;
 static String nextStringChar;          /* next char in string buffer       */
 
-#if     USE_READLINE                   /* for command line editors         */
+                                       /* for command line editors         */
 static  String currentLine;            /* editline or GNU readline         */
 static  String nextChar;
 #define nextConsoleChar() (*nextChar=='\0' ? '\n' : ExtractChar(nextChar))
 extern  Void add_history  Args((String));
 extern  String readline   Args((String));
-#else
-#define nextConsoleChar() FGetChar(stdin)
-#endif
 
 static  Int litLines;                  /* count defn lines in lit script   */
 #define DEFNCHAR  '>'                  /* definition lines begin with this */
@@ -253,14 +250,12 @@ String prompt; {                       /* standard in (i.e. console/kbd)   */
     hereState   = START;
 #endif
 
-#if HAVE_ISATTY && USE_READLINE
     if (!isatty(fileno(stdin))) { /* not reading from a tty: */
 	reading = NOKEYBOARD;     /* don't try readline      */
 	Printf("%s",prompt);FlushStdout();
 	return;
     }
-#endif
-#if USE_READLINE
+
     /* Paranoid freeing code supplied by Sverker Nilsson (sverker@opq.se) 
      * avoids accidentally freeing currentLine twice. 
      */
@@ -277,18 +272,6 @@ String prompt; {                       /* standard in (i.e. console/kbd)   */
     }
     else
 	c0 = c1 = EOF;
-#else
-#if HUGS_FOR_WINDOWS
-    {
-    INT svColor = SetForeColor(GREEN);
-#endif
-    Printf("%s",prompt);
-    FlushStdout();
-#if HUGS_FOR_WINDOWS
-    SetForeColor(svColor);
-    }
-#endif
-#endif
 }
 
 #if HUGS_FOR_WINDOWS

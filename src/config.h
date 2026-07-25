@@ -6,7 +6,6 @@
 
 #include "options.h"
 
-#define HAVE_ISATTY 1
 #define HAVE_LIBDL 1
 #define HAVE_LIBM 1
 #define HAVE_LIMITS_H 1
@@ -56,7 +55,6 @@
 #define TIME_WITH_SYS_TIME 1
 #define RETSIGTYPE void
 #define VOID_INT_SIGNALS 1
-#define USE_READLINE 1
 
 #define SIZEOF_DOUBLE __SIZEOF_DOUBLE__
 #define SIZEOF_FLOAT __SIZEOF_FLOAT__

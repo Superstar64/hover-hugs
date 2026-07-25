@@ -1177,11 +1177,9 @@ primFun(primHSetBuffering) {	/* Change a Handle's buffering */
     rc = setvbuf(handles[h].hfp, NULL, ty, sz);
     if (rc != 0)
 	throwErrno("IO.hSetBuffering", TRUE, h, NULL);
-#if HAVE_ISATTY
     if ((handles[h].hmode&(HWRITE|HAPPEND|HREADWRITE)) &&
 	isatty(fileno(handles[h].hfp)))
 	setBuffTerminal(fileno(handles[h].hfp), ty!=0);
-#endif
     IOReturn(nameUnit);
 }
 
@@ -1193,7 +1191,6 @@ primFun(primHGetBuffering) {	/* Return buffering info of a handle. */
     checkOpen(h, "IO.hGetBuffering");
     if (handles[h].hbufMode == HUNKNOWN_BUFFERING) {
 	/* figure out buffer mode and size. */
-#if HAVE_ISATTY
 	if (isatty (fileno(handles[h].hfp)) ) {
 	    /* TTY connected handles are normally linebuffered. */
 	    handles[h].hbufMode =
@@ -1202,13 +1199,10 @@ primFun(primHGetBuffering) {	/* Return buffering info of a handle. */
 		    HANDLE_LINEBUFFERED : HANDLE_NOTBUFFERED;
 	    handles[h].hbufSize = 0;
 	} else {
-#endif
 	    /* ..if not, block buffered. */
 	    handles[h].hbufMode = HANDLE_BLOCKBUFFERED;
 	    handles[h].hbufSize = BUFSIZ;
-#if HAVE_ISATTY
 	}
-#endif
     }
     IOReturn(ap(ap(mkTuple(2),mkInt((Int)handles[h].hbufMode)),
 		mkInt((Int)handles[h].hbufSize)));
@@ -1430,11 +1424,7 @@ primFun(primHIsTerminalDevice) { /* Does the handle refer to a terminal? */
     Int h;
     HandleArg(h, 1+IOArity);
     checkOpen(h, "System.IO.hIsTerminalDevice");
-#if HAVE_ISATTY
     IOBoolResult(isatty(fileno(handles[h].hfp)));
-#else
-    IOBoolResult(h<=HSTDERR);
-#endif
 }
 
 primFun(primHGetEcho) {
@@ -1443,11 +1433,7 @@ primFun(primHGetEcho) {
     HandleArg(h, 1+IOArity);
     checkOpen(h, "System.IO.hGetEcho");
     fd = fileno(handles[h].hfp);
-#if HAVE_ISATTY
     IOBoolResult(isatty(fd) && getEchoTerminal(fd));
-#else
-    IOBoolResult(FALSE);
-#endif
 }
 
 primFun(primHSetEcho) {
@@ -1458,11 +1444,8 @@ primFun(primHSetEcho) {
     BoolArg(echo, 1+IOArity);
     checkOpen(h, "System.IO.hSetEcho");
     fd = fileno(handles[h].hfp);
-#if HAVE_ISATTY
     if (isatty(fd))
 	setEchoTerminal(fd, echo);
-#endif
-    IOReturn(nameUnit);
 }
 
 #endif /* IO_HANDLES */
