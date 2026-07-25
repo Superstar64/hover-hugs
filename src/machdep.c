@@ -86,9 +86,7 @@ extern unsigned _stklen = 8000;         /* Allocate an 8k stack segment    */
 #endif
 # include <fcntl.h>
 # include <errno.h>
-#if HAVE_STDLIB_H
 # include <stdlib.h>
-#endif
 #if HAVE_UNIX_H
 #include <unix.h>
 #endif

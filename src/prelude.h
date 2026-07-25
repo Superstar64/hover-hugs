@@ -18,9 +18,7 @@
 #include "options.h"
 #include <stdio.h>
 
-#if HAVE_STDLIB_H
 # include <stdlib.h>
-#endif
 #if HAVE_SYS_TYPES_H
 # include <sys/types.h>
 #endif
@@ -517,12 +515,6 @@ extern int 	chdir 	   Args((const char*));
 
 #if HAVE_DIRECT_H
 #include <direct.h>
-#endif
-
-#ifndef HAVE_STDLIB_H
-extern int      system	   Args((const char *));
-extern double   atof	   Args((const char *));
-extern void     exit       Args((int));
 #endif
 
 #ifndef FILENAME_MAX	   /* should already be defined in an ANSI compiler*/
