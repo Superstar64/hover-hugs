@@ -6,7 +6,6 @@
 
 #include "options.h"
 
-#define TIME_WITH_SYS_TIME 1
 #define RETSIGTYPE void
 #define VOID_INT_SIGNALS 1
 
