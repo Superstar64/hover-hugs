@@ -6,7 +6,6 @@
 
 #include "options.h"
 
-#define RETSIGTYPE void
 #define VOID_INT_SIGNALS 1
 
 #define SIZEOF_DOUBLE __SIZEOF_DOUBLE__
