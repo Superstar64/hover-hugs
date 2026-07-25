@@ -6,7 +6,6 @@
 
 #include "options.h"
 
-#define HAVE_FLOAT_H 1
 #define HAVE_FSEEK 1
 #define HAVE_FSTAT 1
 #define HAVE_FTELL 1

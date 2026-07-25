@@ -454,8 +454,6 @@ extern int vsnprintf  Args((char*, size_t, const char*, va_list));
 #define DoubleFMT          "%.15g"
 #endif
 
-#if HAVE_FLOAT_H
-
 #include <float.h>
 
 # define HUGS_FLT_RADIX    FLT_RADIX
@@ -473,26 +471,6 @@ extern int vsnprintf  Args((char*, size_t, const char*, va_list));
 # define HUGS_DBL_MAX_EXP  DBL_MAX_EXP
 #endif
 
-#elif HAVE_VALUES_H
-
-#include <values.h>
-
-# define HUGS_FLT_RADIX    _EXPBASE
-# define HUGS_FLT_MANT_DIG FSIGNIF
-# define HUGS_FLT_MIN_EXP  FMINEXP
-# define HUGS_FLT_MAX_EXP  FMAXEXP 
-
-#if DOUBLE_IS_FLOAT
-# define HUGS_DBL_MANT_DIG HUGS_FLT_MANT_DIG
-# define HUGS_DBL_MIN_EXP  HUGS_FLT_MIN_EXP
-# define HUGS_DBL_MAX_EXP  HUGS_FLT_MAX_EXP
-#else
-# define HUGS_DBL_MANT_DIG DSIGNIF
-# define HUGS_DBL_MIN_EXP  DMINEXP
-# define HUGS_DBL_MAX_EXP  DMAXEXP
-#endif
-
-#endif
 
 #ifdef __SYMBIAN32__
 /* Guesswork, really */
