@@ -32,6 +32,8 @@ which was obtained from http://www.unicode.org/ucd/
 
 # Convert the file to the C table
 
+echo '#include "unitable.h"'
+
 awk '
 BEGIN {
 	FS = ";"
@@ -75,14 +77,14 @@ function endblock() {
 }
 END {
 	endblock()
-	print "#define NUM_BLOCKS " num_blocks
+	print "const int NUM_BLOCKS = " num_blocks ";"
 	print ""
 	for (p in props)
 		props_inv[props[p]] = p
 	for (i=0; i<num_props; i++)
 		printf "static const struct CharProperties prop" i " = { " props_inv[i] " };\n"
 	print ""
-	print "static const struct CharBlock char_block[] = {"
+	print "const struct CharBlock char_block[] = {"
 	for (i=0; i<num_blocks; i++) {
 		printf "    { " blocks[i] " }"
 		print i<num_blocks-1 ? "," : ""

@@ -47,7 +47,7 @@ OBJECTS		= builtin.o char.o compiler.o \
 		  machine.o module.o opts.o \
 		  output.o plugin.o script.o \
 		  static.o storage.o strutil.o \
-		  subst.o type.o version.o
+		  subst.o type.o version.o unitable.o
 IOBJECTS	= hugs.o edit.o observe.o $(OBJECTS)
 
 ################################################################
@@ -123,8 +123,8 @@ UnicodeData-License.txt:
 # Generating object dependencies (requires gcc)
 ################################################################
 
-depend: $(SOURCES) parser.c
-	gcc -MM $(EXTRA_DEFINES) $(CFILES) > MkDepend.mk
+depend: $(SOURCES) parser.c unitable.c
+	gcc -MM $(CFILES) parser.c unitable.c > MkDepend.mk
 
 
 ################################################################

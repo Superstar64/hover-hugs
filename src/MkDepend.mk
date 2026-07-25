@@ -15,7 +15,7 @@ builtin.o: builtin.c prelude.h config.h options.h storage.h HsFFI.h \
  connect.h errors.h machdep.h char.h builtin.h bignums.c printer.c \
  iomonad.c timeprim.c dirprim.c array.c
 char.o: char.c prelude.h config.h options.h storage.h HsFFI.h connect.h \
- errors.h char.h unitable.c
+ errors.h char.h unitable.h
 compiler.o: compiler.c prelude.h config.h options.h storage.h HsFFI.h \
  connect.h errors.h goal.h char.h output.h opts.h
 errors.o: errors.c prelude.h config.h options.h storage.h HsFFI.h \
@@ -56,3 +56,5 @@ subst.o: subst.c prelude.h config.h options.h storage.h HsFFI.h connect.h \
 type.o: type.c prelude.h config.h options.h storage.h HsFFI.h connect.h \
  errors.h output.h subst.h goal.h opts.h preds.c scc.c
 version.o: version.c prelude.h config.h options.h
+parser.o: parser.c
+unitable.o: unitable.c unitable.h
