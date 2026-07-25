@@ -31,7 +31,6 @@
  * ------------------------------------------------------------------------*/
 
 
-#if HAVE_SYS_TIME_H && HAVE_SYS_RESOURCE_H
 #include <sys/time.h>
 #include <sys/resource.h>
 
@@ -59,25 +58,5 @@ long millisecs(t)
 long t; {
     return (t+500)/1000;
 }
-#else
-#include <time.h>
-
-void updateTimers Args((void));
-long millisecs    Args((clock_t));
-clock_t userElapsed=0, systElapsed=0;
-
-void updateTimers() {
-    static clock_t lastUser = 0;
-    clock_t curr;
-    curr        = clock();
-    userElapsed = curr - lastUser;
-    lastUser    = curr;
-}
-
-long millisecs(t)
-clock_t t; {
-    return (long)((t * 1000)/CLK_TCK);
-}
-#endif
 
 /*-------------------------------------------------------------------------*/
