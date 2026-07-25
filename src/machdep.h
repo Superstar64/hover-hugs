@@ -11,9 +11,7 @@
 #define __MACHDEP_H__
 #include "prelude.h"
 
-#if HAVE_TIME_H
 # include <time.h>
-#endif
 
 #if USE_REGISTRY
 # if HAVE_WINDOWS_H

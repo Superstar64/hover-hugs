@@ -707,7 +707,7 @@ primFun(primGC) {			/* force a GC right now            */
     IOReturn(nameUnit);
 }
 
-#if BIGNUMS && defined HAVE_TIME_H
+#if BIGNUMS
 #include <time.h>
 
 primFun(primGetRandomSeed) {		/* generate a random seed          */
