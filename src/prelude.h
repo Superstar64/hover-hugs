@@ -79,9 +79,7 @@
 #endif
 
 /* using a (possibly multi-byte) encoding of Chars in Strings and I/O? */
-#if CHAR_ENCODING_LOCALE || CHAR_ENCODING_UTF8
 # define CHAR_ENCODING 1
-#endif
 
 /*---------------------------------------------------------------------------
  * Configuration options

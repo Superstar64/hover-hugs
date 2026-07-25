@@ -6,7 +6,6 @@
 
 #include "options.h"
 
-#define CHAR_ENCODING_UTF8 1
 #define FLOATS_SUPPORTED 1
 #define HAVE_ALLOCA 1
 #define HAVE_ASSERT_H 1

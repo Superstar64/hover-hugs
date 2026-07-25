@@ -84,24 +84,8 @@ extern	Int	uni_gencat	Args((Char));
  * The byte encoding is assumed to be an extension of ASCII.  These macros
  * should be used unless you're sure you're dealing with ASCII.
  *
- * We use one of the following encodings for input and output, selected
- * at configuration time:
- *
- * CHAR_ENCODING_LOCALE: the encoding determined by the current setting
- *	of LC_CTYPE.  The encodings in some locales cannot represent all
- *	Unicode characters.  Note that this works only for stateless
- *	encodings; the most widely used exception is ISO 2022-JP.
- *
- * CHAR_ENCODING_UTF8: the UTF-8 encoding, which covers all of Char.
- *
- * (default): Chars in the ISO 8859-1 (Latin-1) subset are encoded directly
- *	as bytes; other Chars are unrepresentable.
- *
- * In an ideal world, we would use Unicode characters uniformly inside
- * the program.  However, to minimize changes to the rest of the program,
- * and to save space, we also encode strings in the text table with the
- * same encoding as we use for I/O (but with special treatment of chars
- * not representable in that encoding: see saveStrChr()/getStrChr().)
+ * We assume UTF-8 encoding, which covers all of Char. The other character
+ * encoding options have been removed.
  *
  * The interface is:
  *
@@ -128,15 +112,7 @@ extern	Int	uni_gencat	Args((Char));
 
 #define	BAD_CHAR	0xFFFD
 
-#if CHAR_ENCODING_LOCALE
-#  include <wchar.h>
-#  include <limits.h>
-#  define MAX_CHAR_ENCODING MB_LEN_MAX
-#elif CHAR_ENCODING_UTF8
 #  define MAX_CHAR_ENCODING 6
-#else
-#  define MAX_CHAR_ENCODING 1
-#endif
 
 #if CHAR_ENCODING
 extern	int	fputc_mb	Args((Char, FILE *));
@@ -149,11 +125,7 @@ extern	Char	extc_mb		Args((String *));
 #define	AddChar(c,s)	addc_mb(c,&s)
 #define	ExtractChar(s)	extc_mb(&s)
 
-#if CHAR_ENCODING_UTF8
 #define	charIsRepresentable(c)	TRUE
-#else
-extern	Bool	charIsRepresentable	Args((Char));
-#endif
 
 #else /* !CHAR_ENCODING */
 

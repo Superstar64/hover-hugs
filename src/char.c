@@ -93,10 +93,8 @@ static Void local markConsCharTable	Args((Void));
 static Void local freeConsCharTable	Args((Void));
 static const struct CharProperties * local get_properties Args((Char));
 #endif
-#if CHAR_ENCODING_UTF8
 static Int  local utfseqlen		Args((Int));
 static Int  local utfcodelen		Args((Char));
-#endif
 
 /* --------------------------------------------------------------------------
  * Character set handling:
@@ -400,111 +398,6 @@ int fputc_mb(Char c, FILE *f) {
 }
 #endif /* CHAR_ENCODING */
 
-#if CHAR_ENCODING_LOCALE
-
-/* Using the encoding specified by the current locale (LC_CTYPE).
- * Note that ISO C does not permit both byte-oriented and wchar I/O
- * on the same stream, so we use byte-oriented I/O, and do the conversion
- * ourselves using mbrtowc/wcrtomb.
- */
-
-Bool charIsRepresentable(Char c) {
-    char buf[MAX_CHAR_ENCODING];
-    size_t n;
-    wchar_t wc;
-    mbstate_t st;
-    if (c == '\0')
-	return TRUE;
-    memset(&st, 0, sizeof(st));
-    n = wcrtomb(buf, c, &st);
-    if (n == (size_t)(-1))
-	errno = 0;
-    else {
-	memset(&st, 0, sizeof(st));
-	if (mbrtowc(&wc, buf, n, &st) == n)
-	    return wc==c;
-    }
-    return FALSE;
-}
-
-/* Read a Char encoded as a multi-byte sequence.
- */
-int fgetc_mb(FILE *f) {
-    char buf[MAX_CHAR_ENCODING];
-    Int n = 0;
-    size_t size;
-    wchar_t wc;
-    mbstate_t st;
-    for (;;) {
-	int c = fgetc(f);
-	if (c == EOF)
-	    return n == 0 ? EOF : BAD_CHAR;
-	buf[n++] = c;
-	memset(&st, 0, sizeof(st));
-	size = mbrtowc(&wc, buf, n, &st);
-	switch (size) {
-	case (size_t)(-1):			/* decoding error */
-	    errno = 0;
-	    return BAD_CHAR;
-	case (size_t)(-2):			/* incomplete sequence */
-	    if (n == MAX_CHAR_ENCODING)
-		return BAD_CHAR;
-	    break;
-	case 0:					/* null character */
-	    return 0;
-	default:				/* successful decoding */
-	    if (size < n)
-		/* If the encoding uses lookahead, we have to read extra
-		 * bytes to detect the end of an encoding.  If it's
-		 * just one byte (size == n-1) we can push it back onto
-		 * the input.  This won't work for encodings that need
-		 * more than 1 byte of lookahead, but I don't think
-		 * there are any. */
-		ungetc(c, f);
-	    return wc;
-	}
-    }
-}
-
-/* Add a Char to a multi-byte encoded string, moving the pointer. */
-Void addc_mb(Char c, String *sp) {
-    size_t size;
-    mbstate_t st;
-    memset(&st, 0, sizeof(st));
-    size = wcrtomb(*sp, c, &st);
-    if (size == (size_t)-1) {			/* encoding error */
-	*(*sp)++ = '?';
-	errno = 0;
-    } else
-	*sp += size;
-}
-
-/* Get a Char from a multi-byte encoded string, moving the pointer. */
-Char extc_mb(String *sp) {
-    wchar_t c = '\0';
-    size_t size;
-    mbstate_t st;
-    memset(&st, 0, sizeof(st));
-    size = mbrtowc(&c, *sp, MAX_CHAR_ENCODING, &st);
-    switch (size) {
-    case (size_t)(-1):				/* decoding error */
-	errno = 0;
-	/* fall through to ... */
-    case (size_t)(-2):				/* incomplete sequence */
-	c = BAD_CHAR;
-	(*sp)++;
-	break;
-    case 0:					/* string starts with \0 */
-	(*sp)++;
-	break;
-    default:					/* successful decoding */
-	*sp += size;
-    }
-    return c;
-}
-
-#elif CHAR_ENCODING_UTF8
-
 /*
  * The UTF-FSS (aka UTF-8) encoding of UCS, as described in the following
  * quote from Ken Thompson's utf-fss.c:
@@ -616,8 +509,6 @@ static Int local utfcodelen(Char c) {
 	   c<0x200000 ? 4 :
 	   c<0x4000000 ? 5 : 6;
 }
-
-#endif /* CHAR_ENCODING_UTF8 */
 
 /* --------------------------------------------------------------------------
  * Build array of character conses:
