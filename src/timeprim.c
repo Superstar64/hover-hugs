@@ -106,28 +106,9 @@ primFun(primGetCalTime) { /* Int   -> Int -> IO (.....) */
   }
   
   /* Warning - ugliness. */
-#if HAVE_STRUCT_TM_TM_ZONE
   zoneNm = (char*)tm->tm_zone;
-#elif HAVE_TZNAME || IS_WINDOWS
-  /* ToDo: fix autoconf macro AC_STRUCT_TIMEZONE so that it will recognise
-   *       mingw's _tzname global. For now, force it.
-   */
-  zoneNm = (char*)(tm->tm_isdst ? tzname[1] : tzname[0]);
-#else
-  /* Don't know how to get at the timezone name, complain louder? */
-  zoneNm = NULL;
-#endif
 
-#if HAVE_STRUCT_TM_TM_ZONE
   utcOff = tm->tm_gmtoff;
-#elif HAVE_DECL_TIMEZONE || HAVE_DECL__TIMEZONE
-
-  /* Assume DST adjustment is 1 hour. */
-  utcOff = -(tm->tm_isdst ? (timezone - 3600) : timezone);
-#else
-  /* Again, complain louder? */
-  utcOff = 0;
-#endif
 
   pushString(zoneNm);
   zoneStr = pop();
@@ -196,14 +177,7 @@ primFun(primMkTime) { /* Int{-year-}  -> Int{-month-} -> Int{-day-} ->
      the UTC offset returned by mktime().
   */
   tz = -tz;
-#if HAVE_STRUCT_TM_TM_ZONE
   tz += tm.tm_gmtoff;
-#elif HAVE_DECL_TIMEZONE || HAVE_DECL__TIMEZONE
-  /* Assume DST adjustment is 1 hour */
-  tz += (- (tm.tm_isdst ? (timezone - 3600) : timezone));
-#else
-  /* Unknown, assume nothing */
-#endif
   
   IOReturn(mkInt(t+tz));
 #else /* !HAVE_MKTIME */
