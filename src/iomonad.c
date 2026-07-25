@@ -1380,7 +1380,6 @@ primFun(primHWaitForInput) { /* Check whether a character can be read
     HandleArg(h,2+IOArity);
     IntArg(msecs,1+IOArity);
     
-#if HAVE_SELECT
     checkReadable(h, "IO.hWaitForInput");
     {
 	/* Implementation is a rip-off of GHC's inputReady.c */
@@ -1408,16 +1407,6 @@ primFun(primHWaitForInput) { /* Check whether a character can be read
 	}
 	IOBoolResult(ready > 0);
     }
-#else
-    /* For now, punt on implementing async IO under Win32 */
-    /* For other platforms that don't support select() on file
-       file descs, please insert code that'll work. */
-    IOFail(mkIOError(&handles[h].hcell,
-		     nameIllegal,
-		     "IO.hWaitForInput",
-		     "unsupported operation",
-		     NULL));
-#endif
 }
 
 primFun(primHIsTerminalDevice) { /* Does the handle refer to a terminal? */
