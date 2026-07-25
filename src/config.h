@@ -6,14 +6,11 @@
 
 #include "options.h"
 
-#define HAVE_GMTIME 1
-#define HAVE_INTTYPES_H 1
 #define HAVE_ISATTY 1
 #define HAVE_LIBDL 1
 #define HAVE_LIBM 1
 #define HAVE_LIMITS_H 1
 #define HAVE_LOCALE_H 1
-#define HAVE_LOCALTIME 1
 #define HAVE_MKTIME 1
 #define HAVE_PCLOSE 1
 #define HAVE_POPEN 1
