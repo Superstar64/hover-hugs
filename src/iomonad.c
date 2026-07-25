@@ -1055,16 +1055,8 @@ primFun(primHGetPosn) {			/* Get file position               */
     long pos;
     HandleArg(h,1+IOArity);
     checkOpen(h, "IO.hGetPosn");
-#if HAVE_FTELL
     pos = ftell(handles[h].hfp);
     IOReturn(mkInt((Int)pos));
-#else
-    IOFail(mkIOError(NULL,
-		     nameIllegal,
-		     "IO.hGetPosn",
-		     "unsupported operation",
-		     NULL));
-#endif
 }
 
 primFun(primHSetPosn) {			/* Set file position               */
