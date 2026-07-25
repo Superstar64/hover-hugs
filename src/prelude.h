@@ -19,9 +19,7 @@
 #include <stdio.h>
 
 # include <stdlib.h>
-#if HAVE_SYS_TYPES_H
 # include <sys/types.h>
-#endif
 #if HAVE_UNISTD_H
 # include <unistd.h>
 #endif

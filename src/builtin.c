@@ -31,11 +31,7 @@
 /* Header files needed to compile the IO primitives */
 #if IO_MONAD
 
-#if HAVE_SYS_TYPES_H
 # include <sys/types.h>
-#elif HAVE_TYPES_H
-# include <types.h>
-#endif
 # include <sys/stat.h>
 
 #if HAVE_UNISTD_H

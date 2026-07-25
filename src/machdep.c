@@ -27,13 +27,7 @@
 /*#define DEBUG_SEARCH*/
 
 # include <signal.h>
-#if HAVE_SYS_TYPES_H
 # include <sys/types.h>
-#else
-# if HAVE_TYPES_H
-#  include <types.h>
-# endif
-#endif
 # include <sys/param.h>
 # include <limits.h>
 # include <sys/stat.h>
