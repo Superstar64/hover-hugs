@@ -6,7 +6,6 @@
 
 #include "options.h"
 
-#define HAVE_TIMES 1
 #define HAVE_TIME_H 1
 #define HAVE_TM_ZONE 1
 #define HAVE_UNISTD_H 1
