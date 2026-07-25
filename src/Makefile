@@ -123,22 +123,9 @@ UnicodeData-License.txt:
 # Generating object dependencies (requires gcc)
 ################################################################
 
-HUGS_MAKEFILES = Makefile dotnet/Makefile msc/Makefile winhugs/Makefile
-
-# optional definitions that govern include files
-EXTRA_DEFINES = -DINTERNAL_PRIMS -DUNICODE_CHARS -DWANT_TIMER
-
 depend: $(SOURCES) parser.c
-	gcc -MM $(EXTRA_DEFINES) $(CFILES) | sed 's/\.o:/.$o:/' >TMP
-	if cmp -s TMP MkDepend.in; then : ; else \
-		$(CP) TMP MkDepend.in; \
-		for mfile in $(HUGS_MAKEFILES);\
-		do	(echo '/^# Generated object dependencies/+++,/^# End of generated object dependencies/---d';\
-			 echo '-r MkDepend.in';\
-			 echo w) | ed - $$mfile; \
-		done;\
-	fi
-	rm TMP
+	gcc -MM $(EXTRA_DEFINES) $(CFILES) > MkDepend.mk
+
 
 ################################################################
 # Object dependencies
