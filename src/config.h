@@ -6,7 +6,6 @@
 
 #include "options.h"
 
-#define HAVE_SYS_PARAM_H 1
 #define HAVE_SYS_RESOURCE_H 1
 #define HAVE_SYS_STAT_H 1
 #define HAVE_SYS_TIMEB_H 1

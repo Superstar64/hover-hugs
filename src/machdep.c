@@ -34,9 +34,7 @@
 #  include <types.h>
 # endif
 #endif
-#if HAVE_SYS_PARAM_H
 # include <sys/param.h>
-#endif
 # include <limits.h>
 #if HAVE_SYS_STAT_H
 # include <sys/stat.h>
