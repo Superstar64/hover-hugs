@@ -121,12 +121,9 @@ primFun(primGetCalTime) { /* Int   -> Int -> IO (.....) */
 #if HAVE_STRUCT_TM_TM_ZONE
   utcOff = tm->tm_gmtoff;
 #elif HAVE_DECL_TIMEZONE || HAVE_DECL__TIMEZONE
-# if HAVE_DECL_ALTZONE
-  utcOff = (-(tm->tm_isdst ? altzone : timezone));
-# else
+
   /* Assume DST adjustment is 1 hour. */
   utcOff = -(tm->tm_isdst ? (timezone - 3600) : timezone);
-# endif
 #else
   /* Again, complain louder? */
   utcOff = 0;
@@ -202,12 +199,8 @@ primFun(primMkTime) { /* Int{-year-}  -> Int{-month-} -> Int{-day-} ->
 #if HAVE_STRUCT_TM_TM_ZONE
   tz += tm.tm_gmtoff;
 #elif HAVE_DECL_TIMEZONE || HAVE_DECL__TIMEZONE
-# if HAVE_DECL_ALTZONE
-  tz += (-(tm.tm_isdst ? altzone : timezone));
-# else
   /* Assume DST adjustment is 1 hour */
   tz += (- (tm.tm_isdst ? (timezone - 3600) : timezone));
-# endif
 #else
   /* Unknown, assume nothing */
 #endif
