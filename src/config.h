@@ -6,7 +6,6 @@
 
 #include "options.h"
 
-#define HAVE_RINDEX 1
 #define HAVE_SELECT 1
 #define HAVE_SGTTY_H 1
 #define HAVE_SIGNAL_H 1
