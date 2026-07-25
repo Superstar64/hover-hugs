@@ -178,46 +178,6 @@ CAFInt(primClockTicks, sysconf(_SC_CLK_TCK))
 primFun(primGetCPUUsage) { /* IO (Int,Int,Int,Int) */
   int userSec, userNSec;
   int sysSec,  sysNSec;
-#if IS_WINDOWS
-# ifdef _MSC_VER
-#  define NS_PER_SEC 10000000
-# else
-#  define NS_PER_SEC 10000000LL
-# endif
-# define FT2usecs(ll,ft)    \
-    (ll)=(ft).dwHighDateTime; \
-    (ll) <<= 32;              \
-    (ll) |= (ft).dwLowDateTime;
-
-    FILETIME creationTime, exitTime, kernelTime, userTime;
-# ifdef _MSC_VER
-    unsigned __int64 uT, kT;
-# else
-    unsigned long long uT, kT;
-# endif
- 
-    /* Notice that the 'process time' includes the time used
-       by all the threads of a process, all of which may not
-       be kept busy running the Hugs interpreter...
-    */
-    if (!GetProcessTimes (GetCurrentProcess(), &creationTime,
-		          &exitTime, &kernelTime, &userTime)) {
-	/* Probably on a Win95 box..*/
-        userSec  = 0;
-        userNSec = 0;
-        sysSec   = 0;
-        sysNSec  = 0;
-    } else {
-
-      FT2usecs(uT, userTime);
-      FT2usecs(kT, kernelTime);
-
-      userSec  = (unsigned int)(uT / NS_PER_SEC);
-      userNSec = (unsigned int)((uT - userSec * NS_PER_SEC) * 100);
-      sysSec   = (unsigned int)(kT / NS_PER_SEC);
-      sysNSec  = (unsigned int)((kT - sysSec * NS_PER_SEC) * 100);
-    }
-#elif HAVE_GETRUSAGE
     struct rusage t;
 
     getrusage(RUSAGE_SELF, &t);
@@ -226,28 +186,6 @@ primFun(primGetCPUUsage) { /* IO (Int,Int,Int,Int) */
     sysSec   = t.ru_stime.tv_sec;
     sysNSec  = 1000 * t.ru_stime.tv_usec;
 
-#elif HAVE_TIMES
-    struct tms t;
-# if defined(CLK_TCK)
-#  define ticks CLK_TCK
-# else
-    long ticks;
-    ticks = sysconf(_SC_CLK_TCK);
-# endif
-
-    times(&t);
-    userSec  = t.tms_utime / ticks;
-    userNSec = (t.tms_utime - userSec * ticks) * (1000000000 / ticks);
-    sysSec   = t.tms_stime / ticks;
-    sysNSec  = (t.tms_stime - sysSec * ticks) * (1000000000 / ticks);
-
-#else
-    IOFail(mkIOError(NULL,
-		     nameIllegal,
-		     "CPUTime.getCPUTime",
-		     "illegal operation",
-		     NULL));
-#endif
     IOReturn(ap(ap(ap(ap( mkTuple(4), mkInt(userSec)),
 		      mkInt(userNSec)),
 		   mkInt(sysSec)),

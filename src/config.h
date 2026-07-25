@@ -6,7 +6,6 @@
 
 #include "options.h"
 
-#define HAVE_GETRUSAGE 1
 #define HAVE_GMTIME 1
 #define HAVE_INTTYPES_H 1
 #define HAVE_ISATTY 1
