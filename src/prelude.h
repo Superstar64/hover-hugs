@@ -301,15 +301,10 @@ extern size_t   strlen     Args((const char *));
 extern char	*strcpy	   Args((char *, const char*));
 extern char     *strcat	   Args((char *, const char*));
 #endif
-#if HAVE_STRCMP
 #if HUGS_FOR_WINDOWS
 #define strCompare stricmp
 #else
 #define strCompare strcmp
-#endif
-#else /* probably only used for DOS - ADR */
-extern  int     stricmp	   Args((const char *, const char*));
-#define strCompare stricmp
 #endif
 
 # include <ctype.h>
