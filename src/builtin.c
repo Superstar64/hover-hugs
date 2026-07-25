@@ -54,9 +54,7 @@
 
 # include <sys/resource.h>
 
-#if HAVE_ERRNO_H
 # include <errno.h>
-#endif
 
 #if HAVE_SYS_TIMEB_H
 # include <sys/timeb.h>

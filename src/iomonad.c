@@ -655,7 +655,6 @@ static Void local throwErrno(String fname, Bool isFile, Int h, Cell *mbF)
 static Name local toIOError(errc)
 int errc;
 {
-#if HAVE_ERRNO_H  && !(__MWERKS__ && macintosh)
     switch(errc) {
 
     case EEXIST:
@@ -672,9 +671,6 @@ int errc;
     default:
 	return nameIllegal;
     }
-#else
-    return nameIllegal;
-#endif
 }
 
 /*
@@ -684,7 +680,6 @@ static String local toIOErrorDescr(errc,isFile)
 int   errc;
 Bool  isFile;
 {
-#if HAVE_ERRNO_H  && !(__MWERKS__ && macintosh)
     switch(errc) {
 
     case EEXIST:
@@ -701,9 +696,6 @@ Bool  isFile;
     default:
 	return "";
     }
-#else
-    return "";
-#endif
 }
 
 /* --------------------------------------------------------------------------
