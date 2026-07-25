@@ -348,20 +348,6 @@ extern int vsnprintf  Args((char*, size_t, const char*, va_list));
 #endif
 
 /*---------------------------------------------------------------------------
- * Pipe-related operations:
- *
- * On Windows, many standard Unix names acquire a leading underscore.
- * Irritating, but easy to work around.
- *-------------------------------------------------------------------------*/
-
-#if !HAVE_POPEN && HAVE__POPEN
-#define popen(x,y) _popen(x,y)
-#endif
-#if !HAVE_PCLOSE && HAVE__PCLOSE
-#define pclose(x) _pclose(x)
-#endif
-
-/*---------------------------------------------------------------------------
  * Interrupting execution (signals, allowBreak):
  *-------------------------------------------------------------------------*/
 
@@ -525,11 +511,7 @@ extern int vsnprintf  Args((char*, size_t, const char*, va_list));
  *
  */
 #if USE_PREPROCESSOR
-# if HAVE_POPEN || HAVE__POPEN
 #  define SUPPORT_PREPROCESSOR 1
-# else
-#  define SUPPORT_PREPROCESSOR 0
-# endif
 #else
 # define SUPPORT_PREPROCESSOR 0
 #endif

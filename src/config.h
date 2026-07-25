@@ -6,8 +6,6 @@
 
 #include "options.h"
 
-#define HAVE_PCLOSE 1
-#define HAVE_POPEN 1
 #define HAVE_REALPATH 1
 #define HAVE_RINDEX 1
 #define HAVE_SELECT 1
