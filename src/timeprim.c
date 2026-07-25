@@ -59,7 +59,6 @@ primFun(primGetCalTime) { /* Int   -> Int -> IO (.....) */
                           /* isUTC => convert time to UTC, o/wise local time */
 
   Int isUTC;
-#if HAVE_LOCALTIME && HAVE_GMTIME
   time_t secs;
   struct tm* tm;
   char* zoneNm = NULL;
@@ -94,16 +93,6 @@ primFun(primGetCalTime) { /* Int   -> Int -> IO (.....) */
 		    mkInt(tm->tm_isdst)),
 		 zoneStr),
 	      mkInt(utcOff)));
-#else /* !(HAVE_LOCALTIME && HAVE_GMTIME) */
-
-  IntArg(isUTC,2+IOArity);
-
-  IOFail(mkIOError(NULL,
-		   nameIllegal,
-		   (isUTC ? "Time.toUTCTime" : "Time.toCalendarTime"),
-		   "operation not supported",
-		   NULL));
-#endif
 
 }
 
