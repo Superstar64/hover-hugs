@@ -202,11 +202,7 @@ int macsystem(char *filenames);
  *  dynamic linking declarations
  *-------------------------------------------------------------------------*/
 
-#if PROTOTYPES		  /* To enable use of prototypes whenever possible */
 #define Args(x) x
-#else
-#define Args(x) ()
-#endif
 
 /* local = prefix for locally defined functions */
 /* far   = prefix for far pointers              */

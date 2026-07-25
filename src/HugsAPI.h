@@ -15,11 +15,7 @@
 
 
 #ifndef Args
-# if PROTOTYPES
 #  define Args(x) x
-# else
-#  define Args(x) ()
-# endif
 #endif /* !defined Args */
 
 #ifdef __cplusplus 

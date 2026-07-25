@@ -6,7 +6,6 @@
 
 #include "options.h"
 
-#define PROTOTYPES 1
 #define __PROTOTYPES 1
 #define STDC_HEADERS 1
 #define TIME_WITH_SYS_TIME 1
