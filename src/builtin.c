@@ -50,9 +50,7 @@
 
 # include <errno.h>
 
-#if HAVE_SYS_TIMEB_H
 # include <sys/timeb.h>
-#endif
 
 #if HAVE_WINDOWS_H
 # include <windows.h>
