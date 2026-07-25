@@ -48,9 +48,7 @@
 # endif
 #endif
 #  include <dirent.h>
-#if HAVE_LOCALE_H
 #  include <locale.h>
-#endif
 
 /* Hack for systems with unlimited path length (e.g. the Hurd), which
  * will not define PATH_MAX or MAXPATHLEN.  The Right Thing would be
@@ -2182,9 +2180,7 @@ initSystem()
     SIOUXSetTitle("\pHugs 98");
     
 #endif
-#if HAVE_LOCALE_H
     setlocale(LC_CTYPE, "");
-#endif
     return TRUE;
 }
 
