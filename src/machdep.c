@@ -883,9 +883,7 @@ Void gcCStack() {                       /* Garbage collect elements off    */
 
 
 /* grab the varargs prototype for ioctl */
-#if HAVE_SYS_IOCTL_H
 # include <sys/ioctl.h>
-#endif
 
 /* The order of these three tests is very important because
  * some systems have more than one of the requisite header file
