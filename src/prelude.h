@@ -290,17 +290,7 @@ int macsystem(char *filenames);
  * String operations:
  *-------------------------------------------------------------------------*/
 
-#if HAVE_STRING_H
 # include <string.h>
-#else
-extern int      strcmp     Args((const char*, const char*));
-extern int      strncmp    Args((const char*, const char*, int));
-extern char     *strchr    Args((const char*, int));
-extern char     *strrchr   Args((const char*, int));
-extern size_t   strlen     Args((const char *));
-extern char	*strcpy	   Args((char *, const char*));
-extern char     *strcat	   Args((char *, const char*));
-#endif
 #if HUGS_FOR_WINDOWS
 #define strCompare stricmp
 #else
