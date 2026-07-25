@@ -535,11 +535,7 @@ extern int vsnprintf  Args((char*, size_t, const char*, va_list));
  * Assertions
  *-------------------------------------------------------------------------*/
 
-#if HAVE_ASSERT_H
 #include <assert.h>
-#else
-#define assert(x) doNothing()
-#endif
 
 /*---------------------------------------------------------------------------
  * Preprocessor support
