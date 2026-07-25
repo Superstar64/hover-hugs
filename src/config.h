@@ -6,7 +6,6 @@
 
 #include "options.h"
 
-#define HAVE_STRCASECMP 1
 #define HAVE_STRCMP 1
 #define HAVE_STRINGS_H 1
 #define HAVE_STRING_H 1

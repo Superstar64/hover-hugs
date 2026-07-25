@@ -543,15 +543,7 @@ extern int 	chdir 	   Args((const char*));
 #define CASE_INSENSITIVE_FILENAMES (DOS_FILENAMES | RISCOS)
 
 #if CASE_INSENSITIVE_FILENAMES
-# if HAVE_STRCASECMP
 #  define filenamecmp(s1,s2) strcasecmp(s1,s2)
-# elif HAVE__STRICMP
-#  define filenamecmp(s1,s2) _stricmp(s1,s2)
-# elif HAVE_STRICMP
-#  define filenamecmp(s1,s2) stricmp(s1,s2)
-# elif HAVE_STRCMPI
-#  define filenamecmp(s1,s2) strcmpi(s1,s2)
-# endif
 #else
 # define filenamecmp(s1,s2) strcmp(s1,s2)
 #endif
