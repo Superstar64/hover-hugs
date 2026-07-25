@@ -1068,27 +1068,16 @@ primFun(primHGetPosn) {			/* Get file position               */
 }
 
 primFun(primHSetPosn) {			/* Set file position               */
-#if HAVE_FSEEK
     long   pos = 0;
-#endif
     Int    h;
     HandleArg(h,2+IOArity);
     IntArg(pos,1+IOArity);
     checkOpen(h, "IO.hSetPosn");
-#if HAVE_FSEEK
     setRWState(h, RW_NEUTRAL);
     fflush(handles[h].hfp);
     if (fseek(handles[h].hfp,pos,SEEK_SET) == 0) {
 	IOReturn(nameUnit);
     }
-#else
-    IOFail(mkIOError(NULL,
-		     nameIllegal,
-		     "IO.hSetPosn",
-		     "unsupported operation",
-		     NULL));
-    }
-#endif
 }
 
 primFun(primHSeek) {	/* Seek to new file posn */
