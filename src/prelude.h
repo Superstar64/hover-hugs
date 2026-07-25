@@ -434,14 +434,7 @@ extern int vsnprintf  Args((char*, size_t, const char*, va_list));
  * Memory allocation
  *-------------------------------------------------------------------------*/
 
-#if HAVE_FARCALLOC
-# include <alloc.h>
-# define farCalloc(n,s)	farcalloc((unsigned long)n,(unsigned long)s)
-#elif HAVE_VALLOC
 # define farCalloc(n,s)	(Void *)valloc(((unsigned)n)*((unsigned)s))
-#else
-# define farCalloc(n,s)	(Void *)calloc(((unsigned)n),((unsigned)s))
-#endif
 
 /* bison-generated parsers like to have alloca - so try to define it */
 

@@ -6,7 +6,6 @@
 
 #include "options.h"
 
-#define HAVE_VALLOC 1
 #define HAVE_VALUES_H 1
 #define HAVE_VSNPRINTF 1
 #define HAVE_WCHAR_H 1
