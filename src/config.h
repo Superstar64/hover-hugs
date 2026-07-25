@@ -6,7 +6,6 @@
 
 #include "options.h"
 
-#define HAVE_VSNPRINTF 1
 #define HAVE_WCHAR_H 1
 #define PROTOTYPES 1
 #define __PROTOTYPES 1

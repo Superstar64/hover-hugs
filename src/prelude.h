@@ -304,14 +304,6 @@ int macsystem(char *filenames);
 
 #include <stdarg.h>
 
-#if !HAVE_VSNPRINTF
-# if __MWERKS__ && macintosh
-extern int vsnprintf  Args((char*, unsigned long, const char*, va_list));
-# else
-extern int vsnprintf  Args((char*, size_t, const char*, va_list));
-# endif
-#endif
-
 /*---------------------------------------------------------------------------
  * Interrupting execution (signals, allowBreak):
  *-------------------------------------------------------------------------*/
