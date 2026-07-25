@@ -304,17 +304,10 @@ int macsystem(char *filenames);
  * Interrupting execution (signals, allowBreak):
  *-------------------------------------------------------------------------*/
 
-#if !DOS && VOID_INT_SIGNALS
 # define sigProto(nm)	void nm Args((int))
 # define sigRaise(nm)	nm(1)
 # define sigHandler(nm)	void nm(sig_arg) int sig_arg;
 # define sigResume	return
-#else
-# define sigProto(nm)	int nm Args((Void))
-# define sigRaise(nm)	nm()
-# define sigHandler(nm)	int nm(Void)
-# define sigResume	return 1
-#endif
 
 /* allowBreak: call to allow user to interrupt computation
  * ctrlbrk:    set control break handler

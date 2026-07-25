@@ -6,8 +6,6 @@
 
 #include "options.h"
 
-#define VOID_INT_SIGNALS 1
-
 #define SIZEOF_DOUBLE __SIZEOF_DOUBLE__
 #define SIZEOF_FLOAT __SIZEOF_FLOAT__
 #define SIZEOF_INT __SIZEOF_INT__
