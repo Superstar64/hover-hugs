@@ -79,11 +79,6 @@ primFun(primGetClockTime) { /* :: IO (Int,Int) */
 #endif
 }
 
-#if HAVE_DECL__TIMEZONE
-# define timezone _timezone
-#endif
-
-
 primFun(primGetCalTime) { /* Int   -> Int -> IO (.....) */
                           /* isUTC    secs */
                           /* isUTC => convert time to UTC, o/wise local time */
