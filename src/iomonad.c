@@ -992,7 +992,6 @@ primFun(primHandleToFd) {
 			 NULL));
     }
     checkOpen(h, "System.Posix.IO.handleToFd");
-#if HAVE_DUP
     {
         Int fd = dup(fileno(handles[h].hfp));
         fclose(handles[h].hfp);
@@ -1000,13 +999,6 @@ primFun(primHandleToFd) {
         handles[h].hmode = HCLOSED;
         IOReturn(mkInt(fd));
     }
-#else
-    IOFail(mkIOError(&handles[h].hcell,
-		     nameIllegal,
-		     "System.Posix.IO.handleToFd",
-		     "unsupported operation",
-		     NULL));
-#endif
 }
 
 primFun(primHIsEOF) {	/* Test for end of file on handle  */
