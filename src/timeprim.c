@@ -99,7 +99,6 @@ primFun(primGetCalTime) { /* Int   -> Int -> IO (.....) */
 primFun(primMkTime) { /* Int{-year-}  -> Int{-month-} -> Int{-day-} ->
                          Int{-hour-}  -> Int{-mins-}  -> Int{-sec-} ->
 			 Int{-tz offset-} -> IO Int{-secs since Epoch-} */
-#if HAVE_MKTIME
   Int year, month, day;
   Int hour,min,sec;
   Int tz;
@@ -139,13 +138,6 @@ primFun(primMkTime) { /* Int{-year-}  -> Int{-month-} -> Int{-day-} ->
   tz += tm.tm_gmtoff;
   
   IOReturn(mkInt(t+tz));
-#else /* !HAVE_MKTIME */
-  IOFail(mkIOError(NULL,
-		   nameIllegal,
-		   "Time.toClockTime",
-		   "operation not supported",
-		   NULL));
-#endif
 }
 
 /* --------------------------------------------------------------------------
