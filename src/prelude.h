@@ -20,9 +20,7 @@
 
 # include <stdlib.h>
 # include <sys/types.h>
-#if HAVE_UNISTD_H
 # include <unistd.h>
-#endif
 
 /*---------------------------------------------------------------------------
  * Most of the configuration code from earlier versions of Hugs has been moved
@@ -492,9 +490,6 @@ extern int vsnprintf  Args((char*, size_t, const char*, va_list));
  * File operations:
  *-------------------------------------------------------------------------*/
 
-#if !HAVE_UNISTD_H && !_MSC_VER
-extern int 	chdir 	   Args((const char*));
-#endif
 
 #if HAVE_DIRECT_H
 #include <direct.h>
