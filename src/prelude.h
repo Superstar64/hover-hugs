@@ -314,9 +314,7 @@ extern  int     stricmp	   Args((const char *, const char*));
 #define strCompare stricmp
 #endif
 
-#if HAVE_CTYPE_H
 # include <ctype.h>
-#endif
 #ifndef isascii
 #define  isascii(c)	(((unsigned)(c))<128)
 #endif
