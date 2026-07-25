@@ -36,13 +36,7 @@
 #endif
 # include <sys/param.h>
 # include <limits.h>
-#if HAVE_SYS_STAT_H
 # include <sys/stat.h>
-#else
-# if HAVE_STAT_H
-#  include <stat.h>
-# endif
-#endif
 #  include <dirent.h>
 #  include <locale.h>
 
@@ -125,7 +119,6 @@ Void getFileInfo(f,tm,sz)  /* find time stamp and size of file*/
 String f;
 Time   *tm;
 Long   *sz; {
-#if HAVE_SYS_STAT_H || HAVE_STAT_H || HAVE_UNIX_H
     struct stat scbuf;
     if (!stat(f,&scbuf)) {
 	*tm = scbuf.st_mtime;
@@ -134,19 +127,6 @@ Long   *sz; {
 	*tm = 0;
 	*sz = 0;
     }
-#else                                   /* normally just use stat()        */
-    os_regset r;                        /* RISCOS PRM p.850 and p.837      */
-    r.r[0] = 17;                        /* Read catalogue, no path         */
-    r.r[1] = (int)s;
-    os_swi(OS_File, &r);
-    if(r.r[0] == 1 && (r.r[2] & 0xFFF00000) == 0xFFF00000) {
-	tm->hi = r.r[2] & 0xFF;         /* Load address (high byte)        */
-	tm->lo = r.r[3];                /* Execution address (low 4 bytes) */
-    } else {                            /* Not found, or not time-stamped  */
-	tm->hi = tm->lo = 0;
-    }
-    *sz = (Long)(r.r[0] == 1 ? r.r[4] : 0);
-#endif
 }
 
 #if HAVE_GETFINFO               /* Mac971031 */
@@ -188,9 +168,6 @@ int access(char *fileName, int dummy) {
 Bool readable(f,isReg)        /* is f readable (and also, a regular file?) */
 String f;
 Bool   isReg; {
-#if DJGPP2 || HAVE_GETFINFO /* stat returns bogus mode bits on djgpp2 */
-    return (0 == access(f,4));
-#elif HAVE_SYS_STAT_H || HAVE_STAT_H
     struct stat scbuf;
     return (  !stat(f,&scbuf) 
 #if !(defined macintosh)	/* Macintosh files always have read permission */
@@ -198,14 +175,6 @@ Bool   isReg; {
 #endif
 	   && ( !isReg || (scbuf.st_mode & S_IFREG)) /* regular file */
 	   );
-#elif HAVE_OS_SWI /* RISCOS specific */
-    os_regset r;                        /* RISCOS PRM p.850     -- JBS     */
-    assert(dummy == 0);
-    r.r[0] = 17; /* Read catalogue, no path */
-    r.r[1] = (int)f;
-    os_swi(OS_File, &r);
-    return r.r[0] != 1; /* Does this check it's a regular file? ADR */
-#endif
 }
 
 

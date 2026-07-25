@@ -36,11 +36,7 @@
 #elif HAVE_TYPES_H
 # include <types.h>
 #endif
-#if HAVE_SYS_STAT_H
 # include <sys/stat.h>
-#elif HAVE_STAT_H
-# include <stat.h>
-#endif
 
 #if HAVE_UNISTD_H
 # include <unistd.h>
