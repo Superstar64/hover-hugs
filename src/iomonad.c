@@ -1254,38 +1254,25 @@ primFun(primHIsWritable) {		/* Test is handle writable         */
 primFun(primHIsSeekable) {		/* Test if handle is writable   */
     Int h;
     Bool okHandle;
-#if HAVE_FSTAT
     struct stat sb;
-#endif
 
     HandleArg(h,1+IOArity);
 
     okHandle = (handles[h].hmode&(HREAD|HWRITE|HREADWRITE|HAPPEND));
-#if HAVE_FSTAT
     if (okHandle && (fstat(fileno(handles[h].hfp), &sb) == 0)) {
 	okHandle = S_ISREG(sb.st_mode);
     }
     IOBoolResult(okHandle);
-#else
-    IOFail(mkIOError(&handles[h].hcell,
-		     nameIllegal,
-		     "IO.hIsSeekable",
-		     "unsupported operation",
-		     NULL));
-#endif
 }
 
 primFun(primHFileSize) {  /* If handle points to a regular file,
 			     return the size of the file   */
                           /* :: Handle -> IO Integer       */
     Int h;
-#if HAVE_FSTAT
     struct stat sb;
-#endif
 
     HandleArg(h,1+IOArity);
 
-#if HAVE_FSTAT
     checkOpen(h, "IO.hFileSize");
     if (handles[h].hmode&(HWRITE|HREADWRITE|HAPPEND))
 	fflush(handles[h].hfp);
@@ -1297,13 +1284,6 @@ primFun(primHFileSize) {  /* If handle points to a regular file,
 			 NULL));
     }
     IOReturn(bigWord(sb.st_size));
-#else
-    IOFail(mkIOError(&handles[h].hcell,
-		     nameIllegal,
-		     "IO.hFileSize",
-		     "unsupported operation",
-		     NULL));
-#endif
   }
 
 primFun(primEqHandle) {			/* Test for handle equality        */

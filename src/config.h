@@ -6,7 +6,6 @@
 
 #include "options.h"
 
-#define HAVE_FSTAT 1
 #define HAVE_FTELL 1
 #define HAVE_FTIME 1
 #define HAVE_GETRUSAGE 1
