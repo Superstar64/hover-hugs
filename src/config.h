@@ -6,7 +6,6 @@
 
 #include "options.h"
 
-#define HAVE_LIMITS_H 1
 #define HAVE_LOCALE_H 1
 #define HAVE_MKTIME 1
 #define HAVE_PCLOSE 1
