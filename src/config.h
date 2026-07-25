@@ -6,7 +6,6 @@
 
 #include "options.h"
 
-#define HAVE_SGTTY_H 1
 #define HAVE_SIGNAL_H 1
 #define HAVE_SIGPROCMASK 1
 #define HAVE_SNPRINTF 1
@@ -28,7 +27,6 @@
 #define HAVE_SYS_TIME_H 1
 #define HAVE_SYS_TYPES_H 1
 #define HAVE_SYS_WAIT_H 1
-#define HAVE_TERMIOS_H 1
 #define HAVE_TERMIO_H 1
 #define HAVE_TIME 1
 #define HAVE_TIMES 1
