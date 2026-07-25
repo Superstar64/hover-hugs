@@ -49,9 +49,7 @@
 #  include <stat.h>
 # endif
 #endif
-#if HAVE_DIRENT_H
 #  include <dirent.h>
-#endif
 #if HAVE_LOCALE_H
 #  include <locale.h>
 #endif
@@ -474,8 +472,6 @@ String sep; {
 */
 	  
 
-#if HAVE_DIRENT_H
-
 static Bool scanSubDirs(s)
 String s;
 {
@@ -505,112 +501,6 @@ String s;
     }
     return FALSE;
 }
-
-#elif HAVE_WINDOWS_H
-
-static Bool scanSubDirs(s)
-String s;
-{
-    struct _finddata_t findInfo;
-    long handle;
-    int  save;
-    
-    searchChr(SLASH);
-    save = searchPos;
-    searchStr("*.*");
-    
-    /* initiate the search */
-    handle = _findfirst( searchBuf, &findInfo );
-    if (handle==-1) { errno = 0; return FALSE; }
-    
-    /* search all subdirectories */
-    do {
-	/* if we have a valid sub directory */
-	if (((findInfo.attrib & _A_SUBDIR) == _A_SUBDIR) &&
-	    (findInfo.name[0] != '.')) {
-	    searchReset(save);
-	    searchStr(findInfo.name);
-	    searchChr(SLASH);
-	    if (find2(s)) {
-		_findclose( handle );
-		return TRUE;
-	    }
-	}
-    } while (_findnext( handle, &findInfo ) == 0);
-    
-    _findclose( handle );
-    return FALSE;
-}
-
-#elif __MWERKS__ && macintosh  /* Macintosh subscan */
-
-#include <Files.h>
-#include "MoreFilesExtras.h"
-#include <Errors.h>
-
-#define MAXSPECS 50
-
-extern StringPtr c2pstr(char *aStr);
-extern char *p2cstr(StringPtr aStr);
-
-static Bool scanSubDirs(s)
-String s;
-{   FileName name  = "\0";
-    ConstStr255Param pname = "\p";
-    String subdir = "\0";
-    OSErr error;
-
-    FSSpec specs[MAXSPECS];
-    short found = 0;
-    short start = 1;
-    int i, save;
-    
-    save = searchPos;
-    
-    /* is it in the current directory ? */
-    if (find2(s)) return TRUE;
-
-    searchReset(save);
-    
-    /* initiate the search */
-    
-    /* the complete path to the directory is in searchBuf */
-    strncpy(name,searchBuf,FILENAME_MAX);  /* do not mess up :-) */
-    pname = c2pstr(name);
- 
-    /* get all subdirectories in path */
-    error = GetDirItems( 0, 0, pname, false, true, specs
-                       , MAXSPECS, &found, &start );
-    
-    /* search over the found directories */
-    if ((error != noErr) && (error != fnfErr))
-    { errno = 0;
-      return FALSE;
-    }
-    else
-    { if (found > 0)
-        for (i = 0; i < found; i++)
-        { subdir = p2cstr(specs[i].name);
-
-          searchStr(subdir);
-          searchChr(SLASH);
-
-          if (find2(s))
-             return TRUE;
-          searchReset(save);
-        }
-    }
-
-    return FALSE;
-}
-#else
-
-static Bool scanSubDirs(name)
-String name;
-{   return FALSE;
-}
-
-#endif /* HAVE_WINDOWS_H || HAVE_DIRENT_H || (__MWERKS__ && macintosh) */
 
 /* Variables that may be substituted in the path */
 

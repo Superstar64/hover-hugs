@@ -435,77 +435,6 @@ primFun(primSetPermissions) { /* FilePath -> Bool -> Bool -> Bool -> Bool -> IO 
 #undef SET_CHMOD_FLAG
 
 primFun(primGetDirContents) { /* FilePath -> IO [FilePath] */
-#ifdef _MSC_VER
-  /* The MS CRT doesn't provide opendir()/readdir(), but uses
-     the 'std' MS find first/next/close group of functions for
-     iterating over the contents of a directory. */
-  int rc;
-  long dirHandle;
-  struct _finddata_t fData;
-  char buffer[FILENAME_MAX+20];
-  struct stat st;
-  Cell ls;
-  String fName = evalName(IOArg(1));
-  
-  if (!fName) {
-    IOFail(mkIOError(NULL,
-		     nameIllegal,
-		     "Directory.getDirectoryContents",
-		     "illegal directory name",
-		     &IOArg(1)));
-  }
-  
-  if (strlen(fName) > FILENAME_MAX) {
-    IOFail(mkIOError(NULL,
-		     nameIllegal,
-		     "Directory.getDirectoryContents",
-		     "file name too long",
-		     &IOArg(1)));
-  }
-  
-  /* First, check whether the directory exists... */
-  if (stat(fName, &st) < 0)
-    throwErrno("Directory.getDirectoryContents", FALSE, NO_HANDLE, &IOArg(1));
-  if (!S_ISDIR(st.st_mode)) {
-    IOFail(mkIOError(NULL,
-		     nameIllegal,
-		     "Directory.getDirectoryContents",
-		     "not a directory",
-		     &IOArg(1)));
-  }
-  
-  if (snprintf(buffer,sizeof(buffer)-1,"%s\\*.*",fName) < 0) {
-    IOFail(mkIOError(NULL,
-		     nameIllegal,
-		     "Directory.getDirectoryContents",
-		     "illegal directory name",
-		     &IOArg(1)));
-  } else {
-      buffer[sizeof(buffer)-1] = '\0';
-  }
-
-  dirHandle = _findfirst(buffer, &fData);
-  rc = dirHandle;
-  
-  ls = nameNil;
-  
-  while (rc >= 0) {
-    Cell n;
-    push(ls);
-    pushString(fData.name);
-    n = ap(nameCons, pop());
-    ls = ap(n, pop());
-    rc = _findnext(dirHandle, &fData);
-  }
-  if (errno != ENOENT)
-    throwErrno("Directory.getDirectoryContents", FALSE, NO_HANDLE, &IOArg(1));
-
-  /* Close and release resources */
-  rc = _findclose(dirHandle);
-  if (rc == -1 && errno != ENOENT)
-    throwErrno("Directory.getDirectoryContents", FALSE, NO_HANDLE, &IOArg(1));
-  IOReturn(ls);
-#elif HAVE_DIRENT_H
   /* opendir() / readdir() implementation. */
   DIR* dir;
   struct dirent* pDir;
@@ -549,15 +478,6 @@ primFun(primGetDirContents) { /* FilePath -> IO [FilePath] */
 
   closedir(dir);
   IOReturn(ls);
-
-#else
-  /* Sorry, don't know how to access a directory on your platform */
-    IOFail(mkIOError(NULL,
-		     nameIllegal,
-		     "Directory.getDirectoryContents",
-		     "operation not supported",
-		     &IOArg(1)));
-#endif
 }
 
 primFun(primGetModTime) { /* FilePath -> IO Int{-time_t-} - get the mod. time of the file/directory. */
