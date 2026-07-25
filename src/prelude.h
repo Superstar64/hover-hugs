@@ -329,16 +329,6 @@ extern  int     stricmp	   Args((const char *, const char*));
 #include <varargs.h>
 #endif
 
-#if !HAVE_SNPRINTF
-# if HAVE__SNPRINTF
-#  define snprintf _snprintf
-# elif __MWERKS__ && macintosh
-extern int snprintf  Args((char*, unsigned long, const char*, va_list));
-# else
-extern int snprintf   Args((char*, size_t, const char*, ...));
-# endif
-#endif
-
 #if !HAVE_VSNPRINTF
 # if __MWERKS__ && macintosh
 extern int vsnprintf  Args((char*, unsigned long, const char*, va_list));

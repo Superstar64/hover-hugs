@@ -6,7 +6,6 @@
 
 #include "options.h"
 
-#define HAVE_SNPRINTF 1
 #define HAVE_STDARG_H 1
 #define HAVE_STDINT_H 1
 #define HAVE_STDIO_H 1
