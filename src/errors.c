@@ -178,11 +178,7 @@ sigHandler(breakHandler) {              /* respond to break interrupt      */
 #if REDIRECT_OUTPUT && !HUGS_FOR_WINDOWS
 static Bool disableOutput = FALSE;      /* redirect output to buffer?      */
 
-#if HAVE_STDARG_H
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 
 /* ----------------------------------------------------------------------- */
 
@@ -247,7 +243,6 @@ String hugsClearOutputBuffer() {
     return bufferClear(&outputStream);
 }
 
-#if HAVE_STDARG_H
 Void hugsPrintf(const char *fmt, ...) {
     va_list ap;                    /* pointer into argument list           */
     va_start(ap, fmt);             /* make ap point to first arg after fmt */
@@ -258,20 +253,6 @@ Void hugsPrintf(const char *fmt, ...) {
     }
     va_end(ap);                    /* clean up                             */
 }
-#else
-Void hugsPrintf(fmt, va_alist)
-const char *fmt;
-va_dcl {
-    va_list ap;                    /* pointer into argument list           */
-    va_start(ap);                  /* make ap point to first arg after fmt */
-    if (!disableOutput) {
-	vprintf(fmt, ap);
-    } else {
-	vBufferedPrintf(&outputStream, fmt, ap);
-    }
-    va_end(ap);                    /* clean up                             */
-}
-#endif
 
 Void hugsPutchar(c)
 int c; {
@@ -295,7 +276,6 @@ FILE* fp; {
     }
 }
 
-#if HAVE_STDARG_H
 Void hugsFPrintf(FILE *fp, const char* fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
@@ -306,21 +286,6 @@ Void hugsFPrintf(FILE *fp, const char* fmt, ...) {
     }
     va_end(ap);
 }
-#else
-Void hugsFPrintf(FILE *fp, const char* fmt, va_list)
-FILE* fp;
-const char* fmt;
-va_dcl {
-    va_list ap;
-    va_start(ap);
-    if (!disableOutput) {
-	vfprintf(fp, fmt, ap);
-    } else {
-	vBufferedPrintf(&outputStream, fmt, ap);
-    }
-    va_end(ap);
-}
-#endif
 
 Void hugsPutc(c, fp)
 int   c;

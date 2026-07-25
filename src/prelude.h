@@ -323,11 +323,7 @@ extern  int     stricmp	   Args((const char *, const char*));
  * Printf-related operations:
  *-------------------------------------------------------------------------*/
 
-#if HAVE_STDARG_H
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 
 #if !HAVE_VSNPRINTF
 # if __MWERKS__ && macintosh
