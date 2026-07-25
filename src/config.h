@@ -6,7 +6,6 @@
 
 #include "options.h"
 
-#define HAVE_BIN_SH 1
 #define HAVE_CTYPE_H 1
 #define HAVE_DECL_ALTZONE 0
 #define HAVE_DECL_TIMEZONE 1

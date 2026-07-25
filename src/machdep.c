@@ -1504,11 +1504,9 @@ Bool   useShell; {
 # if HAVE_MACSYSTEM
     return macsystem(cmd);
 # else
-#  if HAVE_BIN_SH
     if (cmd[0]=='\0') {
 	cmd = fromEnv("SHELL","/bin/sh");
     }
-# endif
     return system(cmd);
 # endif
 #else
