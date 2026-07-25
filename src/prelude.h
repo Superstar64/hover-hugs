@@ -389,7 +389,6 @@ extern int vsnprintf  Args((char*, size_t, const char*, va_list));
 
 #else /* !DOS && !HANDLERS_CANT_LONGJMP - eg Unix */
 
-# if HAVE_SIGPROCMASK
 #  include <signal.h>
 #  define ctrlbrk(bh)	{ sigset_t mask; \
 			  signal(SIGINT,bh); \
@@ -397,9 +396,6 @@ extern int vsnprintf  Args((char*, size_t, const char*, va_list));
 			  sigaddset(&mask, SIGINT); \
 			  sigprocmask(SIG_UNBLOCK, &mask, NULL); \
 			}
-# else
-#  define ctrlbrk(bh)	signal(SIGINT,bh)
-# endif
 #if __MWERKS__ && macintosh
 # define allowBreak()   doNothing()
 #else
