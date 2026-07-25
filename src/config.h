@@ -6,7 +6,6 @@
 
 #include "options.h"
 
-#define HAVE_DLFCN_H 1
 #define HAVE_DLOPEN 1
 #define HAVE_DUP 1
 #define HAVE_ERRNO_H 1
