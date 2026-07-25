@@ -6,7 +6,6 @@
 
 #include "options.h"
 
-#define HAVE_ALLOCA 1
 #define HAVE_ASSERT_H 1
 #define HAVE_ATAN 1
 #define HAVE_BIN_SH 1

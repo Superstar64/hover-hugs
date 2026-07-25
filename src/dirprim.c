@@ -146,16 +146,8 @@ primFun(primRemoveFile) { /* remove a file	   */
 }
 
 /* Pair of macros for creating temporary strings */
-#if HAVE_ALLOCA
 # define ALLOC_STRING(x) (String)alloca(sizeof(char)*(x + 1))
 # define FREE_STRING(x)
-#elif HAVE__ALLOCA
-# define ALLOC_STRING(x) (String)_alloca(sizeof(char)*(x + 1))
-# define FREE_STRING(x)
-#else
-# define ALLOC_STRING(x) (String)malloc(sizeof(char)*(x + 1))
-# define FREE_STRING(x)  free(x)
-#endif
 
 primFun(primRenameDirectory) { /* rename a directory	   */
   int rc;

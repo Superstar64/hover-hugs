@@ -103,11 +103,7 @@ String argv[]; {
        * directory in his/her PATH, but the less we assume, the better.)
        */
       notePadLoc = 
-#if HAVE_ALLOCA
 	  alloca
-#else
-          _alloca
-#endif
 		  (sizeof(char)*(MAX_PATH + notePadLen + 2));
       notePadLoc[0] = '&';
       rc = GetWindowsDirectory(notePadLoc+1, MAX_PATH);
