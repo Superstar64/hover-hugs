@@ -4,7 +4,6 @@
 // This is used to make Hug's conditional checks happy
 // Hopefully this can be phased out at some point
 
-#include "platform.h"
 #include "options.h"
 
 #define CHAR_ENCODING_UTF8 1

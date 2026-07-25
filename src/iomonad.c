@@ -977,22 +977,6 @@ primFun(primOpenFd) {			/* open handle to file descriptor. */
 		         NULL));
     }
 
-#if defined(_WIN32) && !cygwin32_HOST_OS
-    if (isSock) {
-	/* fd is a SOCKET, convert it to an FD.
-	 * Note: _open_osfhandle() will fail under
-	 * Win9x. ToDo: better on those plats.
-	 */
-	fd = _open_osfhandle(fd,
-			     (m & HREAD      ? O_RDONLY : 0) |
-			     (m & HWRITE     ? O_WRONLY : 0) |
-			     (m & HREADWRITE ? O_RDWR : 0)   |
-			     (m & HAPPEND    ? O_APPEND : 0) |
-			     (binary ? O_BINARY : O_TEXT)
-			    );
-    }
-#endif
-
     IOReturn(openFdHandle(root,fd,m,binary,"openFd"));
 }
 
@@ -1369,9 +1353,7 @@ primFun(primHSetBinaryMode) {
     BoolArg(binary, 1+IOArity);
 
     checkOpen(h, "System.IO.hSetBinaryMode");
-#if defined(mingw32_HOST_OS) || defined(_MSC_VER)
-    setmode(fileno(handles[h].hfp), binary ? _O_BINARY : _O_TEXT);
-#endif
+
 #if CHAR_ENCODING
     handles[h].hBinaryMode = binary;
 #endif

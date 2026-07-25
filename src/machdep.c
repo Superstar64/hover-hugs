@@ -296,81 +296,8 @@ FileName macHugsDir; /* Directory where Hugs was found. */
 # define DLL_ENDING              ".so"
 #endif
 
-#if HAVE_GETMODULEFILENAME && !DOS && !cygwin32_HOST_OS
-static HMODULE hugsModule = (HMODULE)0;
-static String  hugsRoot   = 0;
-
-extern Void setHugsModule Args((HMODULE));
-extern Bool setHugsRoot   Args((String));
-
-Void setHugsModule(hmod)
-HMODULE hmod; {
-    hugsModule = hmod;
-}
-
-Bool setHugsRoot(s)
-String s; {
-    String newRoot = malloc(strlen(s) + 1);
-    
-    if (!newRoot) return FALSE;
-    
-    strcpy(newRoot,s);
-    
-    if (hugsRoot) free(hugsRoot);
-    hugsRoot = newRoot;
-    return TRUE;
-}
-
-#endif
-
 
 String hugsdir() {		/* directory containing libraries/Prelude.hs */
-#if HSCRIPT
-    /* In HaskellScript (Win32 only), we lookup InstallDir in the registry. */
-    static char dir[FILENAME_MAX+1] = "";
-    if (dir[0] == '\0') { /* not initialised yet */
-	String s = readRegString(HKEY_LOCAL_MACHINE,hugsRegRoot,"InstallDir", 
-				 HUGSDIR);
-	if (s) { 
-	  /* Protect against overruns */
-	  strncpy(dir,s,FILENAME_MAX);
-	  dir[sizeof(dir)-1] = '\0';
-	  free(s);
-	}
-    }
-    return dir;
-#elif __MWERKS__ && macintosh
-    static FileName dir = "\0"; /* Directory containing lib: Prelude.hs */
-    strcpy(dir,macHugsDir);
-    return dir;
-#elif HAVE_GETMODULEFILENAME && !DOS && !cygwin32_HOST_OS
-    /* On Windows, we can find the binary we're running and it's
-     * conventional to put the libraries in the same place.
-     */
-    static char dir[FILENAME_MAX+1] = "";
-   
-    if (hugsRoot)
-	return hugsRoot;
-
-    if ( dir[0] == '\0' ) { /* not initialised yet */
- 	String slash = NIL;
-	char *hugsdir = getenv("HUGSDIR");
-	
-	if (hugsdir) {
-	    strncpy(dir,hugsdir,FILENAME_MAX);
-	} else {
-	    GetModuleFileName(hugsModule,dir,FILENAME_MAX+1);
-	    if ( dir[0] == '\0' ) { /* GetModuleFileName must have failed */
-		return HUGSDIR;
-	    }
-	    if ( (slash = strrchr(dir,SLASH)) != NULL ) {
-		/* truncate after directory name */
-		*slash = '\0';
-	    }
-	}
-    }
-    return dir;
-#else
     /* On Unix systems, data is not typically stored relative to a binary
      * (it's also harder for a binary to determine where it lives).
      * First, check for an environment var, then fall back to
@@ -378,7 +305,6 @@ String hugsdir() {		/* directory containing libraries/Prelude.hs */
      */
     char *hugsdir = getenv("HUGSDIR");
     return hugsdir ? hugsdir : HUGSDIR;
-#endif
 }
 
 static String homeDir() {

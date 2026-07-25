@@ -1,61 +1,61 @@
-hugs.o: hugs.c prelude.h config.h platform.h options.h storage.h HsFFI.h \
+hugs.o: hugs.c prelude.h config.h options.h storage.h HsFFI.h \
   command.h connect.h errors.h script.h opts.h strutil.h evaluator.h \
   machdep.h output.h module.h timer.c
-runhugs.o: runhugs.c prelude.h config.h platform.h options.h storage.h \
+runhugs.o: runhugs.c prelude.h config.h options.h storage.h \
   HsFFI.h connect.h machdep.h observe.h builtin.h evaluator.h errors.h \
   server.h HugsAPI.h
-server.o: server.c prelude.h config.h platform.h options.h storage.h \
+server.o: server.c prelude.h config.h options.h storage.h \
   HsFFI.h connect.h script.h machdep.h evaluator.h opts.h strutil.h \
   errors.h server.h HugsAPI.h
-edit.o: edit.c prelude.h config.h platform.h options.h storage.h HsFFI.h \
+edit.o: edit.c prelude.h config.h options.h storage.h HsFFI.h \
   connect.h errors.h opts.h strutil.h machdep.h
-observe.o: observe.c prelude.h config.h platform.h options.h storage.h \
+observe.o: observe.c prelude.h config.h options.h storage.h \
   HsFFI.h connect.h command.h errors.h machdep.h builtin.h output.h \
   observe.h
-builtin.o: builtin.c prelude.h config.h platform.h options.h storage.h \
+builtin.o: builtin.c prelude.h config.h options.h storage.h \
   HsFFI.h connect.h errors.h machdep.h char.h builtin.h bignums.c \
   printer.c iomonad.c timeprim.c dirprim.c interns.c array.c
-char.o: char.c prelude.h config.h platform.h options.h storage.h HsFFI.h \
+char.o: char.c prelude.h config.h options.h storage.h HsFFI.h \
   connect.h errors.h char.h unitable.c
-compiler.o: compiler.c prelude.h config.h platform.h options.h storage.h \
+compiler.o: compiler.c prelude.h config.h options.h storage.h \
   HsFFI.h connect.h errors.h goal.h char.h output.h opts.h
-errors.o: errors.c prelude.h config.h platform.h options.h storage.h \
+errors.o: errors.c prelude.h config.h options.h storage.h \
   HsFFI.h connect.h errors.h output.h opts.h goal.h char.h evaluator.h
-evaluator.o: evaluator.c prelude.h config.h platform.h options.h \
+evaluator.o: evaluator.c prelude.h config.h options.h \
   storage.h HsFFI.h connect.h errors.h script.h output.h strutil.h opts.h \
   machdep.h evaluator.h
-ffi.o: ffi.c prelude.h config.h platform.h options.h storage.h HsFFI.h \
+ffi.o: ffi.c prelude.h config.h options.h storage.h HsFFI.h \
   connect.h errors.h output.h strutil.h
-goal.o: goal.c prelude.h config.h platform.h options.h storage.h HsFFI.h \
+goal.o: goal.c prelude.h config.h options.h storage.h HsFFI.h \
   connect.h errors.h machdep.h opts.h goal.h
-input.o: input.c prelude.h config.h platform.h options.h storage.h \
+input.o: input.c prelude.h config.h options.h storage.h \
   HsFFI.h connect.h command.h errors.h module.h script.h opts.h goal.h \
   machdep.h char.h parser.c
-machdep.o: machdep.c prelude.h config.h platform.h options.h storage.h \
+machdep.o: machdep.c prelude.h config.h options.h storage.h \
   HsFFI.h connect.h errors.h opts.h strutil.h machdep.h char.h \
   evaluator.h
-machine.o: machine.c prelude.h config.h platform.h options.h storage.h \
+machine.o: machine.c prelude.h config.h options.h storage.h \
   HsFFI.h connect.h errors.h char.h opts.h
-module.o: module.c prelude.h config.h platform.h options.h storage.h \
+module.o: module.c prelude.h config.h options.h storage.h \
   HsFFI.h connect.h errors.h module.h output.h
-opts.o: opts.c prelude.h config.h platform.h options.h storage.h HsFFI.h \
+opts.o: opts.c prelude.h config.h options.h storage.h HsFFI.h \
   connect.h errors.h machdep.h strutil.h opts.h char.h
-output.o: output.c prelude.h config.h platform.h options.h storage.h \
+output.o: output.c prelude.h config.h options.h storage.h \
   HsFFI.h connect.h errors.h output.h char.h
-plugin.o: plugin.c prelude.h config.h platform.h options.h storage.h \
+plugin.o: plugin.c prelude.h config.h options.h storage.h \
   HsFFI.h connect.h
-script.o: script.c prelude.h config.h platform.h options.h storage.h \
+script.o: script.c prelude.h config.h options.h storage.h \
   HsFFI.h connect.h errors.h machdep.h opts.h strutil.h script.h
-static.o: static.c prelude.h config.h platform.h options.h storage.h \
+static.o: static.c prelude.h config.h options.h storage.h \
   HsFFI.h connect.h machdep.h errors.h output.h subst.h module.h opts.h \
   goal.h scc.c
-storage.o: storage.c prelude.h config.h platform.h options.h storage.h \
+storage.o: storage.c prelude.h config.h options.h storage.h \
   HsFFI.h connect.h opts.h errors.h machdep.h evaluator.h strutil.h \
   output.h
-strutil.o: strutil.c prelude.h config.h platform.h options.h storage.h \
+strutil.o: strutil.c prelude.h config.h options.h storage.h \
   HsFFI.h connect.h errors.h strutil.h
-subst.o: subst.c prelude.h config.h platform.h options.h storage.h \
+subst.o: subst.c prelude.h config.h options.h storage.h \
   HsFFI.h connect.h errors.h output.h opts.h subst.h
-type.o: type.c prelude.h config.h platform.h options.h storage.h HsFFI.h \
+type.o: type.c prelude.h config.h options.h storage.h HsFFI.h \
   connect.h errors.h output.h subst.h goal.h opts.h preds.c scc.c
-version.o: version.c prelude.h config.h platform.h options.h
+version.o: version.c prelude.h config.h options.h

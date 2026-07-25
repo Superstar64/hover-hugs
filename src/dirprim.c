@@ -100,11 +100,8 @@ primFun(primCreateDirectory) { /* create a directory, :: String -> IO ()   */
 		     &IOArg(1)));
   }
   
-#if defined(_MSC_VER) || mingw32_HOST_OS
-   rc = mkdir(s);
-#else
    rc = mkdir(s,0777);
-#endif
+
    if (rc != 0)
       throwErrno("Directory.createDirectory", FALSE, NO_HANDLE, &IOArg(1));
   IOReturn(nameUnit);
@@ -551,11 +548,7 @@ primFun(primGetDirContents) { /* FilePath -> IO [FilePath] */
     ls = ap(n, pop());
   }
   
-  if (errno != 0
-#if mingw32_HOST_OS
-      && errno != ENOENT
-#endif
-      ) {
+  if (errno != 0) {
     int rc = errno;
     closedir(dir);
     errno = rc;

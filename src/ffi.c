@@ -466,17 +466,7 @@ List resultTy; {
     }
     fprintf(out,"(");
     if (extraArg) {
-#if sparc_TARGET_ARCH || i386_TARGET_ARCH
-        /* On SPARC we need an additional dummy argument due to stack alignment
-           restrictions, see the comment in mkThunk in builtin.c. On x86
-           platforms we need it, too, but for a different reason: The "real"
-           return address is still visible on the stack as an additional
-           argument, but we return to a small stub which pops the stable pointer
-           before the "real" return. */
-        fprintf(out,"HugsStablePtr fun1, void* unusedArg");
-#else
         fprintf(out,"HugsStablePtr fun1");
-#endif
         if (nonNull(argTys)) {
             fprintf(out,", ");
         }

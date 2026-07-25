@@ -83,10 +83,6 @@
 # define CHAR_ENCODING 1
 #endif
 
-#if defined(_WIN32) || cygwin32_HOST_OS
-#define STDCALL_SUPPORTED 1
-#endif
-
 /*---------------------------------------------------------------------------
  * Configuration options
  *

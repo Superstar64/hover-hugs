@@ -58,11 +58,7 @@ primFun(primGetClockTime) { /* :: IO (Int,Int) */
   struct timeb tb;
   int rc = 0;
   
-# ifdef mingw32_HOST_OS
-  ftime(&tb);
-# else
   rc = ftime(&tb);
-# endif
   
   if (rc == -1)
     throwErrno("Time.getClockTime", TRUE, NO_HANDLE, NULL);
@@ -284,7 +280,7 @@ primFun(primGetCPUUsage) { /* IO (Int,Int,Int,Int) */
       sysSec   = (unsigned int)(kT / NS_PER_SEC);
       sysNSec  = (unsigned int)((kT - sysSec * NS_PER_SEC) * 100);
     }
-#elif HAVE_GETRUSAGE /* && ! irix_HOST_OS && ! solaris2_HOST_OS */
+#elif HAVE_GETRUSAGE
     struct rusage t;
 
     getrusage(RUSAGE_SELF, &t);
