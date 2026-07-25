@@ -37,10 +37,8 @@ CFILES		= hugs.c runhugs.c server.c edit.c observe.c \
 		  goal.c input.c machdep.c machine.c module.c opts.c \
 		  output.c plugin.c script.c static.c storage.c strutil.c \
 		  subst.c type.c version.c
-INCFILES	= array.c bignums.c dirprim.c interns.c iomonad.c \
-		  preds.c printer.c scc.c timeprim.c timer.c
 YFILES		= parser.y
-SOURCES		= $(HFILES) $(CFILES) $(INCFILES) $(YFILES) 
+SOURCES		= $(HFILES) $(CFILES) $(YFILES) 
 OBJECTS		= builtin.o char.o compiler.o \
 		  errors.o evaluator.o ffi.o \
 		  goal.o input.o machdep.o \
@@ -131,7 +129,7 @@ depend: $(SOURCES) parser.c unitable.c
 # Object dependencies
 ################################################################
 
-include MkDepend.mk
+-include MkDepend.mk
 
 ################################################################
 # End of Makefile

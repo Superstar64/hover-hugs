@@ -983,7 +983,990 @@ primFun(primW32toW64) {
  * ------------------------------------------------------------------------*/
 
 #if BIGNUMS
-#include "bignums.c"
+/* --------------------------------------------------------------------------
+ * Functions for manipulating Haskell Integers (bignums).
+ *
+ * The Hugs 98 system is Copyright (c) Mark P Jones, Alastair Reid, the
+ * Yale Haskell Group, and the OGI School of Science & Engineering at OHSU,
+ * 1994-2003, All rights reserved.  It is distributed as free software under
+ * the license in the file "License", which is included in the distribution.
+ *
+ * $RCSfile: bignums.c,v $
+ * $Revision: 1.15 $
+ * $Date: 2004/10/29 12:43:09 $
+ * ------------------------------------------------------------------------*/
+
+/*#define DEBUG_BIGNUMS*/
+
+#if DEBUG_BIGNUMS
+static Void local bigDump(List ds, Int n) {
+    while (nonNull(ds) && 0<n--) {
+	Printf(":%04d",digitOf(hd(ds)));
+	ds = tl(ds);
+    }
+}
+#endif
+
+static Cell bn;			/* Bignum accumulator; used in bignum	   */
+				/* calcs, visited by the garbage collector.*/
+static List bigRem = NIL;	/* used in bigQrm to return remainder	   */
+
+
+/*-------------------------------------------------------------------------*/
+
+PROTO_PRIM(primPlusInteger);
+PROTO_PRIM(primMinusInteger);
+PROTO_PRIM(primMulInteger);
+PROTO_PRIM(primQrmInteger);
+PROTO_PRIM(primNegInteger);
+PROTO_PRIM(primIntToInteger);
+PROTO_PRIM(primIntegerToInt);
+PROTO_PRIM(primWordToInteger);
+PROTO_PRIM(primIntegerToWord);
+PROTO_PRIM(primIntegerToFloat);
+PROTO_PRIM(primIntegerToDouble);
+PROTO_PRIM(primEqInteger);
+PROTO_PRIM(primCmpInteger);
+
+static struct primitive bignumPrimTable[] = {
+  {"primPlusInteger",	2, primPlusInteger},
+  {"primMinusInteger",	2, primMinusInteger},
+  {"primMulInteger",	2, primMulInteger},
+  {"primQrmInteger",	2, primQrmInteger},
+  {"primNegInteger",	1, primNegInteger},
+  {"primIntToInteger",	1, primIntToInteger},
+  {"primIntegerToInt",	1, primIntegerToInt},
+  {"primWordToInteger",	1, primWordToInteger},
+  {"primIntegerToWord",	1, primIntegerToWord},
+  {"primIntegerToFloat",1, primIntegerToFloat},
+  {"primIntegerToDouble",1,primIntegerToDouble},
+  {"primEqInteger",	2, primEqInteger},
+  {"primCmpInteger",	2, primCmpInteger},
+  {0,			0, 0}
+};
+
+/* --------------------------------------------------------------------------
+ * Bignum control:
+ * ------------------------------------------------------------------------*/
+
+#if SHORT_CIRCUIT_COERCIONS
+static Name nameIntToInteger;
+#endif
+
+static Void bignumControl Args((Int));
+static Void bignumControl(what)
+Int what; {
+    switch (what) {
+	case MARK    : mark(bn);
+		       mark(bigRem);
+		       break;
+	case INSTALL : 
+#if SHORT_CIRCUIT_COERCIONS
+#define predef(nm,str) nm=newName(findText(str),NIL); name(nm).defn=PREDEFINED
+		       predef(nameIntToInteger, "primIntToInteger");
+#undef predef
+#endif
+	case RESET   : bn     = NIL;
+		       bigRem = NIL;
+		       break;
+    }
+}
+
+static struct primInfo bignumPrims = { bignumControl, bignumPrimTable, 0 };
+
+/* Used by the IO implementation, so not 'static' like the rest. */
+extern Bignum bigWord   Args((Unsigned));
+
+/* --------------------------------------------------------------------------
+ * Local function prototypes:
+ * ------------------------------------------------------------------------*/
+
+static Int    local digitsCmp Args((List,List));
+static Bignum local bigAdd    Args((Bignum,Bignum));
+static Bignum local bigSub    Args((Bignum,Bignum));
+static Bignum local digitsAdd Args((Cell,List,List));
+static Bignum local digitsSub Args((List,List));
+static Bignum local bigMul    Args((Bignum,Bignum));
+static Bignum local bigQrm    Args((Bignum,Bignum));
+static List   local digitsQrm Args((List,List));
+
+/*---------------------------------------------------------------------------
+ * Simple bignum primitives:
+ *-------------------------------------------------------------------------*/
+
+Bignum bigInt(n)			/* convert Int to bignum	   */
+Int n; {
+    if (n==0)
+	return ZERONUM;
+    else {
+	unsigned long no;
+	Cell nx;
+	if (n<0) {
+	    no = (unsigned long)(-n);
+	    bn = pair(NEGNUM,NIL);
+	}
+	else {
+	    no = (unsigned long)(n);
+	    bn = pair(POSNUM,NIL);
+	}
+	for (nx=bn; no>0; no/=BIGBASE, nx=tl(nx)) {
+	    tl(nx) = pair(mkDigit(no%BIGBASE),NIL);
+	}
+	return bn;
+    }
+}
+
+Bignum bigWord(n)		      /* convert Word to bignum	   */
+Unsigned n; {
+    if (n==0)
+	return ZERONUM;
+    else {
+	unsigned long no;
+	Cell nx;
+	no = (unsigned long)(n);
+	bn = pair(POSNUM,NIL);
+	for (nx=bn; no>0; no/=BIGBASE, nx=tl(nx)) {
+	    tl(nx) = pair(mkDigit(no%BIGBASE),NIL);
+	}
+	return bn;
+    }
+}
+
+Bignum bigDouble(a)			/* convert double to bignum	   */
+double a; {
+    if (a==0) {
+	return ZERONUM;
+    } else {
+	double b; /* Obscure use of a and b is to avoid a bug in Symantec C*/
+	Cell nx;
+	if (a<0) {
+	    b  = (-a);
+	    bn = pair(NEGNUM,NIL);
+	} else {
+	    b = a;
+	    bn = pair(POSNUM,NIL);
+	}
+	b = floor(b);
+	/* NB: in IEEE floating point, !(b>0) is not the same as b<=0 */
+	if (!(b>0))			/* happens on IEEE NaN */
+	    throwException(ap(nameArithException, nameOverflow));
+	for (nx=bn; b>0; nx=tl(nx)) {
+	    double n = fmod(b,(double)(BIGBASE));
+	    Int d    = (Int)n;
+	    if (d<0)			/* happens on IEEE inf and -inf */
+		throwException(ap(nameArithException, nameOverflow));
+	    tl(nx)   = pair(mkDigit(d),NIL);
+	    b        = (b - n) / BIGBASE;
+	}
+	return bn;
+    }
+}
+
+/* The library documentation says that conversion between signed and
+ * unsigned types preserves representation, not sign.  Since this
+ * conversion uses fromInteger, and we do note know the original type,
+ * fromInteger is the same for Int and Word, and must accept values
+ * in the range MINNEGINT..MAXHUGSWORD.
+ */
+
+Cell bigToInt(n)			/* convert bignum to Int	   */
+Bignum n; {
+    if (n!=ZERONUM) {
+	List ds = snd(n);
+	if (nonNull(ds)) {
+	    Int m;
+	    Int b = 1;
+	    if (fst(n)==POSNUM) {
+		m = digitOf(hd(ds));
+		while (nonNull(ds=tl(ds))) {
+		    Int d = digitOf(hd(ds));
+		    if (b > (Int)(MAXHUGSWORD/BIGBASE))
+			return NIL;
+		    b *= BIGBASE;
+		    if (d > (Int)((MAXHUGSWORD - m)/b))
+			return NIL;
+		    m += b*d;
+		}
+	    } else { /* fst(n)==NEGNUM */
+		m = - digitOf(hd(ds));
+		while (nonNull(ds=tl(ds))) {
+		    Int d = - digitOf(hd(ds));
+		    if (b > (MAXPOSINT/BIGBASE))
+			return NIL;
+		    b *= BIGBASE;
+		    if (d < (MINNEGINT - m)/b)
+			return NIL;
+		    m += b*d;
+		}
+	    }
+	    return mkInt(m);
+	}
+    }
+    return mkInt(0);
+}
+
+double bigToDouble(n)			/* convert bignum to double	  */
+Bignum n; {
+    if (n==ZERONUM)
+	return 0.0;
+    else {
+	double m  = 0.0;
+	double b  = 1.0;
+	List  ds = snd(n);
+	for (; nonNull(ds); ds=tl(ds)) {
+	    m += b*digitOf(hd(ds));
+	    b *= BIGBASE;
+	}
+	return fst(n)==POSNUM ? m : (-m);
+    }
+}
+
+Bignum bigStr(s)			/* convert String to bignum	   */
+String s; {				/* Surprisingly, this is GC safe   */
+    List   ds = NIL;			/* because ds is the only variable */
+    String t  = s;			/* that needs marking, and always  */
+    Int    i;				/* appears as the snd of each cons */
+
+    if (*t == '-')			/* look for leading minus	   */
+	t++;				/* and ignore for time being	   */
+    if ((i=(size_t)strlen(t)%BIGEXP)!=0) {
+	Int d = 0;
+	while (0<i--)
+	    d = d*10 + (*t++ - '0');
+	if (d)
+	    ds = cons(mkDigit(d),NIL);
+    }
+    while (*t) {			/* now scan rest of string	   */
+	Int d = 0;
+	for (i=BIGEXP; i>0; i--)
+	    d = d*10 + (*t++ - '0');
+	if (nonNull(ds) || d)
+	    ds = cons(mkDigit(d),ds);
+    }
+
+    return isNull(ds) ? ZERONUM : pair((*s=='-' ? NEGNUM : POSNUM), ds);
+}
+
+Cell bigOut(a,s,b)			/* bignum output, prepend digits to*/
+Bignum a;				/* stream s			   */
+Cell   s;				/* GC safe; s is snd in each cons  */
+Bool   b; {				/* TRUE => wrap neg int in parens  */
+    if (a==ZERONUM)
+	return ap(consChar('0'),s);
+    else {
+	Bool isNeg = fst(a)==NEGNUM;	/* keep record of sign		   */
+	bn         = snd(a);		/* list of digits		   */
+
+	if (b && isNeg)			/* print closing paren		   */
+	    s = ap(consChar(')'),s);
+
+	for (;;) {
+	    Int d = digitOf(hd(bn));	/* get next digit		   */
+	    bn    = tl(bn);		/* move to next digit		   */
+	    if (nonNull(bn)) {		/* more digits to come after this  */
+		Int i = BIGEXP;
+		for (; i>0; i--, d/=10)
+		    s = ap(consChar('0'+(d%10)),s);
+	    }
+	    else {			/* leading (non-zero) digits	   */
+		for (; d; d/=10)
+		    s = ap(consChar('0'+(d%10)),s);
+		break;
+	    }
+	    allowBreak();
+	}
+
+	if (isNeg)			/* print minus sign		   */
+	    s = ap(consChar('-'),s);
+	if (b && isNeg)			/* print open paren		   */
+	    s = ap(consChar('('),s);
+	return s;
+    }
+}
+
+Bignum bigShift(big,c,mult)		/* Digits 0 <= c, mult < BIGBASE   */
+Bignum big;				/* Calculate big*mult+c, if big>=0 */
+Int    c;				/*           big*mult-c, if big<0  */
+Int    mult; {				/* UPDATE big, DESTRUCTIVELY!	   */
+    if (big==ZERONUM)
+	return (c==0) ? ZERONUM : pair(POSNUM,singleton(mkDigit(c)));
+    else {
+	Cell nx = bn = big;
+	while (nonNull(tl(nx))) {
+	    nx     = tl(nx);
+	    c      = digitOf(hd(nx))*mult + c;
+	    hd(nx) = mkDigit(c % BIGBASE);
+	    c      = c / BIGBASE;	/* N.B. new carry is < BIGBASE	   */
+	}
+	if (c>0)
+	    tl(nx) = singleton(mkDigit(c));
+    }
+    return big;
+}
+
+/*---------------------------------------------------------------------------
+ * Simple Bignum operations:
+ *-------------------------------------------------------------------------*/
+
+primFun(primIntToInteger) {		/* Conversion :: Int -> Integer	   */
+    eval(primArg(1));
+    updateRoot(bigInt(whnfInt));
+}
+
+primFun(primIntegerToInt) {		/* Conversion :: Integer -> Int	   */
+#if SHORT_CIRCUIT_COERCIONS
+    /* Optimisation: we try to short-circuit trivial conversions */
+    Cell x = followInd(primArg(1));
+    if (isAp(x) && followInd(fun(x)) == nameIntToInteger) {
+	updateRoot(arg(x));
+	return;
+    } else
+#endif
+    {
+	eval(primArg(1));
+	whnfHead = bigToInt(whnfHead);
+	if (nonNull(whnfHead)) {
+	    updateRoot(whnfHead);
+	} else {
+	    throwException(ap(nameArithException, nameOverflow));
+	}
+    }
+}
+
+primFun(primWordToInteger) {		/* Conversion :: Word -> Integer   */
+    eval(primArg(1));
+    updateRoot(bigWord(whnfInt));
+}
+
+primFun(primIntegerToWord) {		/* Conversion :: Integer -> Word   */
+    eval(primArg(1));
+    whnfHead = bigToInt(whnfHead);
+    if (nonNull(whnfHead))
+	updateRoot(whnfHead);
+    else
+	throwException(ap(nameArithException, nameOverflow));
+}
+
+primFun(primIntegerToFloat) {		/* Conversion :: Integer -> Float  */
+    eval(primArg(1));
+    updateRoot(mkFloat((FloatPro)bigToDouble(whnfHead)));
+}
+
+primFun(primIntegerToDouble) {		/* Conversion :: Integer -> Double */
+    eval(primArg(1));
+    updateRoot(mkDouble((DoublePro)bigToDouble(whnfHead)));
+}
+
+primFun(primNegInteger) {		/* Integer unary negate		   */
+    eval(primArg(1));
+    updateRoot(bigNeg(whnfHead));
+}
+
+Bignum bigNeg(a)		        /* unary negation		   */
+Bignum a; {
+    if (a==ZERONUM)
+	return ZERONUM;
+    else
+	return pair(((fst(a)==POSNUM) ? NEGNUM : POSNUM), snd(a));
+}
+
+/*---------------------------------------------------------------------------
+ * Bignum comparison routines:
+ *-------------------------------------------------------------------------*/
+
+primFun(primEqInteger) {		/* Integer equality test	   */
+    eval(primArg(2));
+    primArg(2) = whnfHead;
+    eval(primArg(1));
+    updateRoot(bigCmp(primArg(2),whnfHead)==0 ? nameTrue : nameFalse);
+}
+
+primFun(primCmpInteger) {		/* Integer comparison		   */
+    eval(primArg(2));
+    primArg(2) = whnfHead;
+    eval(primArg(1));
+    switch (bigCmp(primArg(2),whnfHead)) {
+	case (-1) : updateRoot(nameLT); break;
+	case   0  : updateRoot(nameEQ); break;
+	case   1  : updateRoot(nameGT); break;
+    }
+}
+
+Int bigCmp(a,b)				/* Compare bignums returning:	   */
+Bignum a, b; {				/* -1 if a<b,  +1 if a>b,  0 o/w   */
+    if (a==ZERONUM)
+	return (b==ZERONUM) ? 0 : ((fst(b)==POSNUM) ? (-1) : 1);
+    else if (fst(a)==NEGNUM)
+	if (b==ZERONUM || fst(b)==POSNUM)
+	    return (-1);
+	else
+	    return digitsCmp(snd(b),snd(a));
+    else
+	if (b==ZERONUM || fst(b)==NEGNUM)
+	    return 1;
+	else
+	    return digitsCmp(snd(a),snd(b));
+}
+
+static Int local digitsCmp(xs,ys)	/* Compare positive digit streams  */
+List xs, ys; {				/* -1 if xs<ys, +1 if xs>ys, 0 if= */
+    Int s = 0;
+    for (; nonNull(xs) && nonNull(ys); xs=tl(xs), ys=tl(ys)) {
+	Int x = hd(xs);
+	Int y = hd(ys);
+	if (x<y)
+	    s = (-1);
+	else if (x>y)
+	    s = 1;
+    }
+    return (nonNull(xs) ? 1 : (nonNull(ys) ? (-1) : s));
+}
+
+/*---------------------------------------------------------------------------
+ * Addition and subtraction:
+ *-------------------------------------------------------------------------*/
+
+static Bignum local bigAdd(a,b)		/* Bignum addition		   */
+Bignum a, b; {
+    if (a==ZERONUM)
+	return b;
+    else if (b==ZERONUM)
+	return a;
+    else if (fst(a)==POSNUM)
+	if (fst(b)==POSNUM)
+	    return digitsAdd(POSNUM,snd(a),snd(b));
+	else
+	    return digitsSub(snd(a),snd(b));
+    else /* fst(a)==NEGNUM */
+	if (fst(b)==NEGNUM)
+	    return digitsAdd(NEGNUM,snd(a),snd(b));
+	else
+	    return digitsSub(snd(b),snd(a));
+}
+
+static Bignum local bigSub(a,b)		/* Bignum subtraction		   */
+Bignum a, b; {
+    if (a==ZERONUM)
+	return bigNeg(b);
+    else if (b==ZERONUM)
+	return a;
+    else if (fst(a)==POSNUM)
+	if (fst(b)==NEGNUM)
+	    return digitsAdd(POSNUM,snd(a),snd(b));
+	else
+	    return digitsSub(snd(a),snd(b));
+    else /* fst(a)==NEGNUM */
+	if (fst(b)==POSNUM)
+	    return digitsAdd(NEGNUM,snd(a),snd(b));
+	else
+	    return digitsSub(snd(b),snd(a));
+}
+
+static Bignum local digitsAdd(sign,xs,ys)/* Addition of digit streams	   */
+Cell sign;
+List xs, ys; {
+    Cell nx = bn = pair(sign,NIL);
+    Int  c  = 0;
+    for (;;) {
+	if (nonNull(xs)) {			/* Add any digits to carry */
+	    if (nonNull(ys)) {
+		c += digitOf(hd(xs)) + digitOf(hd(ys));
+		xs = tl(xs);
+		ys = tl(ys);
+	    }
+	    else if (c==0) {			/* look for short cut when */
+		tl(nx) = xs;			/* a stream ends and there */
+		break;				/* is no outstanding carry */
+	    }
+	    else {
+		c += digitOf(hd(xs));
+		xs = tl(xs);
+	    }
+	}
+	else if (c==0) {
+	    tl(nx) = ys;
+	    break;
+	}
+	else if (nonNull(ys)) {
+	    c += digitOf(hd(ys));
+	    ys = tl(ys);
+	}
+
+	if (c>=BIGBASE) {			/* Calculate output digit  */
+	    nx = tl(nx) = cons(mkDigit(c-BIGBASE),NIL);
+	    c  = 1;
+	}
+	else {					/* Carry will always be >0 */
+	    nx = tl(nx) = cons(mkDigit(c),NIL);	/* at this point	   */
+	    c  = 0;
+	}
+	allowBreak();
+    }
+    return bn;
+}
+
+static Bignum local digitsSub(xs,ys)	/* Subtraction of digit streams    */
+List xs, ys; {
+    Cell nx;
+    Int  b  = 0;
+    Int  lz = 0;
+
+    switch (digitsCmp(xs,ys)) {
+	case (-1) : nx = xs;		/* if xs<ys, return -(ys-xs)	   */
+		    xs = ys;
+		    ys = nx;
+		    bn = pair(NEGNUM,NIL);
+		    break;
+
+	case   0  : return ZERONUM;	/* if xs=ys, return 0		   */
+
+	case   1  : bn = pair(POSNUM,NIL);
+		    break;		/* if xs>ys, return +(xs-ys)	   */
+    }
+
+    nx = bn;				/* Now we can assume that xs>ys    */
+    for (;;) {				/* Scan each digit		   */
+	Int y = b;
+	if (nonNull(ys)) {
+	    y += digitOf(hd(xs)) - digitOf(hd(ys));
+	    xs = tl(xs);
+	    ys = tl(ys);
+	}
+	else if (y==0) {
+	    if (nonNull(xs))
+		for (; lz>0; lz--)
+		    nx = tl(nx) = cons(mkDigit(0),NIL);
+	    tl(nx) = xs;
+	    break;
+	}
+	else {
+	    y += digitOf(hd(xs));	/* xs>ys, so we can't run out of   */
+	    xs = tl(xs);		/* digits of xs while y!=0	   */
+	}
+
+	if (y<0) {			/* Calculate output digit	   */
+	    y += BIGBASE;
+	    b  = (-1);
+	}
+	else
+	    b  = 0;
+
+	if (y==0)			/* Don't insert leading zeros	   */
+	    lz++;
+	else {
+	    for (; lz>0; lz--)
+		nx = tl(nx) = cons(mkDigit(0),NIL);
+	    nx = tl(nx) = cons(mkDigit(y),NIL);
+	}
+	allowBreak();
+    }
+    return bn;
+}
+
+/*---------------------------------------------------------------------------
+ * Multiplication:
+ *-------------------------------------------------------------------------*/
+
+static Bignum local bigMul(a,b)		/* Bignum multiply		   */
+Bignum a, b; {
+    if (a==ZERONUM || b==ZERONUM)	/* if either operand is zero, then */
+	return ZERONUM;			/* so is the result ...		   */
+    else {				/* otherwise, use rule of signs:   */
+	Cell nx = bn = ap((hd(a)==hd(b) ? POSNUM : NEGNUM), NIL);
+	for (; nonNull(b=tl(b)); nx=tl(nx)) {	/* loop through digits of b*/
+	    List as = nx;		/* At each stage of the loop, add  */
+	    List xs = tl(a);		/* y * xs to the value in result,  */
+	    Int  y  = digitOf(hd(b));	/* using c as carry		   */
+	    Int  c  = 0;
+	    for (; nonNull(xs); xs=tl(xs)) {	/* loop through digits of a*/
+		c += digitOf(hd(xs)) * y;
+		if (nonNull(tl(as))) {
+		    as = tl(as);
+		    c += digitOf(hd(as));
+		}
+		else
+		    as = tl(as) = cons(NIL,NIL);
+		hd(as) = mkDigit(c % BIGBASE);
+		c     /= BIGBASE;
+	    }
+	    if (c>0)			/* add carry digit, if required	   */
+		tl(as) = cons(mkDigit(c),NIL);
+	    allowBreak();
+	}
+	return bn;
+    }
+}
+
+/*---------------------------------------------------------------------------
+ * Division:
+ *-------------------------------------------------------------------------*/
+
+static Cell local bigQrm(a,b)		/* bignum quotient and remainder   */
+Bignum a, b; {
+    if (b==ZERONUM)			/* division by zero?		   */
+	return NIL;
+    else if (a==ZERONUM)   		/* 0 `div` x == 0 `mod` x == 0	   */
+	return ap(ap(mkTuple(2),ZERONUM),ZERONUM);
+    else {
+	/* The sign of the quotient is positive if numerator and denominator
+	 * have the same sign, negative if the signs differ.  The sign of the
+	 * remainder is always the same as the sign of the numerator.
+	 */
+	Cell qsign = (fst(a)==fst(b) ? POSNUM : NEGNUM);
+	Cell rsign = fst(a);
+	bn         = digitsQrm(snd(a),snd(b));
+	bn         = isNull(bn) ? ZERONUM : pair(qsign,bn);
+	bn         = pair(mkTuple(2),bn);
+	bigRem     = isNull(bigRem) ? ZERONUM : pair(rsign,bigRem);
+	bn         = ap(bn,bigRem);
+	bigRem     = NIL;
+	return bn;
+    }
+}
+
+static List local digitsQrm(us,vs)	/* digits quotient and remainder   */
+List us, vs; {
+    Bool gc = consGC;
+    consGC  = TRUE;
+    if (isNull(tl(vs))) {		/* single digit divisor		   */
+	Int  v   = digitOf(hd(vs));
+	Int  r   = 0;
+	List us1 = NIL;			/* first, copy and reverse us	   */
+	for (; nonNull(us); us=tl(us))
+	    us1 = cons(hd(us),us1);
+	while (nonNull(us1)) {		/* then do division, MSD first	   */
+	    Cell tmp = tl(us1);
+	    Int  u   = r * BIGBASE + digitOf(hd(us1));
+	    r        = u % v;
+	    u	     = u / v;
+	    if (nonNull(us) || u) {	/* output quotient digit	   */
+		hd(us1) = mkDigit(u);
+		tl(us1) = us;
+		us 	= us1;
+	    }
+	    us1	     = tmp;
+	}
+	bigRem = r ? singleton(mkDigit(r)) : NIL;
+	consGC = gc;
+	return us;
+    }
+    else {				/* at least two digits in divisor  */
+
+	/* The division algorithm used here is, inevitably, based on the
+	 * description in Knuth's volume 2 on Seminumerical algorithms,
+	 * and is probably at least as incomprehensible as the MIX
+	 * implementation given there :-)
+	 */
+
+	List us1 = NIL;
+	List vs1 = NIL;
+	List ds  = us;
+	Int  v1  = 0, v2  = 0;
+	Int  uj  = 0, uj1 = 0, uj2 = 0;
+	Int  n   = 0;
+	List qs  = NIL;
+	Int  sc;
+
+	while (nonNull(us) && nonNull(vs)) {
+	    v2  = v1;
+	    v1  = digitOf(hd(vs));
+	    vs1 = cons(hd(vs),vs1);
+	    vs  = tl(vs);
+
+	    uj2 = uj1;
+	    uj1 = digitOf(hd(us));
+	    us1 = cons(hd(us),us1);
+	    us  = tl(us);
+
+	    n++;
+	}
+
+	if (nonNull(vs)) {		/* if us is shorter than vs, then  */
+	    bigRem = ds;		/* remainder is us, quotient zero  */
+	    consGC = gc;
+	    return NIL;
+	}
+	vs = rev(vs1);
+
+	/* Now we have:
+	 *   n      = number of digits in vs which is at least two (we
+	 *	      also know that us has at least n digits),
+	 *   v1, v2 = most significant digits of vs
+	 *   vs     = digits of vs with least significant digit first
+	 */
+
+#if DEBUG_BIGNUMS
+Printf("initial vs (n=%d, v1=%d, v2=%d): ",n,v1,v2);
+bigDump(vs,n);
+Putchar('\n');
+#endif
+	while (nonNull(us)) {
+	    uj2 = uj1;
+	    uj1 = digitOf(hd(us));
+	    us1 = cons(hd(us),us1);
+	    us  = tl(us);
+	}
+
+	us = cons(mkDigit(uj=0),NIL);
+	ds = us1;
+	for (vs1=tl(vs); nonNull(vs1); vs1=tl(vs1)) {
+	    us1    = tl(ds);
+	    tl(ds) = us;
+	    us     = ds;
+	    ds     = us1;
+	}
+
+	/* And, at this point, we have:
+	 *   us = first (n-1) significant digits of original numerator,
+	 *	  with least significant digit first, and a zero at the
+	 *	  end (MSD) of the list, so that length us == n.
+	 *   ds = remaining digits of the numerator, most significant
+	 *	  digit first.
+	 *   uj, uj1, uj2
+	 *      = first three significant digits of us.  (At this point,
+	 *	  uj is actually zero.)
+	 */
+
+#if DEBUG_BIGNUMS
+Printf("initial us (uj=%d, uj1=%d, uj2=%d): ",uj,uj1,uj2);
+bigDump(us,n);
+Putchar('\n');
+Printf("initial ds: ");
+bigDump(ds,1000);
+Putchar('\n');
+#endif
+	sc = BIGBASE / (v1+1);
+#if DEBUG_BIGNUMS
+Printf("scaling factor %d\n",sc);
+#endif
+	if (sc!=1) {			/* Scale numerator and denominator */
+	    Int c = 0;
+	    v1 = v2 = 0;
+	    for (vs1=vs; nonNull(vs1); vs1=tl(vs1)) {
+		v2 = v1;
+		v1 = sc * digitOf(hd(vs1)) + c;
+		c  = v1 / BIGBASE;
+		hd(vs1) = mkDigit(v1%=BIGBASE);
+	    }				/* no carry here, guaranteed	   */
+
+	    c = uj = uj1 = uj2 = 0;
+	    for (us1=ds=rev(ds); nonNull(us1); us1=tl(us1)) {
+		uj2 = uj1;
+		uj1 = uj;
+		uj  = sc * digitOf(hd(us1)) + c;
+		c   = uj / BIGBASE;
+		hd(us1) = mkDigit(uj%=BIGBASE);
+	    }
+	    for (ds=rev(ds), us1=us; nonNull(us1); us1=tl(us1)) {
+		uj2 = uj1;
+		uj1 = uj;
+		uj  = sc * digitOf(hd(us1)) + c;
+		c   = uj / BIGBASE;
+		hd(us1) = mkDigit(uj%=BIGBASE);
+	    }				/* no carry here, guaranteed	   */
+	}
+
+#if DEBUG_BIGNUMS
+Printf("scaled vs (n=%d, v1=%d, v2=%d): ",n,v1,v2);
+bigDump(vs,n);
+Putchar('\n');
+Printf("scaled us (uj=%d, uj1=%d, uj2=%d): ",uj,uj1,uj2);
+bigDump(us,n);
+Putchar('\n');
+Printf("scaled ds: ");
+bigDump(ds,1000);
+Putchar('\n');
+#endif
+	/* Most of the conditions above are still valid, except that both
+	 * the numerator and denominator have been multiplied by the scaling
+	 * factor sc, and the values of the various digit positions have been
+	 * updated accordingly.
+	 *
+	 * Now we can start the division algorithm proper:
+	 */
+
+	while (nonNull(ds)) {
+	    Int nd, c;			/* Guess a value for quotient digit*/
+	    Int qhat = (uj==v1) ? (BIGBASE-1) : (uj*BIGBASE+uj1)/v1;
+	    while (v2*qhat > (uj*BIGBASE+uj1-qhat*v1)*BIGBASE+uj2)
+		qhat--;			/* and then try to improve it	   */
+
+	    us1    = tl(ds);		/* take digit off off front of ds  */
+	    tl(ds) = us;		/* and add to front of us	   */
+	    us     = ds;
+	    ds	   = us1;
+	    nd     = isNull(ds) ? 0 : digitOf(hd(ds));	/* next digit of ds*/
+
+#if DEBUG_BIGNUMS
+Printf("To divide us (uj=%d, uj1=%d, uj2=%d): ",uj,uj1,uj2);
+bigDump(us,n+1);
+Printf(" by vs (v1=%d, v2=%d): ",v1,v2);
+bigDump(vs,n);
+Printf(", guess qhat=%d\n",qhat);
+#endif
+	    uj  = nd;			/* us := us - qhat * vs		   */
+	    uj1 = uj2 = c = 0;
+	    us1 = us;
+	    vs1 = vs;
+	    do {
+		uj2 = uj1;
+		uj1 = uj;
+		uj  = digitOf(hd(us1)) - qhat*digitOf(hd(vs1)) - c;
+		if (uj>=0)
+		    c = 0;
+		else {
+		    c   = (BIGBASE - 1 - uj) / BIGBASE;
+		    uj += c*BIGBASE;
+		}
+		hd(us1) = mkDigit(uj);
+		us1     = tl(us1);
+		vs1     = tl(vs1);
+	    } while (nonNull(vs1));
+
+	    if (digitOf(hd(us1))<c) {	/* maybe we overestimated qhat?	   */
+#if DEBUG_BIGNUMS
+Printf("overestimated qhat by one!\n");
+#endif
+		qhat--;			/* so reduce guess		   */
+		uj  = nd;		/* and set us := us + vs	   */
+		uj1 = uj2 = c = 0;	/* (we can't have overestimated by */
+		us1 = us;		/* more than one thanks to the	   */
+		vs1 = vs;		/* initial scaling of us, vs by sc)*/
+		do {
+		    uj2 = uj1;
+		    uj1 = uj;
+		    uj  = digitOf(hd(us1)) + digitOf(hd(vs1)) + c;
+		    if (uj>=BIGBASE)
+			c = 1, uj -= BIGBASE;
+		    else
+			c = 0;
+		    hd(us1) = mkDigit(uj);
+		    us1     = tl(us1);
+		    vs1     = tl(vs1);
+		} while (nonNull(vs1));
+	    }
+#if DEBUG_BIGNUMS
+Printf("There remains (uj=%d, uj1=%d, uj2=%d): ",uj,uj1,uj2);
+bigDump(us,n);
+Putchar('\n');
+#endif
+
+	    if (nonNull(qs) || qhat)	/* output quotient digit, without  */
+		qs = cons(mkDigit(qhat),qs);	/* leading zeros	   */
+
+	    allowBreak();
+	}
+
+#if DEBUG_BIGNUMS
+Printf("done quotient\n");
+#endif
+	/* Now we have the quotient digits (if any) with least significant
+	 * digit first in qs, and sc times the remainder is the first n
+	 * digits of us.  All that remains is to adjust the remainder:
+	 */
+
+	us1 = rev(take(n,us));
+	us  = NIL;
+	uj  = 0;			/* reuse variable uj as a carry	   */
+	while (nonNull(us1)) {
+	    Int y = uj * BIGBASE + digitOf(hd(us1));
+	    uj    = y % sc;
+	    y    /= sc;
+	    if (nonNull(us) || y) {
+		vs1     = tl(us1);
+		tl(us1) = us;
+		hd(us1) = mkDigit(y);
+		us      = us1;
+		us1	= vs1;
+	    }
+	    else
+		us1 = tl(us1);
+	}
+	bigRem = us;
+	consGC = gc;
+	return qs;
+    }
+}
+
+/*-------------------------------------------------------------------------*/
+
+/* e is a constant expression with no live pointers */
+#define CAFBignum(nm,e)                   \
+  primCAF(nm) {                           \
+    push(e);                              \
+    bn = NIL;                             \
+  }
+
+/* e is an expression with free variables x and y */
+#define BignumBignum2Bignum(nm,e)         \
+  primFun(nm) {                           \
+    Bignum x, y;                          \
+    eval(primArg(2)); push(whnfHead);     \
+    eval(primArg(1)); y = whnfHead;  	  \
+    x = pop();                    	  \
+    if (!isBignum(x) || !isBignum(y))     \
+	internal("Bignum expected");      \
+    updateRoot(e);                   	  \
+    bn = NIL;                             \
+}
+
+/* e is an expression with free variable x */
+#define Bignum2Bignum(nm,e)      	  \
+  primFun(nm) {                     	  \
+    Bignum x;                       	  \
+    eval(primArg(1)); x = whnfHead; 	  \
+    if (!isBignum(x))                     \
+	internal("Bignum expected");      \
+    updateRoot(e);                  	  \
+    bn = NIL;                             \
+}
+
+/* e is an expression with free variable x that does no heap allocation */
+#define Bignum2Bool(nm,e)                 \
+  primFun(nm) {                           \
+    Bignum x;                             \
+    eval(primArg(1)); x = whnfHead;       \
+    if (!isBignum(x))                     \
+	internal("Bignum expected");      \
+    updateRoot(e ? nameTrue : nameFalse); \
+    bn = NIL;                             \
+}
+
+/* e is an expression with free variable x that does no heap allocation */
+#define BignumBignum2Bool(nm,e)           \
+  primFun(nm) {                           \
+    Bignum x, y;                          \
+    eval(primArg(2)); push(whnfHead);     \
+    eval(primArg(1)); y = whnfHead;       \
+    x = pop();                            \
+    if (!isBignum(x) || !isBignum(y))     \
+	internal("Bignum expected");      \
+    updateRoot((e) ? nameTrue : nameFalse); \
+    bn = NIL;                             \
+}
+
+/*-------------------------------------------------------------------------*/
+
+BignumBignum2Bignum(primPlusInteger,bigAdd(x,y))  /* Integer addition	   */
+BignumBignum2Bignum(primMinusInteger,bigSub(x,y)) /* Integer subtraction   */
+BignumBignum2Bignum(primMulInteger,bigMul(x,y))   /* Integer multiply	   */
+
+primFun(primQrmInteger) {		/* Integer quotient and remainder  */
+    Bignum x;
+    eval(primArg(2));
+    primArg(2) = whnfHead;
+    eval(primArg(1));
+    x = bigQrm(primArg(2),primArg(1)=whnfHead);
+    if (isNull(x)) {
+	throwException(ap(nameArithException, nameDivideByZero));
+    }
+    else {
+	updateRoot(x);
+    }
+    bn = NIL;
+}
+
+/*-------------------------------------------------------------------------*/
 #endif
 
 /* --------------------------------------------------------------------------
@@ -1307,7 +2290,618 @@ primFun(primCmpDouble) {               /* Double compare primitive         */
  * Print primitives:
  * ------------------------------------------------------------------------*/
 
-#include "printer.c"
+/* --------------------------------------------------------------------------
+ * Builtin printer, used as an alternative to overloaded "show", and also
+ * used for certain primitive types.
+ *
+ * The Hugs 98 system is Copyright (c) Mark P Jones, Alastair Reid, the
+ * Yale Haskell Group, and the OGI School of Science & Engineering at OHSU,
+ * 1994-2003, All rights reserved.  It is distributed as free software under
+ * the license in the file "License", which is included in the distribution.
+ *
+ * $RCSfile: printer.c,v $
+ * $Revision: 1.15 $
+ * $Date: 2006/09/05 22:43:44 $
+ * ------------------------------------------------------------------------*/
+
+static Void   local printer		Args((Name,Int));
+static Void   local outName   		Args((Name));
+static Void   local outVar		Args((Name));
+static Void   local outOp		Args((Name));
+static Void   local outStr		Args((String));
+static Void   local outPr		Args((Name,Int,Cell));
+static Void   local outLPr		Args((Name,Cell));
+static Void   local outException	Args((Cell));
+static Void   local outBadRedex		Args((Cell));
+static Cell   local printDException	Args((Cell));
+static Cell   local printException	Args((Cell,Cell));
+
+static Name nameLPrint, nameNLPrint;	/* list printing primitives	   */
+static Name nameSPrint, nameNSPrint;	/* string printing primitives	   */
+
+static Cell out;			/* GC'd var used by printer code   */
+
+#define outCh(c)	out = ap(consChar(c),out)
+#define outSCh(c)	outStr(unlexChar(c,'\"'))
+#define updOutRoot(ss)  out = revOnto(out,ss);		\
+			updapRoot(fst(out),snd(out));	\
+			out = NIL;
+
+/* --------------------------------------------------------------------------
+ * Printer control:
+ * ------------------------------------------------------------------------*/
+
+static Void printerControl Args((Int));
+static Void printerControl(what)
+Int what; {
+    switch (what) {
+	case MARK    : mark(out);
+		       break;
+	case INSTALL : 
+		       setCurrModule(modulePrelude);
+#define pFun(n,s,t)    addPrim(0,n=newName(findText(s),NIL),t,modulePrelude,NIL)
+		       pFun(namePrint,	   "_print",   "print");
+		       pFun(nameNPrint,	   "_nprint",  "nprint");
+		       pFun(nameLPrint,	   "_lprint",  "lprint");
+		       pFun(nameNLPrint,   "_nlprint", "nlprint");
+		       pFun(nameSPrint,	   "_sprint",  "sprint");
+		       pFun(nameNSPrint,   "_nsprint", "nsprint");
+#undef pFun
+		       /* deliberate fall through */
+	case RESET   : out = NIL;
+		       break;
+    }
+}
+
+PROTO_PRIM(primPrint);
+PROTO_PRIM(primBPrint);
+PROTO_PRIM(primNPrint);
+PROTO_PRIM(primLPrint);
+PROTO_PRIM(primNLPrint);
+PROTO_PRIM(primSPrint);
+PROTO_PRIM(primNSPrint);
+
+static struct primitive printerPrimTable[] = {
+  {"print",		3, primPrint},
+  {"nprint",		3, primNPrint},
+  {"lprint",		2, primLPrint},
+  {"nlprint",		2, primNLPrint},
+  {"sprint",		2, primSPrint},
+  {"nsprint",		2, primNSPrint},
+  {"primShowsInt",	3, primBPrint},
+  {"primShowsPtr",	3, primBPrint},
+  {"primShowsInteger",	3, primBPrint},
+  {"primShowsFloat",	3, primBPrint},
+  {"primShowsDouble",	3, primBPrint},
+  {0,			0, 0}
+};
+
+static struct primInfo printerPrims = { printerControl, printerPrimTable, 0 };
+
+/*-------------------------------------------------------------------------*/
+
+primFun(primPrint) {			/* Evaluate and print term	   */
+    Cell temp;				/*    :: Int->Expr->[Char]->[Char] */
+    Int  d;
+    eval(primArg(3));
+    d    = whnfInt;
+    temp = evalWithNoError(primArg(2));
+    out  = NIL;
+    if (nonNull(temp)) {
+	push(temp);
+	outException(top());
+    }
+    else
+	printer(namePrint,d);
+    updOutRoot(primArg(1));
+}
+
+primFun(primBPrint) {			/* Eval and print value of basic   */
+    Int d;				/* type -- Int, Integer, Float, or */
+    eval(primArg(3));			/* Double -- as a string.	   */
+    d   = whnfInt;
+    eval(primArg(2));			/* Differs from primPrint only in  */
+    out = NIL;				/* its use of weaker error handling*/
+    printer(namePrint,d);		/* to make showsPrec strict.	   */
+    updOutRoot(primArg(1));
+}
+
+primFun(primNPrint) {			/* print term without evaluation   */
+    Int  d;				/*     :: Int->Expr->[Char]->[Char] */
+    eval(primArg(3));
+    d   = whnfInt;
+    unwind(primArg(2));
+    out = NIL;
+    printer(nameNPrint,d);
+    updOutRoot(primArg(1));
+}
+
+static Void local printer(pr,d)		/* Main part: primPrint/primNPrint */
+Name pr;				/* printer to use on components	   */
+Int  d; {				/* precedence level		   */
+    Int used = 0;			/* Output, in reverse, to "out"	   */
+
+    allowBreak();
+
+    switch(whatIs(whnfHead)) {
+
+	case NAME     : {   Syntax sy = syntaxOf(whnfHead);
+
+			    if (!isCfun(whnfHead) ||
+				    name(whnfHead).arity>whnfArgs)
+				pr = nameNPrint;
+
+#ifndef VERBOSE_PRINT
+			    /* don't print dictionary arguments */
+			    while (used<whnfArgs) {
+				Cell h;
+				Int w;
+				h=pushed(used);
+				for (;;) {
+				    w = whatIs(h);
+				    if (w==AP)
+					h = fun(h);
+				    else if (w==INDIRECT)
+					h = arg(h);
+				    else
+					break;
+				}
+				if (w==NAME && isNull(name(h).type) &&
+				    (whatIs(name(h).parent)==INSTANCE ||
+				     isDfun(h) ||
+				     strncmp(textToStr(name(h).text),"Make.",5) == 0))
+				    used++;
+				else
+				    break;
+			    }
+#endif
+
+			    if (whnfHead==nameCons && whnfArgs==2) {/*list */
+				StackPtr ksp = sp;
+				used 	     = 2;
+				if (pr==namePrint) {
+				    Cell temp = evalWithNoError(top());
+				    if (nonNull(temp)) {
+					push(temp);
+					outCh('[');
+					outException(top());
+					sp = ksp;
+					outLPr(nameLPrint,pushed(1));
+				    }
+				    else if (isChar(whnfHead) && whnfArgs==0) {
+					outCh('"');
+					outSCh(charOf(whnfHead));
+					outLPr(nameSPrint,pushed(1));
+				    }
+				    else {
+					sp = ksp;
+					outCh('[');
+					outPr(namePrint,MIN_PREC,top());
+					outLPr(nameLPrint,pushed(1));
+				    }
+				}
+				else {
+				    unwind(top());
+				    if (isChar(whnfHead) && whnfArgs==0) {
+					outCh('"');
+					outSCh(charOf(whnfHead));
+					outLPr(nameNSPrint,pushed(1));
+				    }
+				    else {
+					sp = ksp;
+					outCh('[');
+					outPr(nameNPrint,MIN_PREC,top());
+					outLPr(nameNLPrint,pushed(1));
+				    }
+				}
+				return;
+			    }
+#ifndef VERBOSE_PRINT
+			    /* hide fromInt/fromDouble */
+			    else if (whnfArgs==2 &&
+				     ((whnfHead==nameFromInt && whatIs(pushed(1))==INTCELL) ||
+				      (whnfHead==nameFromDouble && (whatIs(pushed(1))==FLOATCELL || whatIs(pushed(1))==DOUBLECELL)))) {
+				unwind(pushed(1));
+				printer(pr,d);
+				return;
+			    }
+#endif
+			    else if (whnfArgs-used==1 && sy!=APPLIC) { /* (e1+) */
+				outCh('(');
+				outPr(pr,FUN_PREC-1,pushed(used));
+				outCh(' ');
+				outOp(whnfHead);
+				outCh(')');
+				used++;
+			    }
+			    else if (whnfArgs-used>=2 && sy!=APPLIC) { /* e1+e2 */
+				Syntax a = assocOf(sy);
+				Int    p = precOf(sy);
+				if (whnfArgs-used>2 || d>p)
+				     outCh('(');
+				outPr(pr,(a==LEFT_ASS? p:1+p),pushed(used));
+				used++;
+				outCh(' ');
+				outOp(whnfHead);
+				outCh(' ');
+				outPr(pr,(a==RIGHT_ASS?p:1+p),pushed(used));
+				used++;
+				if (whnfArgs-used>2 || d>p)
+				    outCh(')');
+			    }
+			    else				  /* f ... */
+				outVar(whnfHead);
+			}
+			break;
+
+#if BIGNUMS
+	case NEGNUM   :
+	case ZERONUM  :
+	case POSNUM   : out = rev(bigOut(whnfHead,NIL,d>=UMINUS_PREC));
+			pr  = nameNPrint;
+			break;
+#endif
+
+	case INTCELL  : {   Int digit;
+
+			    if (intOf(whnfHead)<0 && d>=UMINUS_PREC)
+				outCh(')');
+
+			    do {
+				digit = whnfInt%10;
+				if (digit<0)
+				    digit= (-digit);
+				outCh('0'+digit);
+			    } while ((whnfInt/=10)!=0);
+
+			    if (intOf(whnfHead)<0) {
+				outCh('-');
+				if (d>=UMINUS_PREC)
+				    outCh('(');
+			    }
+
+			    out = rev(out);
+			    pr  = nameNPrint;
+			}
+			break;
+
+	case PTRCELL  : {   Pointer p = ptrOf(whnfHead);
+			    char buffer[32];
+			    char spec[16];
+			    /* Fall into line with how GHC shows Addrs  */
+			    sprintf(spec,"0x%%.%dx", (SIZEOF_INTP)*2);
+			    sprintf(buffer,spec,(long)p);
+#if 0
+			    /* Old skool */
+			    sprintf(buffer,"%p",p);
+#endif
+			    outStr(buffer);
+			    pr  = nameNPrint;
+			}
+			break;
+
+	case TUPLE    : {   Int tn   = tupleOf(whnfHead);
+			    Int punc = '(';
+			    Int i;
+
+			    used     = tn<whnfArgs ? tn : whnfArgs;
+			    for (i=0; i<used; ++i) {
+				outCh(punc);
+				outPr(pr,MIN_PREC,pushed(i));
+				punc = ',';
+			    }
+			    for (; i<tn; ++i) {
+				outCh(punc);
+				punc = ',';
+			    }
+			    outCh(')');
+			}
+			pr = nameNPrint;
+			break;
+
+	case CHARCELL : outCh('\'');
+			outStr(unlexChar(charOf(whnfHead), '\''));
+			outCh('\'');
+			pr = nameNPrint;
+			break;
+
+	case FLOATCELL: if (whnfFloat<0.0 && d>=UMINUS_PREC)
+			    outCh('(');
+			outStr(floatToString(whnfFloat));
+			if (whnfFloat<0.0 && d>=UMINUS_PREC)
+			    outCh(')');
+			pr = nameNPrint;
+			break;
+
+	case DOUBLECELL:if (whnfDouble<0.0 && d>=UMINUS_PREC)
+			    outCh('(');
+			outStr(doubleToString(whnfDouble));
+			if (whnfDouble<0.0 && d>=UMINUS_PREC)
+			    outCh(')');
+			pr = nameNPrint;
+			break;
+
+#if HASKELL_ARRAYS
+	case ARRAY    : outStr("{array}");
+			pr = nameNPrint;
+			break;
+#endif
+
+#if IO_REFS
+	case MUTVAR   : outStr("{mutable variable}");
+			pr = nameNPrint;
+			break;
+#endif
+
+	case HUGSOBJECT: 
+			outStr("{Cell ...}");
+			pr = nameNPrint;
+			break;
+
+#if TREX
+	case RECORD   : outStr("{record}");
+			pr = nameNPrint;
+			break;
+#endif
+ 
+#if IO_HANDLES
+	case HANDCELL : outStr("{handle}");
+			pr = nameNPrint;
+			break;
+#endif
+
+#if OBSERVATIONS
+        case OBSERVE  : outStr("printer.c: printer(): OBSERVE");
+                        break;
+#endif
+
+	default       : internal("Error in graph");
+			break;
+    }
+
+    if (used<whnfArgs) {		/* Add remaining args to output	   */
+	do {
+	    outCh(' ');
+	    outPr(pr,FUN_PREC,pushed(used));
+	} while (++used<whnfArgs);
+
+	if (d>=FUN_PREC) {		/* Determine if parens are needed  */
+	    out = appendOnto(out,singleton(consChar('(')));
+	    outCh(')');
+	}
+    }
+}
+
+/* --------------------------------------------------------------------------
+ * List printing primitives:
+ * ------------------------------------------------------------------------*/
+
+primFun(primLPrint) {			/* evaluate and print list	   */
+    Cell temp = evalWithNoError(primArg(2));
+    out       = NIL;
+    if (nonNull(temp)) {
+	push(temp);
+	outStr("] ++ ");
+	outException(top());
+    }
+    else if (whnfHead==nameCons && whnfArgs==2) {
+	outCh(',');
+	outPr(namePrint,MIN_PREC,pushed(0));
+	outLPr(nameLPrint,pushed(1));
+    }
+    else if (whnfHead==nameNil && whnfArgs==0)
+	outCh(']');
+    else {
+	outStr("] ++ ");
+	outBadRedex(primArg(2));
+    }
+    updOutRoot(primArg(1));
+}
+
+primFun(primNLPrint) {			/* print list without evaluation   */
+    unwind(primArg(2));
+    out = NIL;
+    if (whnfHead==nameCons && whnfArgs==2) {
+	outCh(',');
+	outPr(nameNPrint,MIN_PREC,pushed(0));
+	outLPr(nameNLPrint,pushed(1));
+    }
+    else if (whnfHead==nameNil && whnfArgs==0)
+	outCh(']');
+    else {
+	outStr("] ++ ");
+	outPr(nameNPrint,FUN_PREC-1,primArg(2));
+    }
+    updOutRoot(primArg(1));
+}
+
+primFun(primSPrint) {			/* evaluate and print string	   */
+    Cell temp = evalWithNoError(primArg(2));
+    out       = NIL;
+    if (nonNull(temp)) {
+	push(temp);
+	outStr("\" ++ ");
+	outException(top());
+    }
+    else if (whnfHead==nameCons && whnfArgs==2) {
+	temp = evalWithNoError(top());	/* primArg(4), primArg(3) contain  */
+	out  = NIL;			/* the head and tail of list, resp */
+	if (nonNull(temp)) {
+	    push(temp);
+	    outStr("\" ++ [");
+	    outException(top());
+	    outLPr(nameLPrint,primArg(3));
+	}
+	else if (isChar(whnfHead) && whnfArgs==0) {
+	    outSCh(charOf(whnfHead));
+	    outLPr(nameSPrint,primArg(3));
+	}
+	else {
+	    outStr("\" ++ [");
+	    outBadRedex(primArg(4));
+	    outLPr(nameLPrint,primArg(3));
+	}
+    }
+    else if (whnfHead==nameNil && whnfArgs==0)
+	outCh('"');
+    else {
+	outStr("\" ++ ");
+	outBadRedex(primArg(2));
+    }
+    updOutRoot(primArg(1));
+}
+
+primFun(primNSPrint) {			/* print string without eval	   */
+    unwind(primArg(2));
+    out = NIL;
+    if (whnfHead==nameCons && whnfArgs==2) {
+	unwind(pushed(0));
+	if (isChar(whnfHead) && whnfArgs==0) {
+	    outSCh(charOf(whnfHead));
+	    outLPr(nameNSPrint,primArg(3));
+	}
+	else {
+	    outStr("\" ++ [");
+	    outPr(nameNPrint,MIN_PREC,primArg(4));
+	    outLPr(nameNLPrint,primArg(3));
+	}
+    }
+    else if (whnfHead==nameNil && whnfArgs==0)
+	outCh('"');
+    else {
+	outStr("\" ++ ");
+	outPr(nameNPrint,FUN_PREC-1,primArg(2));
+    }
+    updOutRoot(primArg(1));
+}
+
+/* --------------------------------------------------------------------------
+ * Auxiliary functions for printer(s):
+ * ------------------------------------------------------------------------*/
+
+static Void local outName(nm)  /* output nm using parent field if possible */
+Name nm; {
+    Cell p = name(nm).parent;
+    switch (whatIs(p)) {
+#ifdef VERBOSE_PRINT
+	case INSTANCE : outStr("inst");
+			outStr(textToStr(cclass(inst(p).c).text));
+			outCh('_');
+			break;
+
+	case CLASS    : outStr(textToStr(cclass(p).text));
+			outCh('_');
+			break;
+
+	case TYCON    : outStr(textToStr(tycon(p).text));
+			outCh('_');
+			break;
+#endif
+
+	case NAME     : outName(p);
+			outCh('_');
+			break;
+    }
+    outStr(textToStr(name(nm).text));
+}
+
+static Void local outVar(nm)		/* output nm as function symbol	   */
+Name nm; {
+    String s = textToStr(name(nm).text);
+    if ((isascii(*s) && isalpha(*s)) || *s=='_' || *s=='[' || *s=='(')
+	outName(nm);
+    else {
+	outCh('(');
+	outName(nm);
+	outCh(')');
+    }
+}
+
+static Void local outOp(nm)		/* output nm as operator symbol	   */
+Name nm; {
+    String s = textToStr(name(nm).text);
+    if (isascii(s[0]) && isalpha(s[0])) {
+	outCh('`');
+	outName(nm);
+	outCh('`');
+    }
+    else
+	outName(nm);
+}
+
+static Void local outStr(s)		/* output string s		   */
+String s; {
+    while (*s)
+	outCh(ExtractChar(s));
+}
+
+static Void local outPr(pr,d,e)		/* output expr e with printer pr,  */
+Name pr;				/* precedence d			   */
+Int  d;
+Cell e; {
+    out           = ap(NIL,out);
+    fst(out)      = ap(NIL,e);
+    fst(fst(out)) = ap(pr,mkInt(d));
+}
+
+static Void local outLPr(pr,xs)		/* output list xs with printer pr  */
+Name pr;
+Cell xs; {
+    out      = ap(NIL,out);
+    fst(out) = ap(pr,xs);
+}
+
+static Void local outException(ex)	/* Produce expr to print exception */
+Cell ex; {
+    outCh('{');
+    if (isAp(ex) && fun(ex)==nameErrorCall) {
+	outStr("error ");
+	outPr(nameNPrint,FUN_PREC,arg(ex));
+    } else {
+	outStr("throw ");
+	outPr(nameNPrint,FUN_PREC,ex);
+    }
+    outCh('}');
+}
+
+static Void local outBadRedex(rx)	/* Produce expr to print bad redex */
+Cell rx; {
+    outCh('{');
+    outPr(nameNPrint,MIN_PREC,rx);
+    outCh('}');
+}
+
+static Cell local printDException(ex)	/* Produce expression for exception*/
+Cell ex; {				/* with special handling	   */
+    if (isAp(ex) && fun(ex)==nameErrorCall)/* of {error str} exceptions    */
+	return arg(ex);
+    else
+	return printException(ex,nameNil);
+}
+
+static Cell local printException(ex,rs)	/* produce expression for exception*/
+Cell ex, rs; {
+   out = NIL;
+   outException(ex);
+   return revOnto(out,rs);
+}
+
+Void abandon(what,ex)			/* abandon computation		   */
+String what;
+Cell   ex; {
+    push(printDException(ex));
+    out   = NIL;
+    outCh('\n');
+    outStr(what);
+    outStr(" error: ");
+    top() = revOnto(out,top());
+    out   = NIL;
+    outputString(errorStream);
+    errAbort();
+}
+
+/*-------------------------------------------------------------------------*/
+
 
 /* --------------------------------------------------------------------------
  * Evaluate name, obtaining a C string from a Hugs string:
@@ -1374,7 +2968,1805 @@ FILE *fp; {                             /* and print it on fp              */
  * ------------------------------------------------------------------------*/
 
 #if IO_MONAD
-#include "iomonad.c"
+/* --------------------------------------------------------------------------
+ * Implementation of the Haskell IO monad.
+ *
+ * The primitives below implement the standard IO monad for Haskell 1.3
+ * using a continuation passing monad for sequencing.  The primitives are
+ * believed to give a reasonably good implementation of the semantics
+ * specified by the Haskell 1.3 report.  There are also some additional
+ * primitives, particularly for dealing with IOError and Handle values
+ * that are not included in the prelude, but are used by standard libraries.
+ *
+ * The Hugs 98 system is Copyright (c) Mark P Jones, Alastair Reid, the
+ * Yale Haskell Group, and the OGI School of Science & Engineering at OHSU,
+ * 1994-2003, All rights reserved.  It is distributed as free software under
+ * the license in the file "License", which is included in the distribution.
+ *
+ * $RCSfile: iomonad.c,v $
+ * $Revision: 1.101 $
+ * $Date: 2006/05/03 09:10:40 $
+ * ------------------------------------------------------------------------*/
+ 
+Name nameIORun;			        /* run IO code                     */
+Name nameIOBind;		        /* bind IO code                    */
+Name namePutStr;		        /* Prelude.putStr                  */
+
+static Name namePass;			/* auxiliary:: \f b a -> f a b     */
+#if IO_HANDLES
+static Name nameHreader;	        /* auxiliary function		   */
+#endif
+static Cell hugsProgName;		/* value of getProgName            */
+static Cell hugsArgs;			/* value of getArgs                */
+
+#if IO_HANDLES
+static Void   local throwErrno     Args((String,Bool,Int,Cell *));
+static String local toIOErrorDescr Args((int,Bool));
+static Name   local toIOError      Args((int));
+static Int    local newHandle      Args((Cell *,String));
+static String local modeString     Args((Int,Bool));
+static Cell   local openHandle     Args((StackPtr,Cell *,Int,Bool,String));
+static Cell   local openFdHandle   Args((StackPtr,Int,Int,Bool,String));
+static Char   local hGetChar       Args((Int,String));
+static Void   local hPutChar       Args((Char,Int,String));
+static Void   local setRWState     Args((Int,Int));
+static Void   local checkOpen      Args((Int,String));
+static Void   local checkReadable  Args((Int,String));
+static Void   local checkWritable  Args((Int,String));
+#endif
+
+#if IO_HANDLES
+# if WANT_FIXED_SIZE_TABLES
+#  define MAX_HANDLES NUM_HANDLES
+# else
+#  define MAX_HANDLES num_handles
+# endif
+#endif
+
+extern Void local pushString       Args((String));
+
+/* --------------------------------------------------------------------------
+ * IO monad control:
+ * ------------------------------------------------------------------------*/
+
+static Void iomonadControl Args((Int));
+static Void iomonadControl(what)
+Int what; {
+    switch (what) {
+	case INSTALL : 
+		       setCurrModule(modulePrelude);
+#define pFun(n,s,t)    addPrim(0,n=newName(findText(s),NIL),t,modulePrelude,NIL)
+		       pFun(namePass,	 "_pass",    "passIO");
+#if    IO_HANDLES
+		       pFun(nameHreader, "_hreader", "hreader");
+#endif
+#undef pFun
+#define predef(nm,str) nm=newName(findText(str),NIL); name(nm).defn=PREDEFINED
+		       predef(nameIORun,    "hugsIORun");
+		       predef(nameIOBind,   "primbindIO");
+		       predef(namePutStr,   "putStr");
+#undef predef
+		       break;
+
+	case MARK    : mark(hugsProgName);
+		       mark(hugsArgs);
+		       break;
+    }
+}
+
+PROTO_PRIM(primReturnIO);
+PROTO_PRIM(primBindIO);
+PROTO_PRIM(primPass);
+
+PROTO_PRIM(primGC);
+PROTO_PRIM(primGetEnv);
+PROTO_PRIM(primSystem);
+PROTO_PRIM(primGetRandomSeed);
+
+PROTO_PRIM(primGetProgName);
+PROTO_PRIM(primGetArgs);
+PROTO_PRIM(primSetProgName);
+PROTO_PRIM(primSetArgs);
+
+#if IO_HANDLES
+static Void local fopenPrim   Args((StackPtr,Bool,String));
+static int local getIOMode    Args((Cell));
+
+PROTO_PRIM(primHGetChar);
+PROTO_PRIM(primHPutChar);
+PROTO_PRIM(primHPutStr);
+PROTO_PRIM(primHreader);
+PROTO_PRIM(primHContents);
+PROTO_PRIM(primOpenFile);
+PROTO_PRIM(primOpenBinaryFile);
+PROTO_PRIM(primStdin);
+PROTO_PRIM(primStdout);
+PROTO_PRIM(primStderr);
+PROTO_PRIM(primOpenFd);
+PROTO_PRIM(primHandleToFd);
+PROTO_PRIM(primHIsEOF);
+PROTO_PRIM(primHFlush);
+PROTO_PRIM(primHClose);
+PROTO_PRIM(primHGetPosn);
+PROTO_PRIM(primHSetPosn);
+PROTO_PRIM(primHSetBuffering);
+PROTO_PRIM(primHGetBuffering);
+PROTO_PRIM(primHSeek);
+PROTO_PRIM(primHLookAhead);
+PROTO_PRIM(primHIsOpen);
+PROTO_PRIM(primHIsClosed);
+PROTO_PRIM(primHIsReadable);
+PROTO_PRIM(primHIsWritable);
+PROTO_PRIM(primHIsSeekable);
+PROTO_PRIM(primHFileSize);
+PROTO_PRIM(primHWaitForInput);
+PROTO_PRIM(primEqHandle);
+PROTO_PRIM(primGetHandleNumber);
+
+PROTO_PRIM(primHSetBinaryMode);
+PROTO_PRIM(primHPutBuf);
+PROTO_PRIM(primHGetBuf);
+
+PROTO_PRIM(primHIsTerminalDevice);
+PROTO_PRIM(primHGetEcho);
+PROTO_PRIM(primHSetEcho);
+
+PROTO_PRIM(primIOEql);
+PROTO_PRIM(primIOHash);
+#endif
+
+#if IO_REFS
+PROTO_PRIM(primNewRef);
+PROTO_PRIM(primDerefRef);
+PROTO_PRIM(primAssignRef);
+PROTO_PRIM(primEqRef);
+#endif
+
+PROTO_PRIM(primMakeSP);
+PROTO_PRIM(primDerefSP);
+PROTO_PRIM(primFreeSP);
+PROTO_PRIM(primCastSPToP);
+PROTO_PRIM(primCastPToSP);
+
+PROTO_PRIM(primNewFP);
+PROTO_PRIM(primAddFPF);
+PROTO_PRIM(primAddFPFEnv);
+PROTO_PRIM(primWriteFP);
+PROTO_PRIM(primEqFP);
+PROTO_PRIM(primTouchFP);
+PROTO_PRIM(primFPToP);
+
+#if GC_WEAKPTRS
+PROTO_PRIM(primWeakPtrEq);
+PROTO_PRIM(primMkWeak);
+PROTO_PRIM(primDeRefWeak);
+PROTO_PRIM(primReplaceFinalizer);
+PROTO_PRIM(primFinalize);
+PROTO_PRIM(primRunFinalizer);
+PROTO_PRIM(primFinalizerWaiting);
+#endif
+
+#if STABLE_NAMES
+PROTO_PRIM(primMakeSN);
+PROTO_PRIM(primDerefSN);
+PROTO_PRIM(primHashSN);
+PROTO_PRIM(primEqSN);
+#endif
+
+#ifdef HSCRIPT
+PROTO_PRIM(primGetCurrentScript);
+#endif
+
+#ifdef DOTNET
+/* These primops are remnants from the first attempt at
+ * providing .NET interop for Haskell / Hugs. They've been
+ * mostly superceeded by the integration of .NET interop
+ * with the Haskell FFI, but we'll keep these primops around
+ * for a little bit longer.
+ */
+EXT_PROTO_PRIM(primCreateObject);
+EXT_PROTO_PRIM(primInvokeMethod);
+EXT_PROTO_PRIM(primInvokeStaticMethod);
+EXT_PROTO_PRIM(primNewString);
+EXT_PROTO_PRIM(primToHsString);
+EXT_PROTO_PRIM(primNewArgArray);
+EXT_PROTO_PRIM(primSetArg);
+EXT_PROTO_PRIM(primGetArg);
+EXT_PROTO_PRIM(primGetField);
+EXT_PROTO_PRIM(primSetField);
+EXT_PROTO_PRIM(primGetStaticField);
+EXT_PROTO_PRIM(primSetStaticField);
+EXT_PROTO_PRIM(primIsNullPtr);
+EXT_PROTO_PRIM(primMkPrimVector);
+#endif
+
+static struct primitive iomonadPrimTable[] = {
+  {"primretIO",		1+IOArity, primReturnIO},
+  {"primbindIO",	2+IOArity, primBindIO},
+  {"passIO",		2+IOArity, primPass},
+
+  {"primGC",	        0+IOArity, primGC},
+  {"getEnv",	        1+IOArity, primGetEnv},
+  {"primSystem",	1+IOArity, primSystem},
+  {"getRandomSeed",	0+IOArity, primGetRandomSeed},
+
+  {"primGetProgName",   0+IOArity, primGetProgName},
+  {"primGetArgs",       0+IOArity, primGetArgs},
+  {"primSetProgName",   1+IOArity, primSetProgName},
+  {"primSetArgs",       1+IOArity, primSetArgs},
+
+#if IO_HANDLES
+  {"hGetChar",		1+IOArity, primHGetChar},
+  {"hPutChar",		2+IOArity, primHPutChar},
+  {"hPutStr",		2+IOArity, primHPutStr},
+  {"hreader",		1, primHreader},
+  {"hGetContents",	1+IOArity, primHContents},
+  {"openFile",          2+IOArity, primOpenFile},
+  {"openBinaryFile",    2+IOArity, primOpenBinaryFile},
+  {"openFd",            4+IOArity, primOpenFd},
+  {"handleToFd",	1+IOArity, primHandleToFd},
+  {"stdin",		0, primStdin},
+  {"stdout",		0, primStdout},
+  {"stderr",		0, primStderr},
+  {"hIsEOF",		1+IOArity, primHIsEOF},
+  {"hFlush",		1+IOArity, primHFlush},
+  {"hClose",		1+IOArity, primHClose},
+  {"hGetPosnPrim",	1+IOArity, primHGetPosn},
+  {"hSetPosnPrim",	2+IOArity, primHSetPosn},
+  {"hSetBuff",          3+IOArity, primHSetBuffering},
+  {"hGetBuff",          1+IOArity, primHGetBuffering},
+  {"hSeekPrim",         3+IOArity, primHSeek},
+  {"hLookAhead",        1+IOArity, primHLookAhead},
+  {"hIsOpen",		1+IOArity, primHIsOpen},
+  {"hIsClosed",		1+IOArity, primHIsClosed},
+  {"hIsReadable",	1+IOArity, primHIsReadable},
+  {"hIsWritable",	1+IOArity, primHIsWritable},
+  {"hIsSeekable",       1+IOArity, primHIsSeekable},
+  {"hFileSize",         1+IOArity, primHFileSize},
+  {"hWaitForInput",     2+IOArity, primHWaitForInput},
+  {"primEqHandle",	2, primEqHandle},
+  {"primGetHandleNumber", 1, primGetHandleNumber},
+  {"hSetBinaryMode",	2+IOArity, primHSetBinaryMode},
+  {"hPutBuf",		3+IOArity, primHPutBuf},
+  {"hGetBuf",		3+IOArity, primHGetBuf},
+  {"hIsTerminalDevice",	1+IOArity, primHIsTerminalDevice},
+  {"hGetEcho",		1+IOArity, primHGetEcho},
+  {"hSetEcho",		2+IOArity, primHSetEcho},
+#endif
+
+#if IO_REFS
+  {"newRef",            1+IOArity, primNewRef},
+  {"getRef",		1+IOArity, primDerefRef},
+  {"setRef",		2+IOArity, primAssignRef},
+  {"eqRef",		2, primEqRef},
+#endif
+
+  {"makeStablePtr",	1+IOArity, primMakeSP},
+  {"deRefStablePtr",	1+IOArity, primDerefSP},
+  {"freeStablePtr",	1+IOArity, primFreeSP},
+  {"castStablePtrToPtr",1, primCastSPToP},
+  {"castPtrToStablePtr",1, primCastPToSP},
+
+  {"writeForeignObj",	2+IOArity, primWriteFP},
+  {"eqForeignObj",	2, primEqFP},
+
+  {"newForeignPtr_",	1+IOArity, primNewFP},
+  {"addForeignPtrFinalizer", 2+IOArity, primAddFPF},
+  {"addForeignPtrFinalizerEnv", 3+IOArity, primAddFPFEnv},
+  {"touchForeignPtr",	1+IOArity, primTouchFP},
+  {"unsafeForeignPtrToPtr", 1, primFPToP},
+
+#if GC_WEAKPTRS
+  {"weakPtrEq",		2, primWeakPtrEq},
+  {"mkWeak",		3+IOArity, primMkWeak},
+  {"deRefWeak",		1+IOArity, primDeRefWeak},
+  {"replaceFinalizer",	2+IOArity, primReplaceFinalizer},
+  {"finalize",		1+IOArity, primFinalize},
+  {"runFinalizer",	0+IOArity, primRunFinalizer},
+  {"finalizerWaiting",	0+IOArity, primFinalizerWaiting},
+#endif
+
+#if STABLE_NAMES
+  {"makeStableName",	1+IOArity, primMakeSN},
+  {"deRefStableName",	1, primDerefSN},
+  {"hashStableName",	1, primHashSN},
+  {"eqStableName",	2, primEqSN},
+#endif
+  
+#ifdef HSCRIPT
+  {"getCurrentScript",  0+IOArity, primGetCurrentScript},
+#endif
+
+#ifdef DOTNET
+  {"createObject",       2+IOArity, primCreateObject},
+  {"invokeMethod",       3+IOArity, primInvokeMethod},
+  {"invokeStaticMethod", 2+IOArity, primInvokeStaticMethod},
+  {"newString",          1+IOArity, primNewString},
+  {"toString",           1+IOArity, primToHsString},
+  {"newArgArray",        1+IOArity, primNewArgArray},
+  {"setArrayArg",        3+IOArity, primSetArg},
+  {"getArrayArg",        2+IOArity, primGetArg},
+  {"getField",           2+IOArity, primGetField},
+  {"setField",           3+IOArity, primSetField},
+  {"getStaticField",     2+IOArity, primGetStaticField},
+  {"setStaticField",     3+IOArity, primSetStaticField},
+  {"isNullPtr",          1+IOArity, primIsNullPtr},
+  {"mkPrimVector",       2+IOArity, primMkPrimVector},
+#endif
+  {"IOEql",              2+IOArity, primIOEql},
+  {"IOHash",             1+IOArity, primIOHash},
+
+  {0,			0, 0}
+};
+
+static struct primInfo iomonadPrims = { iomonadControl, iomonadPrimTable, 0 };
+
+/* --------------------------------------------------------------------------
+ * The monad combinators:
+ * ------------------------------------------------------------------------*/
+
+primFun(primReturnIO) {			/* IO monad unit		   */
+    IOReturn(IOArg(1));
+}
+
+primFun(primBindIO) {			/* IO monad bind		   */
+    push(ap(namePass,primArg(2)));	/* bind 3 2 1 = 3 (pass 2 1)       */
+    toparg(primArg(1));
+    updapRoot(primArg(3),top());
+}
+
+primFun(primPass) {			/* Auxiliary function		   */
+    push(ap(primArg(3),primArg(1)));	/* pass 3 2 1 = 3 1 2		   */
+    updapRoot(top(),primArg(2));
+}
+
+/* --------------------------------------------------------------------------
+ * Handle operations:
+ * ------------------------------------------------------------------------*/
+
+#if IO_HANDLES
+
+static
+Int local newHandle(sCell,loc) /* return a free Handle or throw an IOError */
+Cell   *sCell;
+String loc; {
+    Int i;
+
+    for (i=0; i<(Int)MAX_HANDLES && nonNull(handles[i].hcell); ++i)
+	;                                       /* Search for unused handle*/
+    if (i>=(Int)MAX_HANDLES) {                  /* If at first we don't    */
+	garbageCollect();                       /* succeed, garbage collect*/
+	for (i=0; i<(Int)MAX_HANDLES && nonNull(handles[i].hcell); ++i)
+	    ;                                   /* and try again ...       */
+#if !WANT_FIXED_SIZE_TABLES
+	if (i >= (Int)MAX_HANDLES) {
+	    Int j;
+	    growDynTable(dynTabHandles);
+	    handles = (struct strHandle*)(dynTabHandles->data);
+	    num_handles = dynTabHandles->maxIdx;
+	    /* Nil out the new entries in the table */
+	    for (j=i; j < (Int)num_handles; j++) {
+		handles[j].hcell = NIL;
+	    }
+	}
+#endif
+    }
+
+    if (i>=(Int)MAX_HANDLES) {                  /* ... before we give up   */
+	IOFail(mkIOError(NULL,
+			 nameIllegal,
+			 loc,
+			 "too many handles open",
+			 sCell));
+    }
+
+    return i;
+}
+
+static
+String local modeString(hmode,binary) /* return mode string for f(d)open */
+Int  hmode;
+Bool binary; {
+    if (binary) {
+	return (hmode&HAPPEND)    ? "ab"  :
+	       (hmode&HWRITE)     ? "wb"  :
+	       (hmode&HREADWRITE) ? "rb+" :
+	       (hmode&HREAD)      ? "rb"  : (String)0;
+    } else {
+	return (hmode&HAPPEND)    ? "a"   :
+	       (hmode&HWRITE)     ? "w"   :
+	       (hmode&HREADWRITE) ? "r+"  :
+	       (hmode&HREAD)      ? "r"   : (String)0;
+    }
+}
+
+static
+Cell local openHandle(root,sCell,hmode,binary,loc) /* open handle to file named s in  */
+StackPtr root;
+Cell   *sCell;                                     /* the specified hmode  */
+Int    hmode;
+Bool   binary;
+String loc; {
+    Int i;
+    String s = evalName(*sCell);
+    String stmode = modeString(hmode,binary);
+
+    /* openHandle() either returns a Handle or throws an IOError. */
+
+    if (!s) {				/* check for valid name		   */
+	IOFail(mkIOError(NULL,
+			 nameIllegal,
+			 loc,
+			 "illegal file name",
+			 NULL));
+    }
+
+    i = newHandle(sCell,loc);
+
+    if (!stmode) {
+	IOFail(mkIOError(NULL,
+			 nameIllegal,
+			 loc,
+			 "illegal mode",
+			 NULL));
+    }
+    /* prepare to open file    */
+    handles[i].hfp = fopen(s,stmode);
+    if (hmode==HREADWRITE && handles[i].hfp==NULL) /* try to create it */
+	handles[i].hfp = fopen(s, binary ? "wb+" : "w+");
+    if (!handles[i].hfp)
+	throwErrno(loc, TRUE, NO_HANDLE, sCell);
+
+    handles[i].hmode = hmode;
+    handles[i].hbufMode = HUNKNOWN_BUFFERING;
+    handles[i].hbufSize = (-1);
+    setRWState(i, RW_NEUTRAL);
+#if CHAR_ENCODING
+    handles[i].hBinaryMode = binary;
+    handles[i].hLookAhead = -1;
+#endif
+    return (handles[i].hcell = ap(HANDCELL,i));
+}
+
+static
+Cell local openFdHandle(root,fd,hmode,binary,loc) /* open handle to file desc fd in  */
+StackPtr root;
+Int    fd;					  /* the specified hmode  */
+Int    hmode;
+Bool   binary;
+String loc; {
+    Int i = newHandle(NIL,loc);
+    String stmode = modeString(hmode,binary);
+
+    /* openFdHandle() either returns a Handle or throws an IOError. */
+
+    if (!stmode) {
+	IOFail(mkIOError(NULL,
+			 nameIllegal,
+			 loc,
+			 "illegal mode",
+			 NULL));
+    }
+    if (!(handles[i].hfp=fdopen(fd,stmode)))
+	throwErrno(loc, TRUE, NO_HANDLE, NULL);
+
+    handles[i].hmode = hmode;
+    handles[i].hbufMode = HANDLE_NOTBUFFERED;
+    handles[i].hbufSize = 0;
+    setRWState(i, RW_NEUTRAL);
+#if CHAR_ENCODING
+    handles[i].hBinaryMode = binary;
+    handles[i].hLookAhead = -1;
+#endif
+    return (handles[i].hcell = ap(HANDCELL,i));
+}
+
+static Char local hGetChar(Int h, String fname) {
+    Int c;
+#if CHAR_ENCODING
+    if (handles[h].hLookAhead>=0) {
+	c = handles[h].hLookAhead;
+	handles[h].hLookAhead = -1;
+    } else if (handles[h].hBinaryMode) {
+	c = getc(handles[h].hfp);
+    } else {
+	c = FGetChar(handles[h].hfp);
+    }
+#else /* !CHAR_ENCODING */
+    c = FGetChar(handles[h].hfp);
+#endif
+    if (c==EOF && !feof(handles[h].hfp))
+	throwErrno(fname, TRUE, h, NULL);
+#if CHAR_ENCODING
+    else if (c==BAD_CHAR) {
+	IOFail(mkIOError(&handles[h].hcell,
+			 nameProtocolError,
+			 fname,
+			 "input contains non-character data - use binary I/O for binary data",
+			 NULL));
+    }
+#endif /* CHAR_ENCODING */
+    return c;
+}
+
+static Void local hPutChar(Char c, Int h, String fname) {
+    Int retval;
+#if CHAR_ENCODING
+    retval = handles[h].hBinaryMode ? putc(c, handles[h].hfp) :
+				      FPutChar(c, handles[h].hfp);
+#else
+    retval = FPutChar(c, handles[h].hfp);
+#endif
+    if (retval == EOF)
+	throwErrno(fname, TRUE, h, NULL);
+#if FLUSHEVERY
+    if (h <= 2) { /* Only flush the standard handles */
+	fflush(handles[h].hfp);
+    }
+#endif
+}
+
+/* If the stream is read-write, set the state, otherwise do nothing */
+static Void local setRWState(Int h, Int newState) {
+    if (handles[h].hmode&HREADWRITE) {
+	/* ANSI C requires repositioning between writes and reads */
+	if (newState==RW_READING) {
+	    if (handles[h].hRWState==RW_WRITING) {
+		fflush(handles[h].hfp);
+		fseek(handles[h].hfp, 0L, SEEK_CUR);
+	    }
+	} else if (newState==RW_WRITING) {
+	    if (handles[h].hRWState==RW_READING)
+		fseek(handles[h].hfp, 0L, SEEK_CUR);
+	}
+	handles[h].hRWState = newState;
+    }
+}
+
+/* ensure that the handle is neither closed nor semi-closed */
+static Void local checkOpen(Int h, String fname) {
+    Int mode = handles[h].hmode;
+    if (mode==HCLOSED)
+	IOFail(mkIOError(&handles[h].hcell,
+			 nameIllegal,
+		         fname,
+			 "handle is closed",
+			 NULL));
+    if (mode==HSEMICLOSED)
+	IOFail(mkIOError(&handles[h].hcell,
+			 nameIllegal,
+		         fname,
+			 "handle is semi-closed",
+			 NULL));
+}
+
+/* ensure that the handle is readable */
+static Void local checkReadable(Int h, String fname) {
+    checkOpen(h, fname);
+    if (!(handles[h].hmode&(HREAD|HREADWRITE)))
+	IOFail(mkIOError(&handles[h].hcell,
+			 nameIllegal,
+			 fname,
+			 "handle is not readable",
+			 NULL));
+}
+
+/* ensure that the handle is writable */
+static Void local checkWritable(Int h, String fname) {
+    checkOpen(h, fname);
+    if (!(handles[h].hmode&(HWRITE|HAPPEND|HREADWRITE)))
+	IOFail(mkIOError(&handles[h].hcell,
+			 nameIllegal,
+			 fname,
+			 "handle is not writeable",
+			 NULL));
+}
+
+/* --------------------------------------------------------------------------
+ * Building strings:
+ * ------------------------------------------------------------------------*/
+
+Void pushString(s)       /* push pointer to string onto stack */
+String s; {
+    if (*s == '\0')
+	push(nameNil);
+    else {
+	Cell l = ap(consChar(ExtractChar(s)),NIL);
+	push(l);
+	while (*s) {
+	    snd(l) = ap(consChar(ExtractChar(s)),NIL);
+	    l = snd(l);
+	}
+	snd(l) = nameNil;
+    }
+}
+
+/* Helper function for constructing IOErrors (see Prelude defn of
+ * IOError for explanation of what the the individual arguments
+ * do.
+ */
+  
+Cell
+mkIOError(mbH, kind, loc, desc, mbF)
+Cell   *mbH;	/* a Handle or NULL */
+Name   kind;	/* an IOErrorType */
+String loc;
+String desc;
+Cell   *mbF;	/* a FilePath or NULL */
+{
+    Cell str;
+    push(nameIOError);
+    toparg(mbH==NULL ? nameNothing : ap(nameJust,*mbH));
+    toparg(kind);
+    pushString(loc); str = pop(); toparg(str);
+    pushString(desc); str = pop(); toparg(str);
+    toparg(mbF==NULL ? nameNothing : ap(nameJust,*mbF));
+    return pop();
+}
+
+
+#endif
+/* --------------------------------------------------------------------------
+ * IO Errors (more defined for file ops)
+ * ------------------------------------------------------------------------*/
+
+static Void local throwErrno(String fname, Bool isFile, Int h, Cell *mbF)
+{
+    IOFail(mkIOError(h == NO_HANDLE ? NULL : &handles[h].hcell,
+		     toIOError(errno),
+		     fname,
+		     toIOErrorDescr(errno, isFile),
+		     mbF));
+}
+
+/*
+ * Map a libc error code to an IOError
+ */
+static Name local toIOError(errc)
+int errc;
+{
+    switch(errc) {
+
+    case EEXIST:
+	return nameAlreadyExists;
+    case ENOENT:
+    case ENOTDIR:
+	return nameDoesNotExist;
+    case EPERM:
+    case EACCES:
+	return namePermDenied;
+    case ENOSPC:
+    case EFBIG:
+	return nameIsFull;
+    default:
+	return nameIllegal;
+    }
+}
+
+/*
+ * Map a libc error code to an IOError descriptive string
+ */
+static String local toIOErrorDescr(errc,isFile)
+int   errc;
+Bool  isFile;
+{
+    switch(errc) {
+
+    case EEXIST:
+	return (isFile ? "file already exists" : "directory already exists");
+    case ENOENT:
+    case ENOTDIR:
+	return (isFile ? "file does not exist" : "directory does not exist");
+    case EPERM:
+    case EACCES:
+	return ""; /* No need to replicate the info conveyed by the IOErrorKind */
+    case ENOSPC:
+    case EFBIG:
+	return "device is full";
+    default:
+	return "";
+    }
+}
+
+/* --------------------------------------------------------------------------
+ * Misc.
+ * ------------------------------------------------------------------------*/
+
+primFun(primGC) {			/* force a GC right now            */
+    garbageCollect();
+    IOReturn(nameUnit);
+}
+
+#if BIGNUMS
+#include <time.h>
+
+primFun(primGetRandomSeed) {		/* generate a random seed          */
+    IOReturn(bigInt(clock()));
+}
+
+#else
+
+primFun(primGetRandomSeed) {		/* generate a random seed          */
+    ERRMSG(0) "getRandomSeed is not implemented on this architecture"
+    EEND;
+}
+
+#endif
+				     
+primFun(primGetEnv) {                 /* primGetEnv :: String -> IO String */
+    String s = evalName(IOArg(1));    /* Eval name	                   */
+    String r;
+    if (!s) {			      /* check for valid name		   */
+	IOFail(mkIOError(NULL,
+			 nameIllegal,
+		         "System.getEnv",
+			 "illegal environment variable name",
+			 &IOArg(1)));
+    }
+    if ((r = getenv(s))==0) {    
+	IOFail(mkIOError(NULL,
+			 nameDoesNotExist,
+		         "System.getEnv",
+			 "environment variable not found",
+			 &IOArg(1)));
+    }
+    pushString(r);
+    IOReturn(pop());
+}
+
+#include <sys/types.h>
+# include <sys/wait.h>
+#ifndef WEXITSTATUS
+/* If it's not defined, return it verbatim. */
+# define WEXITSTATUS(stat_val) (stat_val)
+#endif
+
+primFun(primSystem) {                   /* primSystem :: String -> IO Int  */
+    String s = evalName(IOArg(1));	/* Eval name	                   */
+    Int r;
+    if (!s) {				/* check for valid string          */
+	IOFail(mkIOError(NULL,
+			 nameIllegal,
+		         "System.system",
+			 "illegal system command string",
+			 &IOArg(1)));
+    }
+    r = shellEsc(s, TRUE/*synchronous*/, TRUE/*use shell*/);
+    IOReturn(mkInt(WEXITSTATUS(r)));
+}
+
+Void setHugsArgs(argc,argv)
+Int    argc;
+String argv[]; {
+    int i;
+    Cell str;
+
+    hugsArgs = nameNil;
+    pushString(argv[0]);
+    hugsProgName = pop();
+    for (i=argc-1; i>0; i--) {
+	pushString(argv[i]);
+	str = pop();
+	hugsArgs = ap2(nameCons, str, hugsArgs);
+    }
+}
+
+primFun(primGetProgName) {              /* primGetProgName :: IO String    */
+    IOReturn(hugsProgName);
+}
+
+primFun(primGetArgs) {                  /* primGetArgs :: IO [String]      */
+    IOReturn(hugsArgs);
+}
+
+primFun(primSetProgName) {              /* primSetProgName :: String -> IO () */
+    hugsProgName = IOArg(1);
+    IOReturn(nameUnit);
+}
+
+primFun(primSetArgs) {                  /* primSetArgs :: [String] -> IO () */
+    hugsArgs = IOArg(1);
+    IOReturn(nameUnit);
+}
+
+/* --------------------------------------------------------------------------
+ * File IO
+ * ------------------------------------------------------------------------*/
+
+#if IO_HANDLES
+
+#define HandleArg(nm,offset)  \
+    eval(primArg(offset));    \
+    nm = intValOf(whnfHead)
+
+#define IOBoolResult(e)  \
+    IOReturn((e)?nameTrue:nameFalse)
+
+primFun(primHGetChar) {			/* Read character from handle	   */
+    Int h;
+    Int c;
+    HandleArg(h,1+IOArity);
+
+    checkReadable(h, "IO.hGetChar");
+    setRWState(h, RW_READING);
+    c = hGetChar(h, "IO.hGetChar");
+    if (c==EOF) {
+	setRWState(h, RW_NEUTRAL);
+	IOFail(mkIOError(&handles[h].hcell,
+			 nameEOFErr,
+			 "IO.hGetChar",
+			 "end of file",
+			 NULL));
+    }
+    IOReturn(mkChar(c));
+}
+
+primFun(primHPutChar) {			/* print character on handle	   */
+    Char c = 0;
+    Int  h;
+    HandleArg(h,2+IOArity);
+    CharArg(c,1+IOArity);
+
+    checkWritable(h, "IO.hPutChar");
+    setRWState(h, RW_WRITING);
+    hPutChar(c, h, "IO.hPutChar");
+    IOReturn(nameUnit);
+}
+
+primFun(primHPutStr) {			/* print string on handle	   */
+    Int h;
+    HandleArg(h,2+IOArity);
+    push(primArg(1+IOArity));
+    primArg(1+IOArity) = NIL;
+
+    checkWritable(h, "IO.hPutStr");
+    setRWState(h, RW_WRITING);
+    blackHoleRoot();
+    eval(pop());
+    while (whnfHead==nameCons) {
+	eval(pop());
+	hPutChar(charOf(whnfHead),h,"IO.hPutStr");
+	eval(pop());
+    }
+#if !FLUSHEVERY
+    if (h <= 2) { /* Only flush the standard handles */
+	fflush(handles[h].hfp);
+    }
+#endif
+    IOReturn(nameUnit);
+}
+
+primFun(primHreader) {			/* read String from a handle 	   */
+    Int h;                              /* Handle -> String                */
+    HandleArg(h,1);
+    if (handles[h].hmode&HSEMICLOSED) {	/* read requires semi-closed handle*/
+	Int c = hGetChar(h, "IO.getContents");
+	if (c!=EOF && c>=0 && c<=MAXCHARVAL) {
+	    updapRoot(consChar(c),ap(nameHreader,primArg(1)));
+	    return;
+	}
+	clearerr(handles[h].hfp);
+    }
+    updateRoot(nameNil);
+}
+
+primFun(primHContents) {		/* hGetContents :: Handle -> IO Str*/
+    Int h;
+    HandleArg(h,1+IOArity);
+
+    checkReadable(h, "IO.hGetContents");  /* must have readable handle     */
+    setRWState(h, RW_READING);
+    handles[h].hmode = HSEMICLOSED; /* semi-close handle		   */
+    IOReturn(ap(nameHreader,IOArg(1)));
+}
+
+static int local getIOMode(mode)	/* From IOMode to internal form    */
+Cell mode; {
+    Int    m = HCLOSED;
+
+    eval(mode);				/* Eval IOMode			   */
+    if (isName(whnfHead) && isCfun(whnfHead))
+	switch (cfunOf(whnfHead)) {	/* we have to use numeric consts   */
+	    case 1 : m = HREAD;		/* here to avoid the need to put   */
+		     break;		/* IOMode in startup environment   */
+	    case 2 : m = HWRITE;
+		     break;
+	    case 3 : m = HAPPEND;
+		     break;
+	    case 4 : m = HREADWRITE;
+		     break;
+	}
+    return m;
+}
+
+static Void local fopenPrim(root,binary,loc)/* Auxiliary function for          */
+StackPtr root;                              /* opening a file                  */
+Bool     binary;
+String   loc; {
+    Int    m;
+
+    m = getIOMode(IOArg(1));
+    if (m==HCLOSED) {			/* Only accept legal modes	   */
+	IOFail(mkIOError(NULL,
+			 nameIllegal,
+			 loc,
+			 "unknown handle mode",
+			 &IOArg(2)));
+    }
+    IOReturn(openHandle(root,&IOArg(2),m,binary,loc));
+}
+
+primFun(primOpenFile) {			/* open handle to a text file	   */
+    fopenPrim(root,FALSE,"IO.openFile");
+}
+
+primFun(primOpenBinaryFile) {		/* open handle to a binary file	   */
+    fopenPrim(root,TRUE,"System.IO.openBinaryFile");
+}
+
+primFun(primStdin) {			/* Standard input handle	   */
+    push(handles[HSTDIN].hcell);
+}
+
+primFun(primStdout) {			/* Standard output handle	   */
+    push(handles[HSTDOUT].hcell);
+}
+
+primFun(primStderr) {			/* Standard error handle	   */
+    push(handles[HSTDERR].hcell);
+}
+
+primFun(primOpenFd) {			/* open handle to file descriptor. */
+    Int  m;                             /* :: Int{-Fd-} -> Bool -> IOMode -> Bool -> IO Handle */
+    Int  fd;
+    Bool binary;
+    Bool isSock;
+
+    IntArg(fd,4+IOArity);
+    BoolArg(isSock,3+IOArity);
+    BoolArg(binary,1+IOArity);
+
+    m = getIOMode(IOArg(2));
+    if (m==HCLOSED) {			/* Only accept legal modes	   */
+        IOFail(mkIOError(NULL,
+		         nameIllegal,
+		         "openFd",
+		         "unknown handle mode",
+		         NULL));
+    }
+
+    IOReturn(openFdHandle(root,fd,m,binary,"openFd"));
+}
+
+/* Extract the file descriptor from a Handle, discarding the Handle */
+primFun(primHandleToFd) {
+    Int h;
+    HandleArg(h,1+IOArity);
+    if (IS_STANDARD_HANDLE(h)) {
+        IOFail(mkIOError(NULL,
+			 nameIllegal,
+		         "System.Posix.IO.handleToFd",
+		         "invalid handle",
+			 NULL));
+    }
+    checkOpen(h, "System.Posix.IO.handleToFd");
+    {
+        Int fd = dup(fileno(handles[h].hfp));
+        fclose(handles[h].hfp);
+        handles[h].hfp   = 0;
+        handles[h].hmode = HCLOSED;
+        IOReturn(mkInt(fd));
+    }
+}
+
+primFun(primHIsEOF) {	/* Test for end of file on handle  */
+                        /* :: Handle -> IO Bool */
+    Int h;
+    FILE* fp;
+    Bool isEOF;
+    HandleArg(h,1+IOArity);
+    checkReadable(h, "IO.hIsEOF");
+    fp = handles[h].hfp;
+    isEOF = feof(fp);
+    if (isEOF) { /* If the EOF flag is already signalled,
+		    peeking at the next char isn't likely
+		    to produce a different outcome! */
+	IOBoolResult(isEOF);
+#if CHAR_ENCODING
+    } else if (handles[h].hLookAhead>=0) {
+	IOReturn(nameFalse);
+#endif
+    } else {
+	Int c;
+
+	setRWState(h, RW_READING);
+	c = fgetc(fp);
+	isEOF = feof(fp);
+	if (isEOF)
+	    setRWState(h, RW_NEUTRAL);
+	/* Put the char back and clear any flags. */
+	ungetc(c,fp);
+	clearerr(fp);
+	
+	IOBoolResult(isEOF);
+    }
+}
+
+primFun(primHFlush) {			/* Flush handle			   */
+    Int h;
+    HandleArg(h,1+IOArity);
+    checkWritable(h, "IO.hFlush");
+    fflush(handles[h].hfp);
+    IOReturn(nameUnit);
+}
+
+primFun(primHClose) {			/* Close handle                   */
+    Int h;
+    HandleArg(h,1+IOArity);
+
+    /* Disallow closing any of the standard handles */
+    if (!IS_STANDARD_HANDLE(h) && handles[h].hmode!=HCLOSED) {
+	if (h>HSTDERR && handles[h].hfp)
+	    fclose(handles[h].hfp);
+	handles[h].hfp   = 0;
+	handles[h].hmode = HCLOSED;
+    }
+    /* closing an already closed handle is the identity
+       (i.e., not an error.) */
+    IOReturn(nameUnit);
+}
+
+primFun(primHGetPosn) {			/* Get file position               */
+    Int h;
+    long pos;
+    HandleArg(h,1+IOArity);
+    checkOpen(h, "IO.hGetPosn");
+    pos = ftell(handles[h].hfp);
+    IOReturn(mkInt((Int)pos));
+}
+
+primFun(primHSetPosn) {			/* Set file position               */
+    long   pos = 0;
+    Int    h;
+    HandleArg(h,2+IOArity);
+    IntArg(pos,1+IOArity);
+    checkOpen(h, "IO.hSetPosn");
+    setRWState(h, RW_NEUTRAL);
+    fflush(handles[h].hfp);
+    if (fseek(handles[h].hfp,pos,SEEK_SET) == 0) {
+	IOReturn(nameUnit);
+    }
+}
+
+primFun(primHSeek) {	/* Seek to new file posn */
+                        /* :: Handle -> Int -> Int -> IO () */
+    Int h;
+    Int sMode;
+    Int off;
+
+    HandleArg(h,3+IOArity);
+    IntArg(sMode, 2+IOArity);
+    IntArg(off, 1+IOArity);
+
+    if (sMode == 0) 
+	sMode = SEEK_SET;
+    else if (sMode == 1)
+	sMode = SEEK_CUR;
+    else
+	sMode = SEEK_END;
+
+    checkOpen(h, "IO.hSeek");
+    if (fseek(handles[h].hfp,off,sMode) != 0)
+	throwErrno("IO.hSeek", TRUE, h, NULL);
+
+    setRWState(h, RW_NEUTRAL);
+
+    IOReturn(nameUnit);
+}
+
+primFun(primHLookAhead) { /* Peek at the next char */
+                          /* :: Handle -> IO Char  */
+    Int h;
+    Int c;
+    
+    HandleArg(h,1+IOArity);
+
+    checkReadable(h, "IO.hLookAhead");
+#if CHAR_ENCODING
+    if (handles[h].hLookAhead>=0) {
+	IOReturn(mkChar(handles[h].hLookAhead));
+	return;
+    }
+#endif
+    setRWState(h, RW_READING);
+    if (feof(handles[h].hfp) ||
+	(c = hGetChar(h, "IO.hLookAhead")) == EOF) {
+	setRWState(h, RW_NEUTRAL);
+	IOFail(mkIOError(&handles[h].hcell,
+			 nameEOFErr,
+			 "IO.hLookAhead",
+			 "end of file",
+			 NULL));
+    }
+#if CHAR_ENCODING
+    if (handles[h].hBinaryMode)
+	ungetc(c, handles[h].hfp);
+    else
+	handles[h].hLookAhead = c;
+#else
+    ungetc(c, handles[h].hfp);
+#endif
+    IOReturn(mkChar(c));
+}
+
+primFun(primHSetBuffering) {	/* Change a Handle's buffering */
+                                /* :: Handle -> Int -> Int -> IO () */
+    Int h;
+    Int ty;
+    Int sz;
+    int rc;
+    HandleArg(h,3+IOArity);
+    IntArg(ty,2+IOArity);
+    IntArg(sz,1+IOArity);
+
+    checkOpen(h, "IO.hSetBuffering");
+    switch(ty) {
+    case 0:
+	ty = _IONBF;
+	handles[h].hbufMode = HANDLE_NOTBUFFERED;
+	handles[h].hbufSize = 0;
+	break;
+    case 1:
+	ty = _IOLBF;
+	sz = BUFSIZ;
+	handles[h].hbufMode = HANDLE_LINEBUFFERED;
+	handles[h].hbufSize = 0;
+	break;
+    case 2:
+	ty = _IOFBF;
+	handles[h].hbufMode = HANDLE_BLOCKBUFFERED;
+	if (sz == 0) {
+	    sz=BUFSIZ;
+	}
+	handles[h].hbufSize = sz;
+	break;
+    default:
+	IOFail(mkIOError(&handles[h].hcell,
+			 nameIllegal,
+			 "IO.hSetBuffering",
+			 "illegal buffer mode",
+			 NULL));
+    }
+
+    /* Change the buffering mode; setvbuf() flushes the old buffer. */
+    /* Let setvbuf() allocate the buffer for us. */
+    rc = setvbuf(handles[h].hfp, NULL, ty, sz);
+    if (rc != 0)
+	throwErrno("IO.hSetBuffering", TRUE, h, NULL);
+    if ((handles[h].hmode&(HWRITE|HAPPEND|HREADWRITE)) &&
+	isatty(fileno(handles[h].hfp)))
+	setBuffTerminal(fileno(handles[h].hfp), ty!=0);
+    IOReturn(nameUnit);
+}
+
+primFun(primHGetBuffering) {	/* Return buffering info of a handle. */
+                                /*  Handle :: IO (Int,Int)            */
+    Int h;
+    HandleArg(h,1+IOArity);
+
+    checkOpen(h, "IO.hGetBuffering");
+    if (handles[h].hbufMode == HUNKNOWN_BUFFERING) {
+	/* figure out buffer mode and size. */
+	if (isatty (fileno(handles[h].hfp)) ) {
+	    /* TTY connected handles are normally linebuffered. */
+	    handles[h].hbufMode =
+		(handles[h].hmode&(HWRITE|HAPPEND|HREADWRITE))==0 ||
+		    getBuffTerminal(fileno(handles[h].hfp)) ?
+		    HANDLE_LINEBUFFERED : HANDLE_NOTBUFFERED;
+	    handles[h].hbufSize = 0;
+	} else {
+	    /* ..if not, block buffered. */
+	    handles[h].hbufMode = HANDLE_BLOCKBUFFERED;
+	    handles[h].hbufSize = BUFSIZ;
+	}
+    }
+    IOReturn(ap(ap(mkTuple(2),mkInt((Int)handles[h].hbufMode)),
+		mkInt((Int)handles[h].hbufSize)));
+}
+
+primFun(primHIsOpen) {			/* Test is handle open             */
+    Int h;
+    HandleArg(h,1+IOArity);
+    IOBoolResult(handles[h].hmode!=HCLOSED 
+		 && handles[h].hmode!=HSEMICLOSED);
+}
+
+primFun(primHIsClosed) {		/* Test is handle closed           */
+    Int h;
+    HandleArg(h,1+IOArity);
+    IOBoolResult(handles[h].hmode==HCLOSED);
+}
+
+primFun(primHIsReadable) {		/* Test is handle readable         */
+    Int h;
+    HandleArg(h,1+IOArity);
+    IOBoolResult(handles[h].hmode&(HREAD|HREADWRITE));
+}
+
+primFun(primHIsWritable) {		/* Test is handle writable         */
+    Int h;
+    HandleArg(h,1+IOArity);
+    IOBoolResult(handles[h].hmode&(HWRITE|HREADWRITE|HAPPEND));
+}
+
+#if defined(IS_WINDOWS) && !defined(S_ISREG)
+#define S_ISREG(x)  ((x) & _S_IFREG)
+#endif
+
+primFun(primHIsSeekable) {		/* Test if handle is writable   */
+    Int h;
+    Bool okHandle;
+    struct stat sb;
+
+    HandleArg(h,1+IOArity);
+
+    okHandle = (handles[h].hmode&(HREAD|HWRITE|HREADWRITE|HAPPEND));
+    if (okHandle && (fstat(fileno(handles[h].hfp), &sb) == 0)) {
+	okHandle = S_ISREG(sb.st_mode);
+    }
+    IOBoolResult(okHandle);
+}
+
+primFun(primHFileSize) {  /* If handle points to a regular file,
+			     return the size of the file   */
+                          /* :: Handle -> IO Integer       */
+    Int h;
+    struct stat sb;
+
+    HandleArg(h,1+IOArity);
+
+    checkOpen(h, "IO.hFileSize");
+    if (handles[h].hmode&(HWRITE|HREADWRITE|HAPPEND))
+	fflush(handles[h].hfp);
+    if (fstat(fileno(handles[h].hfp), &sb) != 0 || !S_ISREG(sb.st_mode)) {
+	IOFail(mkIOError(&handles[h].hcell,
+			 nameIllegal,
+			 "IO.hFileSize",
+			 "not a regular file",
+			 NULL));
+    }
+    IOReturn(bigWord(sb.st_size));
+  }
+
+primFun(primEqHandle) {			/* Test for handle equality        */
+    Int h1, h2;
+    HandleArg(h1,1);
+    HandleArg(h2,2);
+    BoolResult(h1==h2);
+}
+
+primFun(primGetHandleNumber) {
+    Int h;
+    HandleArg(h,1);
+    IntResult(h);
+}
+
+primFun(primHSetBinaryMode) {
+    Int h;
+    Bool binary;
+    HandleArg(h, 2+IOArity);
+    BoolArg(binary, 1+IOArity);
+
+    checkOpen(h, "System.IO.hSetBinaryMode");
+
+#if CHAR_ENCODING
+    handles[h].hBinaryMode = binary;
+#endif
+    IOReturn(nameUnit);
+}
+
+primFun(primHPutBuf) {			/* write binary data from a buffer   */
+    Int h, size;
+    Pointer buf;
+
+    HandleArg(h, 3+IOArity);
+    PtrArg(buf, 2+IOArity);
+    IntArg(size, 1+IOArity);
+
+    /* argument checks */
+    checkWritable(h, "System.IO.hPutBuf");
+    if (size < 0) {
+	IOFail(mkIOError(&handles[h].hcell,
+			 nameIllegal,
+			 "System.IO.hPutBuf",
+			 "illegal buffer size",
+			 NULL));
+    }
+#if CHAR_ENCODING
+    if (!handles[h].hBinaryMode) {
+	IOFail(mkIOError(&handles[h].hcell,
+			 nameIllegal,
+			 "System.IO.hPutBuf",
+			 "not a binary handle",
+			 NULL));
+    }
+#endif
+    setRWState(h, RW_WRITING);
+
+    errno = 0;
+    while (size > 0) {
+	size -= (Int)fwrite(buf, 1, size, handles[h].hfp);
+	if (errno < 0)
+	    throwErrno("System.IO.hPutBuf", TRUE, h, NULL);
+    }
+
+    IOReturn(nameUnit);
+}
+
+primFun(primHGetBuf) {			/* read binary data into a buffer   */
+    Int h, size, numRead;
+    Pointer buf;
+
+    HandleArg(h, 3+IOArity);
+    PtrArg(buf, 2+IOArity);
+    IntArg(size, 1+IOArity);
+
+    /* argument checks */
+    checkReadable(h, "System.IO.hGetBuf");
+    if (size < 0) {
+	IOFail(mkIOError(&handles[h].hcell,
+			 nameIllegal,
+			 "System.IO.hGetBuf",
+			 "illegal buffer size",
+			 NULL));
+    }
+#if CHAR_ENCODING
+    if (!handles[h].hBinaryMode) {
+	IOFail(mkIOError(&handles[h].hcell,
+			 nameIllegal,
+			 "System.IO.hGetBuf",
+			 "not a binary handle",
+			 NULL));
+    }
+#endif
+    setRWState(h, RW_READING);
+
+    numRead = (Int)fread(buf, 1, size, handles[h].hfp);
+    if (numRead < size && ferror(handles[h].hfp))
+	throwErrno("System.IO.hGetBuf", TRUE, h, NULL);
+    IOReturn(mkInt(numRead));
+}
+
+primFun(primHWaitForInput) { /* Check whether a character can be read
+				from a handle within x msecs */
+                             /* :: Handle -> Int -> IO Bool */
+    Int h;
+    Int msecs;
+    
+    HandleArg(h,2+IOArity);
+    IntArg(msecs,1+IOArity);
+    
+    checkReadable(h, "IO.hWaitForInput");
+    {
+	/* Implementation is a rip-off of GHC's inputReady.c */
+	int maxfd, fd;
+	int ready;
+	fd_set rfd;
+	struct timeval tv;
+	
+	FD_ZERO(&rfd);
+	fd = fileno(handles[h].hfp);
+	FD_SET(fd, &rfd);
+	
+	maxfd = fd + 1;
+	tv.tv_sec  = msecs / 1000;
+	tv.tv_usec = msecs % 1000;
+	
+	while ( (ready = select(maxfd, &rfd, NULL, NULL, &tv)) < 0 ) {
+	    if (errno != EINTR) {
+		IOFail(mkIOError(&handles[h].hcell,
+				 nameIllegal,
+				 "IO.hWaitForInput",
+				 "input waiting terminated by signal",
+				 NULL));
+	    }
+	}
+	IOBoolResult(ready > 0);
+    }
+}
+
+primFun(primHIsTerminalDevice) { /* Does the handle refer to a terminal? */
+    Int h;
+    HandleArg(h, 1+IOArity);
+    checkOpen(h, "System.IO.hIsTerminalDevice");
+    IOBoolResult(isatty(fileno(handles[h].hfp)));
+}
+
+primFun(primHGetEcho) {
+    Int h;
+    Int fd;
+    HandleArg(h, 1+IOArity);
+    checkOpen(h, "System.IO.hGetEcho");
+    fd = fileno(handles[h].hfp);
+    IOBoolResult(isatty(fd) && getEchoTerminal(fd));
+}
+
+primFun(primHSetEcho) {
+    Int h;
+    Bool echo;
+    Int fd;
+    HandleArg(h, 2+IOArity);
+    BoolArg(echo, 1+IOArity);
+    checkOpen(h, "System.IO.hSetEcho");
+    fd = fileno(handles[h].hfp);
+    if (isatty(fd))
+	setEchoTerminal(fd, echo);
+}
+
+#endif /* IO_HANDLES */
+
+/* --------------------------------------------------------------------------
+ * Mutable variables
+ * ------------------------------------------------------------------------*/
+
+#if IO_REFS
+
+#if CHECK_TAGS
+#define checkRef() if (MUTVAR != whatIs(whnfHead)) internal("Ref expected")
+#else
+#define checkRef() /* do nothing */
+#endif
+
+primFun(primNewRef) {			/* a -> IO (Ref a)		   */
+    IOReturn(ap(MUTVAR,IOArg(1)));
+}
+
+primFun(primDerefRef) {			/* Ref a -> IO a		   */
+    eval(pop());
+    checkRef();
+    IOReturn(snd(whnfHead));
+}
+
+primFun(primAssignRef) {		/* Ref a -> a -> IO ()		   */
+    eval(IOArg(2));
+    checkRef();
+    snd(whnfHead) = IOArg(1);
+    IOReturn(nameUnit);
+}
+
+primFun(primEqRef) {			/* Ref a -> Ref a -> Bool	   */
+    eval(primArg(2));
+    checkRef();
+    push(whnfHead);
+    eval(primArg(1));
+    checkRef();
+    updateRoot(pop()==whnfHead ? nameTrue : nameFalse);
+}
+#endif
+
+/* --------------------------------------------------------------------------
+ * Stable Pointers
+ * ------------------------------------------------------------------------*/
+
+#if CHECK_TAGS
+#define checkSP() checkInt()
+#else
+#define checkSP() /* do nothing */
+#endif
+
+#define SPArg(nm,offset)                          \
+    eval(primArg(offset));                        \
+    checkSP();                                    \
+    nm = (HugsStablePtr)whnfInt
+
+/* nm should be a variable in which result is stored.
+   If you use an expression, reevaluation might occur */
+#define SPResult(nm)                              \
+   updateRoot(mkInt((Int)(nm)))
+
+
+primFun(primMakeSP) {			/* a -> IO (StablePtr a)	   */
+    HugsStablePtr sp = mkStablePtr(IOArg(1));
+    if (sp == 0) {
+        IOFail(mkIOError(NULL,
+			 nameIsFull,
+			 "Foreign.makeStablePtr",
+		         "too many StablePtrs",
+			 NULL));
+    }
+    IOReturn(mkInt(sp));
+}
+
+primFun(primDerefSP) {			/* StablePtr a -> IO a   	   */
+    HugsStablePtr x;
+    SPArg(x,1+IOArity);
+    
+    IOReturn(derefStablePtr(x));
+}
+
+primFun(primFreeSP) {			/* StablePtr a -> IO ()   	   */
+    HugsStablePtr x;
+    SPArg(x,1+IOArity);
+    freeStablePtr(x);
+    IOReturn(nameUnit);
+}
+
+primFun(primCastSPToP) {		/* StablePtr a -> Ptr ()   	   */
+    HugsStablePtr x;
+    SPArg(x,1);
+    PtrResult((Pointer)x);
+}
+
+primFun(primCastPToSP) {		/* Ptr () -> StablePtr a   	   */
+    Pointer x;
+    PtrArg(x,1);
+    SPResult((HsStablePtr)x);
+}
+
+
+    
+/* --------------------------------------------------------------------------
+ * Foreign Objects
+ * ------------------------------------------------------------------------*/
+
+#if CHECK_TAGS
+#define checkForeign() if (MPCELL != whatIs(whnfHead)) internal("ForeignObj expected")
+#else
+#define checkForeign() /* do nothing */
+#endif
+
+primFun(primNewFP) { /* Ptr a -> IO (ForeignPtr a) */
+    Pointer addr = 0;
+    eval(IOArg(1));
+    addr = ptrOf(whnfHead);
+    IOReturn(newMallocPtr(addr));
+}
+
+primFun(primAddFPF) { /* FunPtr (Ptr a -> IO ()) -> ForeignPtr a -> IO () */
+    int mp;
+    eval(IOArg(1));
+    mp = mpOf(whnfHead);
+    eval(IOArg(2));
+    mallocPtrs[mp].finalizers = cons(whnfHead, mallocPtrs[mp].finalizers);
+    IOReturn(nameUnit);
+}
+
+primFun(primAddFPFEnv) {	 /* FunPtr (Ptr env -> Ptr a -> IO ()) ->  */
+    int mp;			 /*	Ptr Env -> ForeignPtr a -> IO ()   */
+    eval(IOArg(1));
+    mp = mpOf(whnfHead);
+    eval(IOArg(2));
+    push(whnfHead);
+    eval(IOArg(3));
+    mallocPtrs[mp].finalizers =
+	cons(pair(whnfHead, pop()), mallocPtrs[mp].finalizers);
+    IOReturn(nameUnit);
+}
+
+primFun(primWriteFP) {		/* ForeignPtr a -> Ptr a -> IO ()	   */
+    Cell mp = NIL;
+    eval(IOArg(2));
+    checkForeign();
+    mp = whnfHead;
+    eval(IOArg(1));
+    derefMP(mp) = ptrOf(whnfHead);
+    IOReturn(nameUnit);
+}
+
+primFun(primEqFP) {		/* ForeignPtr a -> ForeignPtr a -> Bool    */
+    eval(primArg(2));
+    checkForeign();
+    push(whnfHead);
+    eval(primArg(1));
+    checkForeign();
+    updateRoot(pop()==whnfHead ? nameTrue : nameFalse);
+}
+
+primFun(primTouchFP) {		/* ForeignPtr a -> IO ()	           */
+    eval(IOArg(1));
+    checkForeign();
+    IOReturn(nameUnit);
+}
+
+primFun(primFPToP) {		/* ForeignPtr a -> Ptr a                   */
+    eval(primArg(1));
+    checkForeign();
+    PtrResult(derefMP(whnfHead));
+}
+
+#if STABLE_NAMES
+/* --------------------------------------------------------------------------
+ * Stable Names
+ * ------------------------------------------------------------------------*/
+
+primFun(primMakeSN) {		/* a -> IO (StableName a)		   */
+    IOReturn(ap(STABLENAME,IOArg(1)));
+}
+
+primFun(primDerefSN) {		/* StableName a -> a			   */
+    eval(primArg(1));
+    updateRoot(snd(whnfHead));
+}
+
+primFun(primHashSN) {		/* StableName a -> Int			   */
+    eval(primArg(1));
+    updateRoot(mkInt(whnfHead));
+}
+primFun(primEqSN) {		/* StableName a -> StableName a -> Bool	   */
+    eval(primArg(2));
+    push(whnfHead);
+    eval(primArg(1));
+    updateRoot(pop()==whnfHead ? nameTrue : nameFalse);
+}
+#endif
+
+#if GC_WEAKPTRS
+/* --------------------------------------------------------------------------
+ * Weak Pointers
+ * ------------------------------------------------------------------------*/
+
+#if CHECK_TAGS
+#define checkWeak() if(WEAKCELL!=whatIs(whnfHead)) internal("weakPtr expected");
+#else
+#define checkWeak() /* do nothing */
+#endif
+
+primFun(primWeakPtrEq) {		/* Weak a -> Weak a -> Bool	   */
+    eval(primArg(2));
+    push(whnfHead);
+    eval(primArg(1));
+    updateRoot(pop()==whnfHead ? nameTrue : nameFalse);
+}
+
+primFun(primMkWeak) {			/* k -> v -> Maybe (IO ())	   */
+    Cell w = NIL;			/*		    -> IO (Weak v) */
+    eval(IOArg(1));
+    if (whnfHead==nameJust) {		/* Look for finalizer		   */
+	w = pop();
+    }
+    w		     = ap(NIL,ap(NIL,ap(NIL,w)));
+    fst(snd(w))      = IOArg(3);
+    fst(snd(snd(w))) = IOArg(2);
+    liveWeakPtrs     = cons(w,liveWeakPtrs);
+    fst(w)           = WEAKFIN;
+    IOReturn(w);
+}
+
+primFun(primDeRefWeak) {		/* Weak v -> IO (Maybe v)	   */
+    eval(IOArg(1));
+    if (whatIs(whnfHead)!=WEAKFIN) {
+	internal("primDeRefWeak");
+    }
+    if (nonNull(snd(whnfHead))) {
+	IOReturn(ap(nameJust,fst(snd(snd(whnfHead)))));
+    } else {
+	IOReturn(nameNothing);
+    }
+}
+
+primFun(primReplaceFinalizer) {		/* Weak v -> Maybe (IO ())	   */
+					/*	-> IO (Maybe (IO ()))	   */
+    eval(IOArg(1));			/* Grab new finalizer ...	   */
+    if (whnfHead!=nameJust) {
+	push(NIL);
+    }
+    eval(IOArg(2));			/* Get weak pointer ...		   */
+    if (whatIs(whnfHead)!=WEAKFIN) {
+	internal("primReplaceFinalizer");
+    } else if (nonNull(snd(whnfHead))) {/* ... and replace finalizer	   */
+	Cell oldfin = snd(snd(snd(whnfHead)));
+	snd(snd(snd(whnfHead))) = pop();
+	if (nonNull(oldfin)) {
+	    IOReturn(ap(nameJust,oldfin));
+	}
+    }
+    IOReturn(nameNothing);
+}
+
+primFun(primFinalize) {			/* Weak v -> IO ()		   */
+    eval(IOArg(1));			/* Bring weak pointer to an early  */
+    if (whatIs(whnfHead)!=WEAKFIN) {	/* end ...			   */
+	internal("primFinalize");
+    } else if (nonNull(snd(whnfHead))) {
+	Cell wp = whnfHead;
+	Cell vf = snd(snd(wp));
+	if (isPair(vf)) {
+	    if (nonNull(snd(vf))) {
+		fst(vf)    = snd(vf);
+		snd(vf)    = finalizers;
+		finalizers = vf;
+	    }
+	    fst(snd(wp)) = NIL;
+	    snd(snd(wp)) = NIL;
+	    snd(wp)      = NIL;
+	}
+	liveWeakPtrs = removeCell(wp,liveWeakPtrs);
+    }
+    IOReturn(nameUnit);
+}
+
+primFun(primRunFinalizer) {		/* IO ()			   */
+    if (isNull(finalizers)) {
+	IOReturn(nameUnit);
+    } else {
+	updapRoot(ap(hd(finalizers),primArg(2)),primArg(1));
+	finalizers = tl(finalizers);
+	return;
+    }
+}
+
+primFun(primFinalizerWaiting) {		/* IO Boolean			   */
+  IOBoolResult(!isNull(finalizers));
+}
+#endif /* GC_WEAKPTRS */
+
+
+#if HSCRIPT
+#if EMBEDDED
+extern void* getCurrentScript(void);
+
+primFun(primGetCurrentScript) {  /* IO Int */
+    IOReturn( mkInt( (int)getCurrentScript() ) );
+}
+
+#else
+ 
+primFun(primGetCurrentScript) {  /* IO Int */
+    IOReturn( mkInt( 0 ) );
+}
+
+#endif /* EMBEDDED */
+#endif /* HSCRIPT */
+
+/* --------------------------------------------------------------------------
+ * Primitives for implementing disposable memo functions
+ * Byron Cook -- byron@cse.ogi.edu
+ *
+ * IOEql :: Eval a => a -> a -> IO Bool 
+ *   if argument is an Int or Char
+ *   then use ==
+ *   else use pointer identity
+ *
+ * IOHash :: Eval a => a -> IO Int
+ *   if a is an Int or Char
+ *   then use value cast as an Int
+ *   else use pointer identity
+ *
+ * (Earlier versions made Float a special case too - but that's not very
+ *  portable since it assumes that sizeof(FloatPro) == sizeof(Int).)
+ * ------------------------------------------------------------------------*/
+
+primFun(primIOEql) {		    /* :: Eval a => a -> a -> ST Mem Bool */
+    Cell x = IOArg(1);
+    Cell y = IOArg(2);
+    eval(x);
+    eval(y);
+    x = followInd(IOArg(1));
+    y = followInd(IOArg(2));
+
+    if (whatIs(x) == whatIs(y)) {
+	switch (whatIs(x)) {
+	    case INTCELL   : IOBoolResult(intOf(x)==intOf(y));
+	    case CHARCELL  : IOBoolResult(charOf(x)==charOf(y));
+	    /* deliberate fall through to end */
+	}
+    }
+    IOBoolResult(x==y);
+}
+
+primFun(primIOHash) {                      /* :: Eval a => a -> ST Mem Int */
+    Cell x = IOArg(1);
+    eval(x);
+    x = followInd(IOArg(1)); 
+
+    switch(whatIs(x)) {
+	case INTCELL   : IOBoolResult(x); 
+	case CHARCELL  : IOBoolResult(mkInt(charOf(x)));
+    }
+    IOBoolResult(mkInt((Int)x));
+}
+
+/*-------------------------------------------------------------------------*/
 #endif
 
 /* --------------------------------------------------------------------------
@@ -1382,7 +4774,181 @@ FILE *fp; {                             /* and print it on fp              */
  * ------------------------------------------------------------------------*/
 
 #if TIME_MODULE
-#include "timeprim.c"
+/*
+ * Primitives needed to implement the Haskell 98 Time & CPUTime modules.
+ *
+ * This file has to be included by builtin.c, and won't compile on its own.
+ */
+ 
+
+/* --------------------------------------------------------------------------
+ * Time/CPUTime control:
+ * ------------------------------------------------------------------------*/
+
+static Void timeControl Args((Int));
+
+static Void timeControl(what)
+Int what; {
+}
+
+/* --------------------------------------------------------------------------
+ * Time/CPUTime primitive table:
+ * ------------------------------------------------------------------------*/
+
+PROTO_PRIM(primClockTicks);
+PROTO_PRIM(primGetCPUUsage);
+
+PROTO_PRIM(primGetClockTime);
+PROTO_PRIM(primGetCalTime);
+PROTO_PRIM(primMkTime);
+
+static struct primitive timePrimTable[] = {
+  /* CPUTime primitives */
+  {"clockTicks",           0, primClockTicks},
+  {"getCPUUsage",          0+IOArity, primGetCPUUsage},
+  /* Time primitives */
+  {"getClockTimePrim",     0+IOArity, primGetClockTime},        
+  {"toCalTimePrim",        2+IOArity, primGetCalTime},        
+  {"toClockTimePrim",      7+IOArity, primMkTime},
+  {0,			0, 0}
+};
+
+static struct primInfo timePrims = { timeControl, timePrimTable, 0 };
+
+/* --------------------------------------------------------------------------
+ * Time primitives:
+ * ------------------------------------------------------------------------*/
+
+primFun(primGetClockTime) { /* :: IO (Int,Int) */
+  struct timeval tv;
+  int rc;
+  
+  rc = gettimeofday(&tv,NULL);
+  
+  if (rc == -1)
+    throwErrno("Time.getClockTime", TRUE, NO_HANDLE, NULL);
+  IOReturn(ap(ap(mkTuple(2), mkInt(tv.tv_sec)),mkInt(tv.tv_usec)));
+}
+
+primFun(primGetCalTime) { /* Int   -> Int -> IO (.....) */
+                          /* isUTC    secs */
+                          /* isUTC => convert time to UTC, o/wise local time */
+
+  Int isUTC;
+  time_t secs;
+  struct tm* tm;
+  char* zoneNm = NULL;
+  Int utcOff;
+  Cell zoneStr = NIL;
+
+  IntArg(isUTC,2+IOArity);
+  IntArg(secs,1+IOArity);
+  
+  if (isUTC) {
+    tm=gmtime(&secs);
+  } else {
+    tm=localtime(&secs);
+  }
+  
+  /* Warning - ugliness. */
+  zoneNm = (char*)tm->tm_zone;
+
+  utcOff = tm->tm_gmtoff;
+
+  pushString(zoneNm);
+  zoneStr = pop();
+
+  IOReturn(ap(ap(ap(ap(ap(ap(ap(ap(ap(ap(ap(mkTuple(11),mkInt(tm->tm_sec)),
+					 mkInt(tm->tm_min)),
+				      mkInt(tm->tm_hour)),
+				   mkInt(tm->tm_mday)),
+				mkInt(tm->tm_mon)),
+			     mkInt(tm->tm_year)),
+			  mkInt(tm->tm_wday)),
+		       mkInt(tm->tm_yday)),
+		    mkInt(tm->tm_isdst)),
+		 zoneStr),
+	      mkInt(utcOff)));
+
+}
+
+primFun(primMkTime) { /* Int{-year-}  -> Int{-month-} -> Int{-day-} ->
+                         Int{-hour-}  -> Int{-mins-}  -> Int{-sec-} ->
+			 Int{-tz offset-} -> IO Int{-secs since Epoch-} */
+  Int year, month, day;
+  Int hour,min,sec;
+  Int tz;
+
+  struct tm tm;
+  time_t t;
+  
+  IntArg(year,7+IOArity);
+  IntArg(month,6+IOArity);
+  IntArg(day,5+IOArity);
+  IntArg(hour,4+IOArity);
+  IntArg(min,3+IOArity);
+  IntArg(sec,2+IOArity);
+  IntArg(tz,1+IOArity);
+  
+  tm.tm_year = year;
+  tm.tm_mon  = month;
+  tm.tm_mday = day;
+  tm.tm_hour = hour;
+  tm.tm_min  = min;
+  tm.tm_sec  = sec;
+  /* The OpenGroup spec suggests that setting tm_isdst to a neg. value,
+     makes mktime() try to figure this out on its own. */
+  tm.tm_isdst = -1;
+  
+  t = mktime(&tm);
+  
+  if (t ==(time_t)-1)
+    throwErrno("Time.toClockTime", TRUE, NO_HANDLE, NULL);
+
+  /* mktime() assumes that the given time was local, but we might have
+     been passed an UTC cal. time, so we now have to add the UTC
+     offset, that is, the difference between toClockTime's UTC offset and
+     the UTC offset returned by mktime().
+  */
+  tz = -tz;
+  tz += tm.tm_gmtoff;
+  
+  IOReturn(mkInt(t+tz));
+}
+
+/* --------------------------------------------------------------------------
+ * CPUTime primitives:
+ * ------------------------------------------------------------------------*/
+
+#ifdef CLK_TCK
+CAFInt(primClockTicks, CLK_TCK)
+#elif defined(CLOCKS_PER_SEC)
+CAFInt(primClockTicks, CLOCKS_PER_SEC)
+#else
+CAFInt(primClockTicks, sysconf(_SC_CLK_TCK))
+#endif
+
+/* 
+ * The code for grabbing the process times has been lifted from GHC.
+ * Don't feel too bad about that, since I wrote and maintained it. 
+ */
+primFun(primGetCPUUsage) { /* IO (Int,Int,Int,Int) */
+  int userSec, userNSec;
+  int sysSec,  sysNSec;
+    struct rusage t;
+
+    getrusage(RUSAGE_SELF, &t);
+    userSec  = t.ru_utime.tv_sec;
+    userNSec = 1000 * t.ru_utime.tv_usec;
+    sysSec   = t.ru_stime.tv_sec;
+    sysNSec  = 1000 * t.ru_stime.tv_usec;
+
+    IOReturn(ap(ap(ap(ap( mkTuple(4), mkInt(userSec)),
+		      mkInt(userNSec)),
+		   mkInt(sysSec)),
+		mkInt(sysNSec)));
+}
+
 #endif
 
 /* --------------------------------------------------------------------------
@@ -1390,7 +4956,507 @@ FILE *fp; {                             /* and print it on fp              */
  * ------------------------------------------------------------------------*/
 
 #if DIRECTORY_MODULE
-#include "dirprim.c"
+/*
+ * Primitives needed to implement the Haskell 98 Directory module.
+ *
+ * This file has to be included by builtin.c, and won't compile on its own.
+ */
+ 
+
+/* --------------------------------------------------------------------------
+ * Directory control:
+ * ------------------------------------------------------------------------*/
+
+static Void dirControl Args((Int));
+
+static Void dirControl(what)
+Int what; {
+}
+
+/* --------------------------------------------------------------------------
+ * Directory primitive table:
+ * ------------------------------------------------------------------------*/
+
+PROTO_PRIM(primCreateDirectory);
+PROTO_PRIM(primRemoveDirectory);
+PROTO_PRIM(primRemoveFile);
+PROTO_PRIM(primRenameDirectory);
+PROTO_PRIM(primRenameFile);
+PROTO_PRIM(primGetDirectory);
+PROTO_PRIM(primSetDirectory);
+PROTO_PRIM(primFileExist);
+PROTO_PRIM(primDirExist);
+PROTO_PRIM(primGetPermissions);
+PROTO_PRIM(primSetPermissions);
+PROTO_PRIM(primGetDirContents);
+PROTO_PRIM(primGetModTime);
+
+static struct primitive dirPrimTable[] = {
+  {"createDirectory",      1+IOArity, primCreateDirectory},
+  {"removeDirectory",      1+IOArity, primRemoveDirectory},
+  {"removeFile",           1+IOArity, primRemoveFile},
+  {"renameDirectory",      2+IOArity, primRenameDirectory},
+  {"renameFile",           2+IOArity, primRenameFile},
+  {"getCurrentDirectory",  0+IOArity, primGetDirectory},
+  {"setCurrentDirectory",  1+IOArity, primSetDirectory},
+  {"doesFileExist",        1+IOArity, primFileExist},
+  {"doesDirectoryExist",   1+IOArity, primDirExist},
+  {"getPerms",             1+IOArity, primGetPermissions},
+  {"setPerms",             5+IOArity, primSetPermissions},
+  {"getDirContents",       1+IOArity, primGetDirContents},
+  {"getModTime",           1+IOArity, primGetModTime},
+
+  {0,			0, 0}
+};
+
+static struct primInfo dirPrims = { dirControl, dirPrimTable, 0 };
+
+static	Bool	local	isDirectory	Args((String));
+
+#define ToBool(v) ( (v) ? nameTrue : nameFalse)
+
+#ifdef _MSC_VER
+/* If not provided, define em. */
+#ifndef R_OK
+#define R_OK 04
+#endif
+#ifndef W_OK
+#define W_OK 02
+#endif
+#ifndef X_OK
+#define X_OK 06
+#endif
+#endif
+
+/* MSVC6 doesn't define these helper macros in <sys/stat.h> there
+ * might be other platforms too, so... The assumption here is that
+ * S_ISDIR() and friends indeed are CPP macros - if that's not the
+ * case, please adjust the conditional below to suit your platform
+ * (and feed back the tweak you make.)
+ */
+#if !defined(S_ISDIR)
+#define S_ISDIR(st_mode)  ((st_mode & S_IFMT) == S_IFDIR)
+#endif
+
+#if !defined(S_ISREG)
+#define S_ISREG(st_mode)  ((st_mode & S_IFMT) == S_IFREG)
+#endif
+
+/* --------------------------------------------------------------------------
+ * Directory primitives:
+ * ------------------------------------------------------------------------*/
+
+primFun(primCreateDirectory) { /* create a directory, :: String -> IO ()   */
+  int rc;
+  String s = evalName(IOArg(1));
+  
+  if (!s) {
+    IOFail(mkIOError(NULL,
+		     nameIllegal,
+		     "Directory.createDirectory",
+		     "illegal directory name",
+		     &IOArg(1)));
+  }
+  
+   rc = mkdir(s,0777);
+
+   if (rc != 0)
+      throwErrno("Directory.createDirectory", FALSE, NO_HANDLE, &IOArg(1));
+  IOReturn(nameUnit);
+}
+
+primFun(primRemoveDirectory) { /* remove a directory	   */
+  int rc;
+  String s = evalName(IOArg(1));
+  
+  if (!s) {
+    IOFail(mkIOError(NULL,
+		     nameIllegal,
+		     "Directory.removeDirectory",
+		     "illegal directory name",
+		     &IOArg(1)));
+  }
+  
+   rc = rmdir(s);
+
+   if (rc != 0)
+      throwErrno("Directory.removeDirectory", FALSE, NO_HANDLE, &IOArg(1));
+  IOReturn(nameUnit);
+}
+
+primFun(primRemoveFile) { /* remove a file	   */
+  int rc;
+  String s = evalName(IOArg(1));
+  
+  if (!s) {
+    IOFail(mkIOError(NULL,
+		     nameIllegal,
+		     "Directory.removeFile",
+		     "illegal file name",
+		     &IOArg(1)));
+  }
+  
+   rc = unlink(s);
+
+  if (rc != 0)
+    throwErrno("Directory.removeFile", TRUE, NO_HANDLE, &IOArg(1));
+  IOReturn(nameUnit);
+}
+
+/* Pair of macros for creating temporary strings */
+# define ALLOC_STRING(x) (String)alloca(sizeof(char)*(x + 1))
+# define FREE_STRING(x)
+
+primFun(primRenameDirectory) { /* rename a directory	   */
+  int rc;
+  String tmpStr;
+  String to;
+  String from;
+
+  tmpStr = evalName(IOArg(1));
+  if (!tmpStr) {
+    IOFail(mkIOError(NULL,
+		     nameIllegal,
+		     "Directory.renameDirectory",
+		     "illegal directory name",
+		     &IOArg(1)));
+  }
+  to = ALLOC_STRING(strlen(tmpStr));
+  strcpy(to, tmpStr);
+
+  from = evalName(IOArg(2));
+  if (!from) {
+    FREE_STRING(to);
+    IOFail(mkIOError(NULL,
+		     nameIllegal,
+		     "Directory.renameDirectory",
+		     "illegal directory name",
+		     &IOArg(2)));
+  }
+
+  rc = rename(from,to);
+
+  FREE_STRING(to);
+
+  if (rc != 0)
+    throwErrno("Directory.renameDirectory", FALSE, NO_HANDLE, &IOArg(1));
+  IOReturn(nameUnit);
+}
+
+primFun(primRenameFile) { /* rename a file	   */
+  int rc;
+  String tmpStr;
+  String to;
+  String from;
+
+  tmpStr = evalName(IOArg(1));
+  if (!tmpStr) {
+    IOFail(mkIOError(NULL,
+		     nameIllegal,
+		     "Directory.renameFile",
+		     "illegal file name",
+		     &IOArg(1)));
+  }
+  to = ALLOC_STRING(strlen(tmpStr));
+  strcpy(to, tmpStr);
+
+  from = evalName(IOArg(2));
+  if (!from) {
+    FREE_STRING(to);
+    IOFail(mkIOError(NULL,
+		     nameIllegal,
+		     "Directory.renameFile",
+		     "illegal file name",
+		     &IOArg(2)));
+  }
+
+  if (isDirectory(from)) {
+    FREE_STRING(to);
+    IOFail(mkIOError(NULL,
+		     namePermDenied,
+		     "Directory.renameFile",
+		     "is a directory",
+		     &IOArg(2)));
+  }
+
+  if (isDirectory(to)) {
+    FREE_STRING(to);
+    IOFail(mkIOError(NULL,
+		     namePermDenied,
+		     "Directory.renameFile",
+		     "is a directory",
+		     &IOArg(1)));
+  }
+
+  rc = rename(from,to);
+  
+  FREE_STRING(to);
+
+  if (rc != 0)
+    throwErrno("Directory.renameFile", TRUE, NO_HANDLE, &IOArg(1));
+  IOReturn(nameUnit);
+}
+
+
+primFun(primGetDirectory) { /* IO String - get current directory. */
+  char buffer[FILENAME_MAX+1];
+  if ((char*)(getcwd(buffer,FILENAME_MAX)) == (char*)NULL)
+    throwErrno("Directory.getCurrentDirectory", FALSE, NO_HANDLE, NULL);
+  pushString(buffer);
+  IOReturn(pop());
+}
+
+primFun(primSetDirectory) { /* String -> IO () - set current directory. */
+  int rc;
+  String s = evalName(IOArg(1));
+
+  if (!s) {
+    IOFail(mkIOError(NULL,
+		     nameIllegal,
+		     "Directory.setCurrentDirectory",
+		     "illegal directory name",
+		     &IOArg(1)));
+  }
+  
+   rc = chdir(s);
+
+   if (rc != 0)
+      throwErrno("Directory.setCurrentDirectory", FALSE, NO_HANDLE, &IOArg(1));
+   IOReturn(nameUnit);
+}
+
+primFun(primFileExist) { /* FilePath -> IO Bool - check to see if file exists. */
+  int rc;
+  String s = evalName(IOArg(1));
+  struct stat st;
+
+  if (!s) {
+    IOFail(mkIOError(NULL,
+		     nameIllegal,
+		     "Directory.doesFileExist",
+		     "illegal file name",
+		     &IOArg(1)));
+  }
+  
+  rc = stat(s, &st);
+  
+  IOBoolResult(rc == 0 && !S_ISDIR(st.st_mode) );
+}
+
+primFun(primDirExist) { /* FilePath -> IO Bool - check to see if directory exists. */
+  String s = evalName(IOArg(1));
+
+  if (!s) {
+    IOFail(mkIOError(NULL,
+		     nameIllegal,
+		     "Directory.doesDirectoryExist",
+		     "illegal directory name",
+		     &IOArg(1)));
+  }
+  IOBoolResult(isDirectory(s));
+}
+
+static Bool local isDirectory(s)
+String s; {
+  int rc;
+  struct stat st;
+#ifdef _WIN32
+  /* For whatever reason, stat()ing a directory name
+   * like "foo/" returns an error, while both "foo" and "foo/."
+   * is fine. We want them all to be treated equal.
+   */
+  int len = strlen(s);
+  while (len > 0 && 
+	 (s[len-1] == '/' || s[len-1] == '\\')) {
+      s[len-1] = '\0';
+      len--;
+  }
+#endif
+  rc = stat(s, &st);
+  return (rc==0 && S_ISDIR(st.st_mode));
+}
+
+primFun(primGetPermissions) { /* FilePath -> IO (Bool,Bool,Bool,Bool) */
+  int rc;
+  String s = evalName(IOArg(1));
+  struct stat st;
+  int isR, isW, isX;
+  
+
+#if __MWERKS__ && macintosh
+    IOFail(mkIOError(NULL,
+		     nameIllegal,
+		     "Directory.primGetPermissions",
+		     "operation not supported",
+		     &IOArg(1)));
+#else
+  if (!s) {
+    IOFail(mkIOError(NULL,
+		     nameIllegal,
+		     "Directory.getPermissions",
+		     "illegal file name",
+		     &IOArg(1)));
+  }
+  
+  isR = access(s, R_OK);
+  isW = access(s, W_OK);
+  isX = access(s, X_OK);
+  rc = stat(s, &st);
+  
+  if (rc != 0)
+    throwErrno("Directory.getPermissions", FALSE, NO_HANDLE, &IOArg(1));
+  IOReturn(ap(ap(ap(ap( mkTuple(4),
+			ToBool(isR == 0)),
+		    ToBool(isW == 0)),
+		 ToBool(isX == 0 && !S_ISDIR(st.st_mode))),
+	      ToBool(isX == 0 && S_ISDIR(st.st_mode))));
+#endif
+}
+
+#define EVAL_BOOL(x,y) \
+   eval(y);\
+   if (whnfHead==nameTrue) { \
+      x = TRUE; \
+   } else if (whnfHead==nameFalse) { \
+      x = FALSE; \
+   } else { \
+      IOFail(mkIOError(NULL, \
+	     nameIllegal, \
+	     "Directory.setPermissions", \
+	     "illegal flag", \
+	     NULL)); \
+   }
+
+#ifdef _MSC_VER
+#define READ_FLAG   S_IREAD
+#define WRITE_FLAG  S_IWRITE
+#define EXEC_FLAG   S_IEXEC
+#else
+#define READ_FLAG   S_IRUSR
+#define WRITE_FLAG  S_IWUSR
+#define EXEC_FLAG   S_IXUSR
+#endif
+
+#define SET_CHMOD_FLAG(x,y)  (x ? y : 0)
+
+primFun(primSetPermissions) { /* FilePath -> Bool -> Bool -> Bool -> Bool -> IO () */
+  int rc;
+  String str;
+  struct stat st;
+
+  Bool   r;
+  Bool   w;
+  Bool   e;
+  Bool   s;
+  
+#if __MWERKS__ && macintosh
+    IOFail(mkIOError(NULL,
+		     nameIllegal,
+		     "Directory.primSetPermissions",
+		     "operation not supported",
+		     &IOArg(1)));
+#else
+  EVAL_BOOL(s, IOArg(1));
+  EVAL_BOOL(e, IOArg(2));
+  EVAL_BOOL(w, IOArg(3));
+  EVAL_BOOL(r, IOArg(4));
+  
+  str = evalName(IOArg(5));
+  
+  if (!str) {
+    IOFail(mkIOError(NULL,
+		     nameIllegal,
+		     "Directory.setPermissions",
+		     "illegal file name",
+		     &IOArg(5)));
+  }
+
+  rc = stat(str, &st);
+  if (rc == 0)
+    rc = chmod(str,
+	       (st.st_mode & ~(READ_FLAG|WRITE_FLAG|EXEC_FLAG)) |
+	       SET_CHMOD_FLAG(r, READ_FLAG)  |
+	       SET_CHMOD_FLAG(w, WRITE_FLAG) |
+	       SET_CHMOD_FLAG(e||s, EXEC_FLAG));
+	     
+  if (rc != 0)
+    throwErrno("Directory.setPermissions", TRUE, NO_HANDLE, &IOArg(5));
+  IOReturn(nameUnit);
+  
+#endif
+}
+
+/* Pedantically remove these local defs. */
+#undef READ_FLAG
+#undef WRITE_FLAG
+#undef EXEC_FLAG
+#undef SET_CHMOD_FLAG
+
+primFun(primGetDirContents) { /* FilePath -> IO [FilePath] */
+  /* opendir() / readdir() implementation. */
+  DIR* dir;
+  struct dirent* pDir;
+  Cell ls;
+  String fName = evalName(IOArg(1));
+  
+  if (!fName) {
+    IOFail(mkIOError(NULL,
+		     nameIllegal,
+		     "Directory.getDirectoryContents",
+		     "illegal file name",
+		     &IOArg(1)));
+  }
+  
+  dir = opendir(fName);
+  
+  if (dir == NULL)
+    throwErrno("Directory.getDirectoryContents", FALSE, NO_HANDLE, &IOArg(1));
+
+  ls = nameNil;
+  
+  /* To ensure that the test below doesn't
+     succeed just because the impl of readdir()
+     'forgot' to reset 'errno', do it ourselves. */
+  errno = 0;
+  
+  while ( (pDir = readdir(dir)) ) {
+    Cell n;
+    push(ls);
+    pushString(pDir->d_name);
+    n = ap(nameCons, pop());
+    ls = ap(n, pop());
+  }
+  
+  if (errno != 0) {
+    int rc = errno;
+    closedir(dir);
+    errno = rc;
+    throwErrno("Directory.getDirectoryContents", FALSE, NO_HANDLE, &IOArg(1));
+  }
+
+  closedir(dir);
+  IOReturn(ls);
+}
+
+primFun(primGetModTime) { /* FilePath -> IO Int{-time_t-} - get the mod. time of the file/directory. */
+  int rc;
+  String s = evalName(IOArg(1));
+  struct stat st;
+
+  if (!s) {
+    IOFail(mkIOError(NULL,
+		     nameIllegal,
+		     "Directory.getModificationTime",
+		     "illegal file name",
+		     &IOArg(1)));
+  }
+  
+  rc = stat(s, &st);
+  
+  if (rc < 0)
+    throwErrno("Directory.getModificationTime", TRUE, NO_HANDLE, &IOArg(1));
+  IOReturn(mkInt(st.st_mtime));
+}
 #endif
 
 /* --------------------------------------------------------------------------
@@ -1399,7 +5465,439 @@ FILE *fp; {                             /* and print it on fp              */
  * ------------------------------------------------------------------------*/
 
 #if INTERNAL_PRIMS
-#include "interns.c"
+/* --------------------------------------------------------------------------
+ * Implementation of primitives which provide access to internal Hugs
+ * data structures and representations from within Haskell.
+ *
+ * Despite appearances, the only primitives which break referential
+ * transparency are the pointer equality primitives.
+ *
+ * The Hugs 98 system is Copyright (c) Mark P Jones, Alastair Reid, the
+ * Yale Haskell Group, and the OGI School of Science & Engineering at OHSU,
+ * 1994-2003, All rights reserved.  It is distributed as free software under
+ * the license in the file "License", which is included in the distribution.
+ *
+ * $RCSfile: interns.c,v $
+ * $Revision: 1.14 $
+ * $Date: 2003/11/19 21:49:48 $
+ * ------------------------------------------------------------------------*/
+ 
+/* --------------------------------------------------------------------------
+ * internalPrims control
+ * ------------------------------------------------------------------------*/
+
+static Void linkInternals Args((Void));
+
+static Name nameLeft;			/* standard data constructors      */
+static Name nameRight;			
+
+static Void local internalControl Args((Int));
+static Void local internalControl(what)
+Int what; {
+    switch (what) {
+	case INSTALL : 
+#define predef(nm,str) nm=newName(findText(str),NIL); name(nm).defn=PREDEFINED
+		       setCurrModule(modulePrelude);
+		       predef(nameLeft,       "Left");
+		       predef(nameRight,      "Right");
+#undef predef
+		       break;
+
+	case RESET :   linkInternals();
+		       break;
+    }
+}
+
+PROTO_PRIM(primGetCell);
+PROTO_PRIM(primCellPtrEq);
+PROTO_PRIM(primCatchError2);
+PROTO_PRIM(primClassifyCell);
+PROTO_PRIM(primNameInfo);
+PROTO_PRIM(primNameEq);
+PROTO_PRIM(primNameString);
+
+#if BYTECODE_PRIMS
+PROTO_PRIM(primNameCode);
+PROTO_PRIM(primIntAt);
+PROTO_PRIM(primFloatAt);
+PROTO_PRIM(primDoubleAt);
+PROTO_PRIM(primCellAt);
+PROTO_PRIM(primNameAt);
+PROTO_PRIM(primBytecodeAt);
+PROTO_PRIM(primTextAt);
+PROTO_PRIM(primAddrAt);
+#endif /* BYTECODE_PRIMS */
+
+static struct primitive internalPrimTable[] = {
+  {"getCell",       1, primGetCell},
+  {"cellPtrEq",     2, primCellPtrEq},
+  {"catchError2",   1, primCatchError2},
+  {"classifyCell",  2+IOArity, primClassifyCell},
+  {"nameString",    1, primNameString},
+  {"nameInfo",      1, primNameInfo},
+  {"nameEq",        2, primNameEq},
+
+#if BYTECODE_PRIMS
+  {"nameCode",      1, primNameCode},
+  {"intAt",         1, primIntAt},
+  {"floatAt",       1, primFloatAt},
+  {"doubleAt",      1, primDoubleAt},
+  {"cellAt",        1, primCellAt},
+  {"nameAt",        1, primNameAt},
+  {"bytecodeAt",    1, primBytecodeAt},
+  {"textAt",        1, primTextAt},
+  {"addrAt",        1, primAddrAt},
+#endif /* BYTECODE_PRIMS */
+
+  {0,		    0, 0}
+};
+
+static struct primInfo internalPrims = {internalControl, internalPrimTable, 0};
+
+/* --------------------------------------------------------------------------
+ * linkInternals
+ * ------------------------------------------------------------------------*/
+
+static Module moduleInternals;
+
+static Name nameHugsApply;            /* data CellKind = Apply Cell [Cell] */
+static Name nameHugsFun;              /*    	       | Fun   Name        */
+static Name nameHugsCon;              /*    	       | Con   Name        */
+static Name nameHugsTuple;            /*    	       | Tuple Int         */
+static Name nameHugsInt;              /*    	       | Int   Int         */
+static Name nameHugsInteger;          /*    	       | Integer Integer   */
+static Name nameHugsFloat;            /*    	       | Float Float       */
+static Name nameHugsDouble;           /*    	       | Double Double     */
+static Name nameHugsChar;             /*    	       | Char  Char        */
+static Name nameHugsPrim;             /*    	       | Prim  String      */
+static Name nameHugsError;            /*    	       | Error Cell        */
+
+static Void linkInternals() {
+    String internLib = "Hugs.Internals";
+    moduleInternals = findModule(findText(internLib));
+    if (nonNull(moduleInternals)) {
+	setCurrModule(moduleInternals);
+	nameHugsApply   = findName(findText("Apply"));
+	nameHugsFun     = findName(findText("Fun"));
+	nameHugsCon     = findName(findText("Con"));
+	nameHugsTuple   = findName(findText("Tuple"));
+	nameHugsInt     = findName(findText("Int"));
+	nameHugsInteger = findName(findText("Integer"));
+	nameHugsFloat   = findName(findText("Float"));
+	nameHugsDouble  = findName(findText("Double"));
+	nameHugsChar    = findName(findText("Char"));
+	nameHugsPrim    = findName(findText("Prim"));
+	nameHugsError   = findName(findText("Error"));
+     
+	if (isNull(nameHugsApply)   
+	    || isNull(nameHugsFun)     
+	    || isNull(nameHugsCon)     
+	    || isNull(nameHugsTuple)   
+	    || isNull(nameHugsInt)     
+	    || isNull(nameHugsInteger) 
+	    || isNull(nameHugsFloat)   
+	    || isNull(nameHugsDouble)   
+	    || isNull(nameHugsChar)    
+	    || isNull(nameHugsPrim)    
+	    || isNull(nameHugsError)
+	    ) {
+		fatal("module HugsInternals doesn't define CellKind correctly");
+	}
+    }
+}
+
+/* --------------------------------------------------------------------------
+ * Operations on Cells
+ * ------------------------------------------------------------------------*/
+
+/* Cells have to be boxed (using the HUGSOBJECT tag) so that we can        */
+/* evaluate a Cell expression such as "fst (cell1, cell2)" without         */
+/* evaluating the thunk inside the Cell.                                   */
+
+#define isHugsObject(a)     (isPair(a) && fst(a)==HUGSOBJECT)
+#define checkHugsObject(x)  \
+  if (!isHugsObject(x)) internal("HugsObject expected")
+
+#define HugsObjectArg(nm, offset)                  \
+   eval(primArg(offset));                          \
+   checkHugsObject(whnfHead);                      \
+   nm = snd(whnfHead);
+
+primFun(primGetCell) {                 /* Trivial coercion                 */
+    updapRoot(HUGSOBJECT,primArg(1));  /*  :: a -> Cell                    */
+}
+
+
+/* --------------------------------------------------------------------------
+ * Pointer equality on Cells
+ * ------------------------------------------------------------------------*/
+
+primFun(primCellPtrEq) {	       /* Unsafe pointer equality test     */
+    Cell x = 0;
+    Cell y = 0;
+    HugsObjectArg(x,1);
+    push(x);
+    HugsObjectArg(y,2);
+    x = pop();
+
+    /* We chase indirection chains since that's easy and gives more
+     * accurate results.  
+     * Don't do this if we use this function during error recovery -
+     * it might be possible for an infinite loop to occur.
+     */
+    while (isPair(x) && INDIRECT == fst(x))
+	x = snd(x);
+    while (isPair(y) && INDIRECT == fst(y))
+	y = snd(y);
+    updateRoot( (x==y) ? nameTrue : nameFalse );
+}
+
+/* --------------------------------------------------------------------------
+ * Error catching - evaluate a Cell and return an error redex or its value
+ * ------------------------------------------------------------------------*/
+
+primFun(primCatchError2) {	       /* Error catching  primitive        */
+				       /*  :: a -> Either Cell a           */
+    Cell err = NIL;
+    err = evalWithNoError(primArg(1)); 
+    if (isNull(err)) {
+	updapRoot(nameRight, primArg(1));
+    } else {
+	updapRoot(nameLeft, ap(HUGSOBJECT, err));
+    }
+}
+
+/* --------------------------------------------------------------------------
+ * Examine an object either with or without evaluation.
+ *
+ * This primitive lets Haskell programs examine values of any datatype
+ * (probably to print them).  It is wired into the IO monad to (narrowly)
+ * avoid breaking referential transparency.
+ * ------------------------------------------------------------------------*/
+
+/* --------------------------------------------------------------------------
+ * Note: we can't force the object _outside_ classify for two reasons: 
+ *									     
+ * 1) Writing "strict classifyCell x" only causes x to be evaluated to 
+ *    WHNF.  Since x is a Cell, this doesn't achieve very much.	     
+ *									     
+ * 2) We can overcome this by adding an operation 			     
+ *									     
+ *      "forceCell :: Cell -> Cell" 			     
+ *									     
+ *    and writing "classifyObject (forceObject x)" but, if "x" is a CAF, 
+ *    then "x" will be updated but the indirection via "x" will remain  
+ *    in place.								     
+ * ------------------------------------------------------------------------*/
+
+primFun(primClassifyCell) {          /* classifyCell                       */
+    Bool gc = consGC;                /*  :: Bool -> Cell -> IO CellKind    */
+    Bool strict;
+    Cell result = NIL;
+    BoolArg(strict,2+IOArity);
+    if (strict) {
+	Cell temp;
+	eval(IOArg(1)); /* object */
+	checkHugsObject(whnfHead);
+	whnfHead = snd(whnfHead);
+	if (nonNull(temp = evalWithNoError(whnfHead))) {
+	    IOReturn(ap(nameHugsError,ap(HUGSOBJECT,temp)));
+	}
+    } else {
+	eval(IOArg(1)); /* object */
+	checkHugsObject(whnfHead);
+	whnfHead = snd(whnfHead);
+	unwind(whnfHead);
+    }
+    consGC = TRUE;
+    if (whnfArgs > 0) {
+	Cell args = nameNil;
+	while (whnfArgs-- > 0) 
+	    args = ap(ap(nameCons,
+			 ap(HUGSOBJECT, pushed(whnfArgs))),
+			 args);
+	result = ap(ap(nameHugsApply, 
+		       ap(HUGSOBJECT,whnfHead)), 
+		       args);
+    } else {
+	switch (whatIs(whnfHead)) {
+
+	    case NAME     : result = ap((isCfun(whnfHead) ? nameHugsCon 
+							  : nameHugsFun), 
+					mkInt(whnfHead));
+			    break;
+
+	    case TUPLE    : result = ap(nameHugsTuple,mkInt(tupleOf(whnfHead)));
+			    break;
+
+#if BIGNUMS
+	    case ZERONUM  : 
+	    case POSNUM   : 
+	    case NEGNUM   : 
+			    result = ap(nameHugsInteger, whnfHead);
+			    break;
+#endif
+
+	    case INTCELL  : result = ap(nameHugsInt, whnfHead);
+			    break;
+
+	    case CHARCELL : result = ap(nameHugsChar, whnfHead);
+			    break;
+
+	    case FLOATCELL: result = ap(nameHugsFloat, whnfHead);
+			    break;
+
+	    case DOUBLECELL: result = ap(nameHugsDouble, whnfHead);
+			    break;
+
+#if IO_HANDLES
+	    case HANDCELL : result = ap(nameHugsPrim, mkStr(findText("{handle}")));
+			    break;
+#endif
+
+#if IO_REFS
+	    case MUTVAR   : result = ap(nameHugsPrim, mkStr(findText("{ref}")));
+			    break;
+#endif
+
+#if HASKELL_ARRAYS
+	    case ARRAY    : result = ap(nameHugsPrim, mkStr(findText("{primitive array}")));
+			    break;
+#endif
+
+	    case HUGSOBJECT : 
+			    /* ToDo: fix so that debugger can examine itself */
+			    result = ap(nameHugsPrim, mkStr(findText("{Cell ...}")));
+			    break;
+
+	    case INSTANCE : result = ap(nameHugsPrim, mkStr(findText("{instance}")));
+			    break;
+#if OBSERVATIONS
+            case OBSERVE  : result = ap(nameHugsPrim, mkStr(findText("{observe marker}")));
+                            break;
+#endif
+	    default       : internal("Error in graph2");
+			    break;
+	}
+    }
+    consGC = gc;
+    IOReturn(result);
+}
+
+/* --------------------------------------------------------------------------
+ * Operations on Names
+ * ------------------------------------------------------------------------*/
+
+primFun(primNameString) {              /* Get string of a name             */
+  Text t;                              /*  :: Name -> String              */
+  Name nm;
+  IntArg(nm,1);
+  t = name(nm).text;
+  if (0 <= t && t < NUM_TEXT) {
+      /* ToDo: replace updateRoot(mkStr(..)) with updapRoot(STRCELL,..) */
+      updateRoot(mkStr(t));
+  } else { 
+      /* If textToStr generates result on the fly, we build the entire
+       * string now.
+       */
+      pushString(textToStr(t));
+      updateRoot(pop());
+  }      
+}
+
+primFun(primNameInfo) {                /* Get arity and fixity of a Name   */
+  Name nm;                             /*  :: Name -> (Int,Int,Char)       */
+  Syntax syn = 0;
+  Char assoc = 0;  
+  IntArg(nm,1);
+  syn = syntaxOf(nm);
+  switch (assocOf(syn)) {
+  case APPLIC    : assoc = 'A'; break;
+  case LEFT_ASS  : assoc = 'L'; break;
+  case RIGHT_ASS : assoc = 'R'; break;
+  case NON_ASS   : assoc = 'N'; break;
+  }
+  updapRoot(ap(ap(mkTuple(3),
+	    mkInt(name(nm).arity)),
+	    mkInt(precOf(syn))),
+	    mkChar(assoc));
+}
+
+primFun(primNameEq) {                  /* Compare names                    */
+  Name nm1;                            /*  :: Name -> Name -> Bool         */
+  Name nm2;                    
+  IntArg(nm1,2);
+  IntArg(nm2,1);
+  BoolResult(nm1==nm2);
+}
+
+#if BYTECODE_PRIMS
+
+primFun(primNameCode) {                /* Obtain address of first bytecode */
+  Name nm;                             /*  :: Name -> Addr                 */
+  IntArg(nm,1);
+  IntResult(name(nm).code);
+}
+
+#endif /* BYTECODE_PRIMS */
+
+/* --------------------------------------------------------------------------
+ * Operations on Addresses/Bytecodes
+ * ------------------------------------------------------------------------*/
+
+#if BYTECODE_PRIMS
+
+primFun(primIntAt) {                  /* Obtain Int at address             */
+  Addr m;                             /*  :: Addr -> Int                   */
+  IntArg(m,1);
+  IntResult(IntAt(m));
+}
+
+primFun(primFloatAt) {                /* Obtain float at address           */
+  Addr m;                             /*  :: Addr -> Cell                  */
+  IntArg(m,1);
+  FloatResult(FloatAt(m));
+}
+
+primFun(primDoubleAt) {               /* Obtain float at address           */
+  Addr m;                             /*  :: Addr -> Cell                  */
+  IntArg(m,1);
+  DoubleResult(DoubleAt(m));
+}
+
+primFun(primCellAt) {                 /* Obtain cell at address            */
+  Addr m;                             /*  :: Addr -> Cell                  */
+  IntArg(m,1);
+  updapRoot(HUGSOBJECT,CellAt(m));
+}
+
+primFun(primNameAt) {                 /* Obtain Name at address            */
+  Addr m;                             /*  :: Addr -> Name                  */
+  IntArg(m,1);
+  IntResult(CellAt(m));
+}
+
+primFun(primBytecodeAt) {             /* Obtain bytecode at address        */
+  Addr m;                             /*  :: Addr -> Bytecode              */
+  IntArg(m,1);
+  IntResult(InstrAt(m));
+}
+
+primFun(primTextAt) {                 /* Obtain string at address          */
+  Addr m;                             /*  :: Addr -> String                */
+  IntArg(m,1);
+  updapRoot(STRCELL,TextAt(m));
+}
+
+primFun(primAddrAt) {                 /* Obtain address at address         */
+  Addr m;                             /*  :: Addr -> Addr                  */
+  IntArg(m,1);
+  IntResult(AddrAt(m));
+}
+
+#endif /* BYTECODE_PRIMS */
+
+/*-------------------------------------------------------------------------*/
 #endif
 
 /* --------------------------------------------------------------------------
@@ -1407,7 +5905,374 @@ FILE *fp; {                             /* and print it on fp              */
  * ------------------------------------------------------------------------*/
 
 #if HASKELL_ARRAYS
-#include "array.c"
+/* --------------------------------------------------------------------------
+ * Haskell array primitives.
+ *
+ * The Hugs 98 system is Copyright (c) Mark P Jones, Alastair Reid, the
+ * Yale Haskell Group, and the OGI School of Science & Engineering at OHSU,
+ * 1994-2003, All rights reserved.  It is distributed as free software under
+ * the license in the file "License", which is included in the distribution.
+ *
+ * $RCSfile: array.c,v $
+ * $Revision: 1.10 $
+ * $Date: 2004/01/06 10:02:51 $
+ * ------------------------------------------------------------------------*/
+
+static Name nameEltUndef;		/* undefined element in array	   */
+
+PROTO_PRIM(primArray);
+PROTO_PRIM(primUpdate);
+PROTO_PRIM(primAccum);
+PROTO_PRIM(primAccumArray);
+PROTO_PRIM(primAmap);
+PROTO_PRIM(primSubscript);
+PROTO_PRIM(primBounds);
+PROTO_PRIM(primElems);
+PROTO_PRIM(primEltUndef);
+#if IO_MONAD
+PROTO_PRIM(primIONewArr);
+PROTO_PRIM(primIOReadArr);
+PROTO_PRIM(primIOWriteArr);
+PROTO_PRIM(primIOFreeze);
+PROTO_PRIM(primIOArrEq);
+#endif
+
+static struct primitive arrayPrimTable[] = {
+  {"primArray",		3, primArray},
+  {"primUpdate",	2, primUpdate},
+  {"primAccum",		3, primAccum},
+  {"primAccumArray",	5, primAccumArray},
+  {"primAmap",		2, primAmap},
+  {"primSubscript",	2, primSubscript},
+  {"primBounds",	1, primBounds},
+  {"primElems",		1, primElems},
+  {"eltUndef",		0, primEltUndef},
+#if IO_MONAD
+  {"IONewArr",		3+IOArity, primIONewArr},
+  {"IOReadArr",		2+IOArity, primIOReadArr},
+  {"IOWriteArr",	3+IOArity, primIOWriteArr},
+  {"IOFreeze",		1+IOArity, primIOFreeze},
+  {"IOBounds",	        1, primBounds},
+  {"IOArrEq",	        2, primIOArrEq},
+#endif
+  {0,			0, 0}
+};
+
+static Void outOfBounds Args((void));
+static void outOfBounds() {
+    throwException(ap(nameArrayException, ap(nameIndexOutOfBounds, nameNil)));
+}
+
+/* --------------------------------------------------------------------------
+ * Array control:
+ * ------------------------------------------------------------------------*/
+
+static Void arrayControl Args((Int));
+static Void arrayControl(what)
+Int what; {
+    switch (what) {
+	case INSTALL : 
+		       setCurrModule(modulePrelude);
+#define pFun(n,s,t)    addPrim(0,n=newName(findText(s),NIL),t,modulePrelude,NIL)
+		       pFun(nameEltUndef,  "_undefined_array_element",
+							"eltUndef");
+#undef pFun
+		       break;
+    }
+}
+
+static struct primInfo arrayPrims = { arrayControl, arrayPrimTable, 0 };
+
+/*-------------------------------------------------------------------------*/
+
+/* The implementation of arrays is heavily parameterized to allow the
+ * use of different implementations.  Non-conservative GC is also an
+ * important goal, which is also why so much of this was originally done
+ * using macros rather than procedures.  As it happens, this probably could
+ * have been avoided, but there don't seem to be sufficiently good reasons
+ * to warrant changing it.
+ *
+ * The result, however, is a torture-test for the C preprocessor!
+ *
+ * A description of the various `parameters' follows:
+ *
+ * Primitives that build a new array use the macro:
+ * declArr;		Allocate slot on stack to hold a freshly created
+ *			array that will be seen by the garbage collector.
+ *			The value of the array can subsequently be referred
+ *			to using the `arr' macro.  The declArr macro also
+ *			declares a local Int variable, alen, to hold the
+ *			length of the array.
+ *
+ * There are four methods for creating a new array, all of which return
+ * the intermediate array in arr and its length in alen:
+ *
+ * aNewSet(b,s,v);	Allocate new array with bounds b and size s.
+ *			Data elements set to v.
+ * aNewNil(b,s);	Equivalent to aNewSet(b,s,NIL), treated separately
+ *			because it is possible to use more efficient code
+ *			for this special case in some implementations.
+ * aNewCopy(a);		Builds an exact copy of array a, which can then be
+ *			modified destructively, without changing a.
+ *			Note that this forces evaluation of a.
+ * aNewLike(a,v);	Builds an array of the same size and bounds as a
+ *			with each element initialized to v.
+ *			Note that this forces evaluation of a.
+ *
+ * All four of these methods are implemented using macros; the b, r, a
+ * parameters are integers, identifying particular primArg(x) slots.
+ * The v parameters should be constants, unmovable by GC, or primArg(x)
+ * references that can be safely modified during GC.
+ *
+ * Other functions are:
+ *
+ * aEvalModel(a);	Evaluate model array primArg(a), and overwrite it
+ *			on stack with an indirection free pointer to the
+ *			resulting array.
+ * aAssocs(as,p);	Move list of assocs -- (offset,value) pairs -- from
+ *			primArg(as) (which is NIL'd to prevent space leak)
+ *			to top of stack and evaluate, in sequence, until all
+ *			assocs have been processed.  For each pair, we
+ *			run procedure p with the offset in whnfInt and the
+ *			associated value in top(), to be popped before p is
+ *			done.
+ * aSetElt;		To be used with aAssocs: if arr[whnfInt] is NIL,
+ *			set it to top(), otherwise set to undefined.
+ * aAddElt(f);		To be used with aAssocs: replace whnfInt element e
+ *			of arr with ap(ap(primArg(f),e),top())
+ * aNullElts;		Set any null elements in arr to nameEltUndef.
+ * aCopyNull(a);	Replace any null elements in arr with corresponding
+ *			values in array primArg(a).
+ * aMapElts(f);		Replace every element e in arr with ap(primArg(f),e).
+ * aGetElt(a);		Push value of whnfInt'th element of primArg(a).
+ * aPutElt(a,v);	Put v into whnfInt'th slot of primArg(a).
+ * aElems(a);		Evaluate array at primArg(a), and return its list of
+ *			elements on top of stack in reverse order, backed onto
+ *			NIL (ready for revOnto(top(),nameNil)).
+ * aBounds()		Extract bounds from arr.
+ * aGetBounds(a)	Extract bounds from primArg(a).
+ *
+ * There is no guarantee that the representation used for arr will be the
+ * same as for any other array.  The following methods do however ensure
+ * that the standard representation is used when a value is finally returned:
+ *
+ * updarrRoot();	Updates root of redex with array represented by arr.
+ *			(Should also reset arr to avoid space leaks.)
+ * aRetForIO();		Update root to return an array from IO monad;
+ *			i.e. pass arr to the continuation.
+ */
+
+#define declArr		StackPtr arrPos=sp+1; Int alen; push(NIL)
+#define arr		stack(arrPos)
+
+#define aNewNil(b,s)	aNewSet(b,s,NIL)
+#define aNewSet(b,s,v)	{   Int i;				\
+			    eval(primArg(s));			\
+			    alen = (whnfInt>0)?whnfInt:0;	\
+			    for (arr=NIL, i=alen; i>0; i--)	\
+				arr = ap(v,arr);		\
+			    arr = ap(primArg(b),arr);		\
+			}
+#define aNewCopy(a)	{   Cell es = snd(primArg(a));		\
+			    for (arr=ap(hd(es),NIL), alen=0;	\
+				 nonNull(es=tl(es)); ++alen)	\
+				arr = ap(hd(es),arr);		\
+			    arr = rev(arr);			\
+			}
+#define aNewLike(a,v)	{   Cell es = snd(primArg(a));		\
+			    for (arr=ap(hd(es),NIL), alen=0;	\
+				 nonNull(es=tl(es)); ++alen)	\
+				arr = ap(v,arr);		\
+			    arr = rev(arr);			\
+			}
+#define aEvalModel(a)	eval(primArg(a)); primArg(a)=whnfHead
+#define aSetElt		{   List us = snd(arr);			\
+			    for (; 0<whnfInt--; us=tl(us));	\
+			    hd(us) = isNull(hd(us))?top():nameEltUndef;\
+			    drop();				\
+			}
+#define aAddElt(f)	{   List us = snd(arr);			\
+			    for (; 0<whnfInt--; us=tl(us));	\
+			    hd(us) = ap(primArg(f),hd(us));	\
+			    hd(us) = ap(hd(us),pop());		\
+			}
+#define aNullElts	{   List us = snd(arr);			\
+			    for (; nonNull(us); us=tl(us))	\
+				if (isNull(hd(us)))		\
+				    hd(us) = nameEltUndef;	\
+			}
+#define aCopyNull(a)	{   List us = snd(snd(primArg(a)));	\
+			    List vs = snd(arr);			\
+			    for (; nonNull(vs); vs=tl(vs), us=tl(us))\
+				if (isNull(hd(vs)))		\
+				    hd(vs) = hd(us);		\
+			}
+#define aMapElts(f)	{   List us = snd(arr);			\
+			    for (; nonNull(us); us=tl(us))	\
+				hd(us) = ap(primArg(f),hd(us));	\
+			}
+#define aGetElt(a)	{   List es = snd(snd(primArg(a)));	\
+			    while (0<whnfInt--)			\
+				es = tl(es);			\
+			    push(hd(es));			\
+			}
+#define aPutElt(a,v)	{   List es = snd(snd(primArg(a)));	\
+			    while (0<whnfInt--)			\
+				es = tl(es);			\
+			    hd(es) = v;				\
+			}
+#define aElems(a)	{   List us;				\
+			    eval(primArg(a));			\
+			    us = snd(snd(primArg(a)));		\
+			    chkStack(2); onto(NIL); onto(NIL);	\
+			    for(; nonNull(us); us=tl(us)) {	\
+				top()     = ap(nameCons,hd(us));\
+				pushed(1) = ap(top(),pushed(1));\
+			    }					\
+			    drop();				\
+			}
+#define aBounds()	fst(arr)
+#define aGetBounds(a)	fst(snd(primArg(a)))
+#define updarrRoot()	updapRoot(ARRAY,arr); arr=NIL
+#define aRetForIO()	arr = ap(ARRAY,arr);			\
+			updapRoot(primArg(1),arr);		\
+			arr = NIL;
+
+/* The implementation of aAssocs(as,p) should be independent of the
+ * representation for arrays:
+ */
+#define aAssocs(as,p)	push(primArg(as)); primArg(as)=NIL;	\
+			eval(pop());				\
+			while (whnfHead==nameCons) {		\
+			    eval(pop());			\
+			    eval(top());			\
+			    if (whnfInt<0 || whnfInt>=alen)	\
+				outOfBounds();			\
+			    drop(); p; eval(pop());		\
+			}
+
+/* Finally, we come to the implementation of the Haskell array primitives: */
+
+primFun(primArray) {			/* :: (a,a)			   */
+    declArr;				/*    -> Int			   */
+    aNewNil(3,2);			/*	 -> [(Int,b)]		   */
+    aAssocs(1,aSetElt);			/*	    -> Array a b	   */
+    aNullElts;
+    updarrRoot();
+}
+
+primFun(primUpdate) {			/* :: [(Int,b)]			   */
+    declArr;				/*    -> Array a b		   */
+    aEvalModel(1);			/*       -> Array a b		   */
+    aNewLike(1,NIL);
+    aAssocs(2,aSetElt);
+    aCopyNull(1);
+    updarrRoot();
+}
+
+primFun(primAccum) {			/* :: [(Int,c)] -> Array a b	   */
+    declArr;				/*    -> (b -> c -> b)		   */
+    aEvalModel(2);			/*	 -> Array a b		   */
+    aNewCopy(2);
+    aAssocs(3,aAddElt(1));
+    updarrRoot();
+}
+
+primFun(primAccumArray) {		/* :: (a,a) -> Int		   */
+    declArr;				/*    -> (b -> c -> b) -> b	   */
+    aNewSet(5,4,primArg(2));		/*	 -> [(Int,c)]		   */
+    aAssocs(1,aAddElt(3));		/*	    -> Array a b	   */
+    updarrRoot();
+}
+
+primFun(primAmap) {			/* :: (a -> b)			   */
+    declArr;				/*    -> Array c a		   */
+    aEvalModel(1);			/*       -> Array c b		   */
+    aNewCopy(1);
+    aMapElts(2);
+    updarrRoot();
+}
+
+primFun(primSubscript) {		/* :: Array a b -> Int -> b        */
+    aEvalModel(2);
+    eval(primArg(1));
+    aGetElt(2);
+    updateRoot(top());
+}
+
+primFun(primBounds) {			/* :: Array a b -> (a,a)	   */
+    aEvalModel(1);
+    updateRoot(aGetBounds(1));
+}
+
+primFun(primElems) {			/* :: Array a b -> [b]		   */
+    aEvalModel(1);
+    aElems(1);
+    updateRoot(revOnto(top(),nameNil));
+}
+
+primFun(primEltUndef) {
+    throwException(ap(nameArrayException, ap(nameUndefinedElement, nameNil)));
+}
+
+#if IO_MONAD
+primFun(primIONewArr) {			/* :: (a,a)			   */
+    declArr;				/*    -> Int			   */
+    aNewSet(3+IOArity,2+IOArity,IOArg(1));/*	 -> b			   */
+    aRetForIO();			/*	    -> IO (IOArray a b)	   */
+}
+
+primFun(primIOReadArr) {		/* :: IOArray a b -> Int -> IO b   */
+    aEvalModel(2+IOArity);
+    eval(primArg(1+IOArity));
+    aGetElt(2+IOArity);
+    IOReturn(top());
+}
+
+primFun(primIOWriteArr) {		/* :: IOArray a b -> Int -> b	   */
+    aEvalModel(3+IOArity);		/*    -> IO ()			   */
+    eval(primArg(2+IOArity));
+    aPutElt(3+IOArity,IOArg(1));
+    IOReturn(nameUnit);
+}
+
+primFun(primIOFreeze) {			/* :: IOArray a b		   */
+    declArr;				/*    -> IO (Array a b)		   */
+    aEvalModel(1+IOArity);
+    aNewCopy(1+IOArity);
+    aRetForIO();
+}
+
+primFun(primIOArrEq) {		        /* :: IOArray a b                 */
+    aEvalModel(1);                      /*    -> IOArray a b -> Bool      */
+    aEvalModel(2);
+    BoolResult(primArg(1)==primArg(2));
+}
+
+#endif /* IO_MONAD */
+
+/* Retire macros used in the implementation of arrays -------------------- */
+
+#undef aNewSet
+#undef aNewNil
+#undef aNewCopy
+#undef aNewLike
+#undef aEvalModel
+#undef aAssocs
+#undef aSetElt
+#undef aAddElt
+#undef aNullElts
+#undef aCopyNull
+#undef aMapElts
+#undef aGetElt
+#undef aPutElt
+#undef aElems
+#undef aBounds
+#undef aGetBounds
+#undef updarrRoot
+#undef aRetForIO
+
+/*-------------------------------------------------------------------------*/
 #endif
 
 /* --------------------------------------------------------------------------

@@ -12,8 +12,7 @@ edit.o: edit.c prelude.h config.h options.h storage.h HsFFI.h connect.h \
 observe.o: observe.c prelude.h config.h options.h storage.h HsFFI.h \
  connect.h command.h errors.h machdep.h builtin.h output.h observe.h
 builtin.o: builtin.c prelude.h config.h options.h storage.h HsFFI.h \
- connect.h errors.h machdep.h char.h builtin.h bignums.c printer.c \
- iomonad.c timeprim.c dirprim.c array.c
+ connect.h errors.h machdep.h char.h builtin.h
 char.o: char.c prelude.h config.h options.h storage.h HsFFI.h connect.h \
  errors.h char.h unitable.h
 compiler.o: compiler.c prelude.h config.h options.h storage.h HsFFI.h \
@@ -45,8 +44,7 @@ plugin.o: plugin.c prelude.h config.h options.h storage.h HsFFI.h \
 script.o: script.c prelude.h config.h options.h storage.h HsFFI.h \
  connect.h errors.h machdep.h opts.h strutil.h script.h
 static.o: static.c prelude.h config.h options.h storage.h HsFFI.h \
- connect.h machdep.h errors.h output.h subst.h module.h opts.h goal.h \
- scc.c
+ connect.h machdep.h errors.h output.h subst.h module.h opts.h goal.h
 storage.o: storage.c prelude.h config.h options.h storage.h HsFFI.h \
  connect.h opts.h errors.h machdep.h evaluator.h strutil.h output.h
 strutil.o: strutil.c prelude.h config.h options.h storage.h HsFFI.h \
@@ -54,7 +52,7 @@ strutil.o: strutil.c prelude.h config.h options.h storage.h HsFFI.h \
 subst.o: subst.c prelude.h config.h options.h storage.h HsFFI.h connect.h \
  errors.h output.h opts.h subst.h
 type.o: type.c prelude.h config.h options.h storage.h HsFFI.h connect.h \
- errors.h output.h subst.h goal.h opts.h preds.c scc.c
+ errors.h output.h subst.h goal.h opts.h
 version.o: version.c prelude.h config.h options.h
 parser.o: parser.c
 unitable.o: unitable.c unitable.h

@@ -62,7 +62,68 @@ static Void   local autoReloadFiles   Args((Void));
  * Optional timer hooks:
  * ------------------------------------------------------------------------*/
 #if WANT_TIMER
-#include "timer.c"
+/* --------------------------------------------------------------------------
+ * This file provides a simple mechanism for measuring elapsed time on Unix
+ * machines (more precisely, on any machine with an rusage() function).
+ * A somewhat limited version for other systems is also included, believed
+ * to be ANSI compatible, but not guaranteed ...
+ *
+ * It is included in the Hugs distribution for the purpose of benchmarking
+ * the Hugs interpreter, comparing its performance across a variety of
+ * different machines, and with other systems for similar languages.
+ *
+ * To make use of these functions, use the --enable-timer when configuring
+ * Hugs or change the setting of "WANT_TIMER" in config.h and recompile
+ * Hugs.
+ *
+ * It would be somewhat foolish to try to use the timings produced in this
+ * way for anything other than the purpose described above.  In particular,
+ * using timings to compare the performance of different versions of an
+ * algorithm is likely to give very misleading results.  The current
+ * implementation of Hugs as an interpreter, without any significant
+ * optimizations, means that there are much more significant overheads than
+ * can be accounted for by small variations in Hugs code.
+ *
+ * The Hugs 98 system is Copyright (c) Mark P Jones, Alastair Reid, the
+ * Yale Haskell Group, and the OGI School of Science & Engineering at OHSU,
+ * 1994-2003, All rights reserved.  It is distributed as free software under
+ * the license in the file "License", which is included in the distribution.
+ *
+ * $RCSfile: timer.c,v $
+ * $Revision: 1.6 $
+ * $Date: 2004/10/14 22:08:49 $
+ * ------------------------------------------------------------------------*/
+
+
+#include <sys/time.h>
+#include <sys/resource.h>
+
+void updateTimers Args((void));
+long millisecs  Args((long));
+long userElapsed, systElapsed;
+
+void updateTimers() {
+    static long lastUser = 0;
+    static long lastSyst = 0;
+    long curr;
+    struct rusage ruse;
+    getrusage(RUSAGE_SELF,&ruse);
+
+    curr        = ruse.ru_utime.tv_sec*1000000L + ruse.ru_utime.tv_usec;
+    userElapsed = curr - lastUser;
+    lastUser    = curr;
+
+    curr        = ruse.ru_stime.tv_sec*1000000L + ruse.ru_stime.tv_usec;
+    systElapsed = curr - lastSyst;
+    lastSyst    = curr;
+}
+
+long millisecs(t)
+long t; {
+    return (t+500)/1000;
+}
+
+/*-------------------------------------------------------------------------*/
 #endif
 
 /* --------------------------------------------------------------------------
