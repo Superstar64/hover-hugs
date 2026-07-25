@@ -6,7 +6,6 @@
 
 #include "options.h"
 
-#define HAVE_SYS_WAIT_H 1
 #define HAVE_TERMIO_H 1
 #define HAVE_TIME 1
 #define HAVE_TIMES 1

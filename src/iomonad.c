@@ -745,9 +745,7 @@ primFun(primGetEnv) {                 /* primGetEnv :: String -> IO String */
 }
 
 #include <sys/types.h>
-#if HAVE_SYS_WAIT_H
 # include <sys/wait.h>
-#endif
 #ifndef WEXITSTATUS
 /* If it's not defined, return it verbatim. */
 # define WEXITSTATUS(stat_val) (stat_val)
