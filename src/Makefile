@@ -66,12 +66,6 @@ all		: hugs runhugs ffihugs
 hugs	: $(IOBJECTS)
 		  $(CC) $(LDFLAGS) $(IOBJECTS) $(LIBS) -o hugs
 
-version.o : version.c $(SOURCES)
-		  @$(CC) \
-		      -DMONTH_YEAR='"'"`date +'%B %Y' 2> /dev/null`"'"' \
-		      -DYYYYMMDD='"'"`date +'%Y%m%d' 2> /dev/null`"'"' \
-		      -c $(CFLAGS) $(OPTFLAGS) $<
-
 SERVER_OBJECTS	= server.o $(OBJECTS) 
 runhugs : runhugs.o $(SERVER_OBJECTS)
 		  $(CC) $(LDFLAGS) runhugs.o $(SERVER_OBJECTS) $(LIBS) -o runhugs
