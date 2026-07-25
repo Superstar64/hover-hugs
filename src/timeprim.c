@@ -44,8 +44,6 @@ static struct primInfo timePrims = { timeControl, timePrimTable, 0 };
  * ------------------------------------------------------------------------*/
 
 primFun(primGetClockTime) { /* :: IO (Int,Int) */
-
-#if HAVE_GETTIMEOFDAY
   struct timeval tv;
   int rc;
   
@@ -54,29 +52,6 @@ primFun(primGetClockTime) { /* :: IO (Int,Int) */
   if (rc == -1)
     throwErrno("Time.getClockTime", TRUE, NO_HANDLE, NULL);
   IOReturn(ap(ap(mkTuple(2), mkInt(tv.tv_sec)),mkInt(tv.tv_usec)));
-#elif HAVE_FTIME
-  struct timeb tb;
-  int rc = 0;
-  
-  rc = ftime(&tb);
-  
-  if (rc == -1)
-    throwErrno("Time.getClockTime", TRUE, NO_HANDLE, NULL);
-
-  IOReturn(ap(ap(mkTuple(2),mkInt(tb.time)),mkInt(tb.millitm * 1000)));
-#elif HAVE_TIME
-  time_t t = time(NULL);
-  
-  if (t == (time_t)-1)
-    throwErrno("Time.getClockTime", TRUE, NO_HANDLE, NULL);
-  IOReturn(ap(ap(mkTuple(2),mkInt(t)),mkInt(0)));
-#else
-  IOFail(mkIOError(NULL,
-		   nameIllegal,
-		   "Time.getClockTime",
-		   "operation not supported",
-		   NULL));
-#endif
 }
 
 primFun(primGetCalTime) { /* Int   -> Int -> IO (.....) */
