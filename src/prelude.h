@@ -314,9 +314,7 @@ typedef unsigned Bool;
 #endif
 #define TRUE     1
 #define FALSE    0
-#ifndef _XtIntrinsic_h
 typedef char    *String;
-#endif
 typedef int      Int;
 typedef signed char Int8;
 typedef short    Int16;
