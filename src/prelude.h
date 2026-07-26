@@ -40,12 +40,6 @@
  * test to the configure script.
  *-------------------------------------------------------------------------*/
 
-#ifdef __RISCOS__ /* Acorn DesktopC running RISCOS2 or 3 */
-# define RISCOS 1
-#else
-# define RISCOS 0
-#endif
-
 #if defined __DJGPP__ && __DJGPP__==2
 # define DJGPP2 1
 #else
@@ -554,15 +548,9 @@ typedef void*    Pointer;
 #define doNothing() do { } while (0) /* Null statement */
 
 #ifndef STD_PRELUDE
-#if     RISCOS
-#define STD_PRELUDE	      "prelude"
-#define STD_PRELUDE_HUGS      "hugs.prelude"
-#define STD_EMPTY_MODULE      "hugs.prelude"
-#else
 #define STD_PRELUDE	      "Prelude"
 #define STD_PRELUDE_HUGS      "Hugs.Prelude"
 #define STD_EMPTY_MODULE      "Hugs"
-#endif
 #endif
 
 #if IO_MONAD

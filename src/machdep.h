@@ -20,15 +20,9 @@
  * Find information about a file:
  * ------------------------------------------------------------------------*/
 
-#if RISCOS
-typedef struct { unsigned hi, lo; } Time;
-#define timeChanged(now,thn)    (now.hi!=thn.hi || now.lo!=thn.lo)
-#define timeSet(var,tm)         var.hi = tm.hi; var.lo = tm.lo
-#else
 typedef time_t Time;
 #define timeChanged(now,thn)    (now!=thn)
 #define timeSet(var,tm)         var = tm
-#endif
 
 extern Void getFileInfo (String, Time *, Long *);
 

@@ -21,7 +21,7 @@ Bool   showStats    = FALSE;     /* TRUE => print stats after eval  */
 Bool   addType      = FALSE;     /* TRUE => print type with value   */
 Bool   useShow      = TRUE;      /* TRUE => use Text/show printer   */
 Bool   displayIO    = FALSE;     /* TRUE => use printer for IO result*/
-Bool   useDots      = RISCOS;    /* TRUE => use dots in progress    */
+Bool   useDots      = FALSE;    /* TRUE => use dots in progress    */
 Bool   listScripts  = FALSE;     /* TRUE => list scripts after loading*/
 Bool   quiet        = TRUE;      /* TRUE => don't show progress     */
 Bool   printing     = FALSE;     /* TRUE => currently printing value*/

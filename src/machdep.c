@@ -55,10 +55,6 @@
 extern unsigned _stklen = 8000;         /* Allocate an 8k stack segment    */
 #endif
 
-#if RISCOS
-#include "swis.h"
-#include "os.h"
-#endif
 
 /* Macintosh include files */
 #if HAVE_CONSOLE_H
@@ -739,64 +735,6 @@ Int recovered; {
 
 Cell *CStackBase;                       /* Retain start of C control stack */
 
-#if RISCOS                              /* Stack traversal for RISCOS      */
-
-/* Warning: The following code is specific to the Acorn ARM under RISCOS
-   (and C4).  We must explicitly walk back through the stack frames, since
-   the stack is extended from the heap. (see PRM pp. 1757).  gcCStack must
-   not be modified, since the offset '5' assumes that only v1 is used inside
-   this function. Hence we do all the real work in gcARM.
-*/
-		  
-#define spreg 13 /* C3 has SP=R13 */
-
-#define previousFrame(fp)       ((int *)((fp)[-3]))
-#define programCounter(fp)      ((int *)((*(fp)-12) & ~0xFC000003))
-#define isSubSPSP(w)            (((w)&dontCare) == doCare)
-#define doCare                  (0xE24DD000)  /* SUB r13,r13,#0 */
-#define dontCare                (~0x00100FFF) /* S and # bits   */
-#define immediateArg(x)         ( ((x)&0xFF) << (((x)&0xF00)>>7) )
-
-static void gcARM(int *fp) {
-    int si = *programCounter(fp);       /* Save instruction indicates how */
-					/* many registers in this frame   */
-    int *regs = fp - 4;
-    if (si & (1<<0)) markWithoutMove(*regs--);
-    if (si & (1<<1)) markWithoutMove(*regs--);
-    if (si & (1<<2)) markWithoutMove(*regs--);
-    if (si & (1<<3)) markWithoutMove(*regs--);
-    if (si & (1<<4)) markWithoutMove(*regs--);
-    if (si & (1<<5)) markWithoutMove(*regs--);
-    if (si & (1<<6)) markWithoutMove(*regs--);
-    if (si & (1<<7)) markWithoutMove(*regs--);
-    if (si & (1<<8)) markWithoutMove(*regs--);
-    if (si & (1<<9)) markWithoutMove(*regs--);
-    if (previousFrame(fp)) {
-	/* The non-register stack space is for the previous frame is above
-	   this fp, and not below the previous fp, because of the way stack
-	   extension works. It seems the only way of discovering its size is
-	   finding the SUB sp, sp, #? instruction by walking through the code
-	   following the entry point.
-	*/
-	int *oldpc = programCounter(previousFrame(fp));
-	int fsize = 0, i;
-	for(i = 1; i < 6; ++i)
-	    if(isSubSPSP(oldpc[i])) fsize += immediateArg(oldpc[i]) / 4;
-	for(i=1; i<=fsize; ++i)
-	    markWithoutMove(fp[i]);
-    }
-}
-
-void gcCStack() {
-    int dummy;
-    int *fp = 5 + &dummy;
-    while (fp) {
-	gcARM(fp);
-	fp = previousFrame(fp);
-    }
-}
-
-#else                   /* Garbage collection for standard stack machines  */
 
 Void gcCStack() {                       /* Garbage collect elements off    */
     Cell stackTop = NIL;                /* C stack                         */
@@ -833,7 +771,6 @@ Void gcCStack() {                       /* Garbage collect elements off    */
 #undef  StackGrowsUp
 #undef  GuessDirection
 }
-#endif
 
 /* --------------------------------------------------------------------------
  * Terminal dependent stuff:
@@ -1061,11 +998,6 @@ Bool   useShell; {
 # endif
 }
 
-#if RISCOS                              /* RISCOS also needs a chdir()     */
-int chdir(char *s) {                    /* RISCOS PRM p. 885    -- JBS     */
-    return os_swi2(OS_FSControl + XOS_Bit, 0, (int)s) != NULL;
-}
-#endif
 
 
 /* --------------------------------------------------------------------------
