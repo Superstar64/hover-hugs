@@ -303,12 +303,7 @@ extern void hs_free_fun_ptr(HsFunPtr fp);
 
 /* Copied verbatim from prelude.h */
 
-#if defined(__BORLANDC__)
-# define DLLIMPORT(rty) rty far _import
-# define DLLEXPORT(rty) rty far _export
-#else 
 # define DLLIMPORT(rty) rty
 # define DLLEXPORT(rty) rty
-#endif /* Don't need to declare DLL exports */
 
 #endif /* __HSFFI_H__ */

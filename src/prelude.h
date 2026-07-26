@@ -119,13 +119,8 @@ int macsystem(char *filenames);
  */
 #endif
 
-#if defined(__BORLANDC__)
-# define DLLIMPORT(rty) rty far _import
-# define DLLEXPORT(rty) rty far _export
-#else 
 # define DLLIMPORT(rty) rty
 # define DLLEXPORT(rty) rty
-#endif /* Don't need to declare DLL exports */
 
 #ifdef __EXTERNAL
 #define HUGSAPI(rty) DLLIMPORT(rty)
