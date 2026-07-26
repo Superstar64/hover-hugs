@@ -39,9 +39,6 @@ Void startEvaluator(Void)
 
     hugsPath      = uniqPath(strCopy(HUGSPATH));
     hugsSuffixes  = strCopy(HUGSSUFFIXES);
-#if HSCRIPT
-    hscriptSuffixes();
-#endif
 }
 
 /* --------------------------------------------------------------------------

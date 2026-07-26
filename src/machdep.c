@@ -63,41 +63,6 @@ Long   *sz; {
     }
 }
 
-#if HAVE_GETFINFO               /* Mac971031 */
-/* --------------------------------------------------------------------------
- * Define a MacOS version of access():
- *   If the file is not accessible, -1 is returned and errno is set to
- * the reason for the failure.
- *   If the file is accessible and the dummy is 0 (existence), 2 (write), 
- * or 4 (read), the return is 0.
- *   If the file is accessible, and the dummy is 1 (executable), then if
- * the file is a program (of type 'APPL'), the return is 0, otherwise -1.
- *   Warnings: Use with caution. UNIX access do no translate to Macs.
- * Check of write access is not implemented (same as read).
- * ------------------------------------------------------------------------*/
-
-int access(char *fileName, int dummy);
-
-int access(char *fileName, int dummy) { 
-	FInfo   fi;
-	short   rc;
-	
-	errno = getfinfo(fileName, 0, &fi);
-	if (errno != 0)  return -1;             /* Check file accessible. */
-	
-	/* Cases dummy = existence, read, write. */
-	if (dummy == 0 || dummy & 0x6)  return 0;
-	
-	/* Case dummy = executable. */
-	if (dummy == 1) { 
-		if (fi.fdType == 'APPL')  return 0;
-		errno = fi.fdType;
-		return -1;
-	}
-	
-	return 0;
-}
-#endif
 
 Bool readable(f,isReg)        /* is f readable (and also, a regular file?) */
 String f;
@@ -116,12 +81,6 @@ Bool   isReg; {
 
 static String local homeDir	  (void);
 
-
-#if HSCRIPT
-static String local hscriptDir    (Void);
-static void   local hscriptSuffixes (Void);
-#endif
-
 #if 0
 /* UNUSED */
 static int    local pathCmp       (String, String);
@@ -136,25 +95,14 @@ static String local expandVariable (String);
 static String local skipVariable  (String);
 static String local nextPath      (String);
 static Bool   local samePath      (String,String);
-#if DOS_FILENAMES
-static Bool   local isPathSep     (String);
-#endif
 static Bool   local scanSubDirs   (String);
 
 
-#if DOS_FILENAMES
-# define SLASH                   '\\'
-# define isSLASH(c)              ((c)=='\\' || (c)=='/')
-# define PATHSEP                 ';'
-# define isPATHSEP(x)            isPathSep(x)
-# define DLL_ENDING              ".dll"
-#else
 # define SLASH                   '/'
 # define isSLASH(c)              ((c)==SLASH)
 # define PATHSEP                 ':'
 # define isPATHSEP(x)            (*(x) == PATHSEP)
 # define DLL_ENDING              ".so"
-#endif
 
 
 String hugsdir() {		/* directory containing libraries/Prelude.hs */
@@ -172,26 +120,6 @@ static String homeDir() {
 }
 
 
-#if HSCRIPT    
-static String local hscriptDir() {  /* Directory containing hscript.dll	   */
-    static char dir[FILENAME_MAX+1] = "";
-    if (dir[0] == '\0') { /* not initialised yet */
-	String s = readRegString(HKEY_LOCAL_MACHINE,HScriptRoot,"InstallDir","");
-	if (s) {
-	  /* Protect against overruns */
-	  strncpy(dir,s,FILENAME_MAX);
-	  free(s);
-	}
-    }
-    return dir;
-}
-
-static void hscriptSuffixes() {
-    String ss = hugsSuffixes;
-    hugsSuffixes = substPath(":.hsx:.hash",hugsSuffixes);
-    free(ss);
-}
-#endif
 
 String local RealPath(s)         /* Find absolute pathname of file  */
 String s; {
@@ -284,15 +212,6 @@ static Bool local tryEndings()  /* Try each of the listed endings          */
     return FALSE;
 }
 
-#if DOS_FILENAMES
-static Bool local isPathSep(sep)      /* does 'sep' mark the end of a valid path? */
-String sep; {
-    /* ';' is always a separator */
-    /* ':' is a separator iff it is not followed by a backslash */
-    /* (should test for <x>:\ but that seems too difficult) */
-    return *sep == ';' || *sep == ':' && *(sep+1) != SLASH;
-}
-#endif
 
 /* scandir, June 98 Daan Leijen
    searches the direct subdirectories of a directory for a file
@@ -345,9 +264,6 @@ struct shellVariable {
 static struct shellVariable shell_var[] = {
     { "Hugs",		&hugsdir },
     { "Home",		&homeDir },
-#if HSCRIPT
-    { "HScript",	&hscriptDir },
-#endif
     { 0, 0 }
 };
 
@@ -472,29 +388,12 @@ String s; {
 String dirname(filename)	/* Return the directory part of the filename */
 String filename; {		/* or "." if no directory.                   */
     
-#if DOS_FILENAMES
-    /* Allow both / and \\ as delimiters */
-    /* So we cannot make use of strrchr() */
-    String slash;
-
-    slash = filename + strlen(filename) - 1;
-    while (slash > filename) {
-	if (isSLASH(*slash)) break;
-	slash--;
-    }
-    if (slash <= filename) {
-	return strCopy(".");
-    } else {
-	return strnCopy(filename, slash - filename);
-    }
-#else
     String slash = strrchr(filename,SLASH);
     if (!slash) {
 	return strCopy(".");
     } else {
 	return strnCopy(filename, slash - filename);
     }
-#endif
 }
 
 /* --------------------------------------------------------------------------
@@ -783,10 +682,6 @@ Void setBuffTerminal(Int fd, Bool buffered) {
 
 Int getTerminalWidth() {                /* determine width of terminal     */
 #ifdef TIOCGWINSZ
-#ifdef _M_UNIX                          /* SCO Unix 3.2.4 defines TIOCGWINSZ*/
-#include <sys/stream.h>                 /* Required by sys/ptem.h          */
-#include <sys/ptem.h>                   /* Required to declare winsize     */
-#endif
     static struct winsize terminalSize;
     ioctl(fileno(stdout),TIOCGWINSZ,&terminalSize);
     return (terminalSize.ws_col==0)? 80 : terminalSize.ws_col;
@@ -1154,13 +1049,8 @@ String file; {
     return path;
 }
 
-#if LEADING_UNDERSCORE
-#  define INIT_MODULE_FUN  "_initModule"
-#  define API_VERSION_FUN  "_HugsAPIVersion"
-#else
 #  define INIT_MODULE_FUN  "initModule"
 #  define API_VERSION_FUN  "HugsAPIVersion"
-#endif
 
 Void needPrims(version,dll)   /* Load dll containing prims for current module */
 Int  version;
@@ -1281,23 +1171,6 @@ String flags; {
  
     used    = 0;
 
-#if defined(MKDLL_VISUAL_STUDIO)
-    /* find the location of ffihugs.bat */
-    /* is in the same directory */
-    {
-	char Buffer[MAX_PATH+1];
-	char Buffer2[MAX_PATH+1];
-	GetModuleFileName(GetModuleHandle(NULL), Buffer, MAX_PATH);
-	strcpy(strrchr(Buffer, '.'), ".bat");
-	GetShortPathName(Buffer, Buffer2, MAX_PATH);
-
-	insert(Buffer2);
-	insert(MKDLL_CMD);
-    }
-#elif defined(MKDLL_CMD)
-    /* The compile and link command */
-    insert(MKDLL_CMD);
-#endif
     
     /* Identify ourselves */
     insert(" -D__HUGS__");

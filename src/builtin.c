@@ -3036,9 +3036,6 @@ PROTO_PRIM(primDerefSN);
 PROTO_PRIM(primHashSN);
 PROTO_PRIM(primEqSN);
 
-#ifdef HSCRIPT
-PROTO_PRIM(primGetCurrentScript);
-#endif
 
 
 static struct primitive iomonadPrimTable[] = {
@@ -3126,9 +3123,6 @@ static struct primitive iomonadPrimTable[] = {
   {"hashStableName",	1, primHashSN},
   {"eqStableName",	2, primEqSN},
   
-#ifdef HSCRIPT
-  {"getCurrentScript",  0+IOArity, primGetCurrentScript},
-#endif
 
   {"IOEql",              2+IOArity, primIOEql},
   {"IOHash",             1+IOArity, primIOHash},
@@ -4482,22 +4476,6 @@ primFun(primFinalizerWaiting) {		/* IO Boolean			   */
 }
 
 
-#if HSCRIPT
-#if EMBEDDED
-extern void* getCurrentScript(void);
-
-primFun(primGetCurrentScript) {  /* IO Int */
-    IOReturn( mkInt( (int)getCurrentScript() ) );
-}
-
-#else
- 
-primFun(primGetCurrentScript) {  /* IO Int */
-    IOReturn( mkInt( 0 ) );
-}
-
-#endif /* EMBEDDED */
-#endif /* HSCRIPT */
 
 /* --------------------------------------------------------------------------
  * Primitives for implementing disposable memo functions

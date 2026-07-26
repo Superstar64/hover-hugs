@@ -3402,9 +3402,7 @@ Int what; {
 		       handles[HSTDIN].hBinaryMode = FALSE;
 		       handles[HSTDOUT].hBinaryMode = FALSE;
 		       handles[HSTDERR].hBinaryMode = FALSE;
-#if !HSCRIPT
 		       resetStablePtrs();
-#endif
 		       consGC = TRUE;
 		       lsave  = NIL;
 		       rsave  = NIL;

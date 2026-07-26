@@ -316,9 +316,6 @@ Kind   extKind;				/* Kind of extension, *->row->row  */
  * Static analysis of modules:
  * ------------------------------------------------------------------------*/
 
-#if HSCRIPT
-String reloadModule;
-#endif
 
 Void startModule(nm)                             /* switch to a new module */
 Cell nm; {
@@ -332,9 +329,6 @@ Cell nm; {
 	}
     } else if (!isPreludeScript()) {
 	/* You're allowed to break the rules in the Prelude! */
-#if HSCRIPT
-	reloadModule = textToStr(t);
-#endif
 	ERRMSG(0) "Module \"%s\" already loaded", textToStr(t)
 	EEND;
     }
