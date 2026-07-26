@@ -11,8 +11,6 @@
 #define SIZEOF_INT __SIZEOF_INT__
 #define SIZEOF_INTP __SIZEOF_POINTER__
 
-#define LARGE_HUGS 1
-
 // Flags one might be good to make toggleable later
 
 /* Define to 1 if you want to use the primitives which let you examine Hugs

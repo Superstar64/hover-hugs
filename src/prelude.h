@@ -308,12 +308,7 @@ typedef void*    Pointer;
 #define DEF_PROFINTDIV	   10		/* hpsize/this cells between samples*/
 #endif
 
-#if     REGULAR_HUGS
-#define Pick(s,r,l)	   r
-#endif
-#if     LARGE_HUGS
 #define Pick(s,r,l)	   l
-#endif
 
 #define NUM_OBS_TAGS       Pick(100,    200,        1000)
 #define NUM_BRKPTS         Pick(100,    200,        200)
