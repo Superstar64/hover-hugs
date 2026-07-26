@@ -224,13 +224,6 @@ int macsystem(char *filenames);
 
 /* bison-generated parsers like to have alloca - so try to define it */
 
-#if HAVE_ALLOCA_H
-#include <alloca.h>
-#else
-# if HAVE__ALLOCA
-#  include <malloc.h>
-# endif
-#endif
 
 
 /*---------------------------------------------------------------------------
