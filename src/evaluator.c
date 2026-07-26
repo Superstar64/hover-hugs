@@ -18,9 +18,6 @@
 #include "machdep.h"
 #include "evaluator.h"
 
-#if HAVE_WINDOWS_H
-#include <windows.h>
-#endif
 
 /* --------------------------------------------------------------------------
  * Flags and options:

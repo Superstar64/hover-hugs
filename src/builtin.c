@@ -46,9 +46,6 @@
 
 # include <sys/timeb.h>
 
-#if HAVE_WINDOWS_H
-# include <windows.h>
-#endif
 
 # include <dirent.h>
 

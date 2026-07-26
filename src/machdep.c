@@ -49,9 +49,6 @@
 #if HAVE_STD_H
 # include <std.h>
 #endif
-#if HAVE_WINDOWS_H
-# include <windows.h>
-#endif
 
 #if DOS
 #include <mem.h>
@@ -1052,7 +1049,6 @@ shellEsc(cmd, sync, useShell)         /* run a shell command (or shell)  */
 String cmd;
 Bool   sync;
 Bool   useShell; {
-#ifndef HAVE_WINDOWS_H
 
   /* currently ignore the 'useShell' and 'sync' flags */
 # if HAVE_MACSYSTEM
@@ -1063,75 +1059,6 @@ Bool   useShell; {
     }
     return system(cmd);
 # endif
-#else
-  STARTUPINFO si;
-  PROCESS_INFORMATION pi;
-  BOOL bStatus;
-  DWORD dwResult;
-
-  if (useShell) {
-    return system(cmd);
-  }
-
-  ZeroMemory(&si, sizeof(si));
-  si.cb = sizeof(si);
-  si.dwFlags = STARTF_USESHOWWINDOW;
-  si.wShowWindow = SW_SHOW;
-  
-  bStatus = 
-    CreateProcess(NULL,  /* app name is the first component of the command line string */
-		  cmd, 
-		  NULL,  /* default process security attributes */
-		  NULL,  /* default prim. thread security attributes */
-		  FALSE, /* don't inherit */
-		  CREATE_NEW_CONSOLE,
-		  NULL,  /* environment; same block as parent */
-		  NULL,  /* current directory; same as parent */
-		  &si,
-		  &pi);
-		    
-  if (!bStatus) {
-    return 1;
-  } else {
-    CloseHandle(pi.hThread);
-    /*
-     * Wait for the editor process to complete, or not. If we
-     * don't wait for the editor process to complete, the user
-     * will have to manually :(re)load the sources after having
-     * save them within the editor. The default is to wait.
-     */
-    if (!sync) {
-      CloseHandle(pi.hProcess);
-      return 0;
-    } else {
-# if !HUGS_FOR_WINDOWS
-      dwResult = WaitForSingleObject(pi.hProcess, INFINITE);
-      return (dwResult == WAIT_OBJECT_0 ? 0 : 1);
-# else
-      MSG msg;
-
-      while (1) {
-	dwResult = MsgWaitForMultipleObjects(1, 
-					     &pi.hProcess,
-					     FALSE, /* fWaitAll */
-					     INFINITE,
-					     QS_PAINT);
-	if (dwResult == WAIT_OBJECT_0) {
-	  return 0;
-	} else if (dwResult == (WAIT_OBJECT_0 + 1)) {
-	  /* Dispatch waiting messages. */
-	  while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-	    TranslateMessage(&msg);
-	    DispatchMessage(&msg);
-	  }
-	} else {
-	  return 1;
-	}
-      }
-# endif
-    }
-  }
-#endif
 }
 
 #if RISCOS                              /* RISCOS also needs a chdir()     */

@@ -14,9 +14,6 @@
 # include <time.h>
 
 #if USE_REGISTRY
-# if HAVE_WINDOWS_H
-#include <windows.h>
-# endif
 #endif
 
 /* --------------------------------------------------------------------------

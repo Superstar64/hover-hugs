@@ -24,10 +24,6 @@
 #include "char.h"
 #include <ctype.h>
 
-#if HAVE_WINDOWS_H
-#include <windows.h>
-#undef IN
-#endif
 
 /* --------------------------------------------------------------------------
  * Global data:
@@ -503,9 +499,6 @@ static Void local skip() {              /* move forward one char in input  */
 		c1 = EOF;
 	    else {
 		c1 = nextConsoleChar();
-#if HAVE_WINDOWS_H && !HUGS_FOR_WINDOWS
-		Sleep(0);
-#endif
 		/* On Win32, hitting ctrl-C causes the next getchar to
 		 * fail - returning "-1" to indicate an error.
 		 * This is one of the rare cases where "-1" does not mean EOF.
