@@ -1128,7 +1128,6 @@ String s; {
  * Int64-related operations:
  *-------------------------------------------------------------------------*/
 
-#if PROVIDE_INT64
 Int part1Int64(i)
 HsInt64 i; {
     return (Int)(i >> 32);
@@ -1143,7 +1142,6 @@ HsInt64 int64FromParts(c1,c2)
 Int c1, c2; {
     return ((HsInt64)c1 << 32) | (HsInt64)((HsWord32)c2);
 }
-#endif /* PROVIDE_INT64 */
 
 /* --------------------------------------------------------------------------
  * Dynamic loading:
@@ -1541,33 +1539,6 @@ String val; {
 		    REG_SZ, (LPBYTE)realVal, lstrlen(realVal)+1);
 }
 
-#if HUGS_FOR_WINDOWS
-Bool writeRegInt(var,val)         /* write String to registry */
-String var;                        
-Int    val; {
-    return setValue(HKEY_CURRENT_USER, hugsRegRoot, var, 
-		    REG_DWORD, (LPBYTE)&val, sizeof(val));
-}
-
-Int readRegInt(var, def)          /* read Int from registry */
-String var;
-Int    def; {
-    DWORD buf;
-    DWORD type;
-
-    if (queryValue(HKEY_CURRENT_USER, hugsRegRoot, var, &type, 
-		   (LPBYTE)&buf, sizeof(buf))
-	&& type == REG_DWORD) {
-	return (Int)buf;
-    } else if (queryValue(HKEY_LOCAL_MACHINE, hugsRegRoot, var, &type, 
-			  (LPBYTE)&buf, sizeof(buf))
-	       && type == REG_DWORD) {
-	return (Int)buf;
-    } else {
-	return def;
-    }
-}
-#endif
 
 /* concatenate together all strings from registry of the form regPath\\*\\var,
  * separated by PATHSEP.
@@ -1674,12 +1645,6 @@ Int what; {                             /* initialisation etc..            */
 		       bdTemp = NIL;
 	case BREAK   :
 	case EXIT    : normalTerminal();
-#if HUGS_FOR_WINDOWS
-		       if (what==EXIT)
-			   WinHugsExit();
-		       else
-			   SetCursor(LoadCursor(NULL,IDC_ARROW));
-#endif
 		       break;
     }
 }

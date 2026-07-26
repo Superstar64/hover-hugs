@@ -128,11 +128,9 @@ Cell e; {
 			  snd(e) = translate(snd(e));
 			  return e;
 
-#if BIGNUMS
 	case POSNUM     :
 	case ZERONUM    :
 	case NEGNUM     : return e;
-#endif
 	case NAME       : if (e==nameOtherwise)
 			      return nameTrue;
 			  if (isCfun(e)) {
@@ -171,12 +169,7 @@ Cell e; {
 			      if (m == nameListMonad)
 				  return transComp(r,qs,nameNil);
 			      else {
-#if MONAD_COMPS
-				  r = ap(ap(nameReturn,m),r);
-				  return transDo(m,r,qs);
-#else
 				  internal("translate: monad comps");
-#endif
 			      }
 			  }
 	case MDOCOMP	: {   Cell m	= translate(fst(fst(snd(e))));
@@ -739,9 +732,7 @@ Cell pat; {                       /* test with pat.                        */
 
 	case STRCELL   :
 	case CHARCELL  :
-#if NPLUSK
 	case ADDPAT    :
-#endif
 	case TUPLE     :
 	case NAME      : return pat;
 
@@ -757,10 +748,8 @@ Cell p; {
     Cell h = getHead(p);
     if (h==nameFromInt || h==nameFromInteger || h==nameFromDouble)
 	return p;
-#if NPLUSK
     else if (whatIs(h)==ADDPAT)
 	return ap(fun(p),refutePat(arg(p)));
-#endif
     else if (isExt(h)) {
 	Cell pf = refutePat(extField(p));
 	Cell pr = refutePat(extRow(p));
@@ -826,10 +815,8 @@ Cell pat; {                     /* replaces parts of pattern that do not   */
 			     if (h==nameFromInt     ||
 				 h==nameFromInteger || h==nameFromDouble)
 				 return WILDCARD;
-#if NPLUSK
 			     else if (whatIs(h)==ADDPAT)
 				 return pat;
-#endif
 			     else if (isExt(h)) {
 				 Cell pf = matchPat(extField(pat));
 				 Cell pr = matchPat(extRow(pat));
@@ -931,7 +918,6 @@ List lds; {
 			     return remPat(snd(pat),nv,lds);
 			 }
 
-#if NPLUSK
 	case ADDPAT    : 
 	  { Cell dict = arg(fun(pat));
 	    /* I don't really know what I'm doing here, but
@@ -955,7 +941,6 @@ List lds; {
 			      expr),
 			   lds);
 	  }
-#endif
 
 	case FINLIST   : return remPat1(mkConsList(snd(pat)),expr,lds);
 
@@ -1072,14 +1057,10 @@ Cell e;  {                             /* e  = expr to transform           */
 
 	case AP       : return pmcPair(co,sc,e);
 
-#if BIGNUMS
 	case POSNUM   :
 	case ZERONUM  :
 	case NEGNUM   :
-#endif
-#if NPLUSK
 	case ADDPAT   :
-#endif
 	case EXT      :
 	case TUPLE    :
 	case NAME     :
@@ -1477,10 +1458,8 @@ Cell ma; {                      /* match, ma.                              */
     Cell h = getHead(p);
     switch (whatIs(h)) {
 	case CONFLDS : return fst(snd(p));
-#if NPLUSK
 	case ADDPAT  : arg(fun(p)) = translate(arg(fun(p)));
 		       return fun(p);
-#endif
 	case EXT     : h      = fun(fun(p));
 		       arg(h) = translate(arg(h));
 		       return h;
@@ -1514,9 +1493,7 @@ Cell d; {
 	case TUPLE     : return tupleOf(d);
 	case CHARCELL  : return 0;
 	case AP        : switch (whatIs(fun(d))) {
-#if NPLUSK
 			     case ADDPAT : return 1;
-#endif
 			     case EXT    : return 2;
 			     default     : return 0;
 			 }
@@ -1527,18 +1504,14 @@ Cell d; {
 
 static Bool local eqNumDiscr(d1,d2)     /* Determine whether two numeric   */
 Cell d1, d2; {                          /* descriptors have same value     */
-#if NPLUSK
     if (whatIs(fun(d1))==ADDPAT)
 	return whatIs(fun(d2))==ADDPAT && snd(fun(d1))==snd(fun(d2));
-#endif
     if (isInt(arg(d1)))
 	return isInt(arg(d2)) && intOf(arg(d1))==intOf(arg(d2));
     if (isDouble(arg(d1)))
 	return isDouble(arg(d2)) && doubleOf(arg(d1))==doubleOf(arg(d2));
-#if BIGNUMS
     if (isBignum(arg(d1)))
 	return isBignum(arg(d2)) && bigCmp(arg(d1),arg(d2))==0;
-#endif
     internal("eqNumDiscr");
     return FALSE;/*NOTREACHED*/
 }
@@ -1588,14 +1561,10 @@ Cell e; {
 
 	case LETREC    : return liftLetrec(co,tr,e);
 
-#if BIGNUMS
 	case POSNUM    :
 	case ZERONUM   :
 	case NEGNUM    :
-#endif
-#if NPLUSK
 	case ADDPAT    :
-#endif
 	case EXT       :
 	case TUPLE     :
 	case NAME      :
@@ -1856,14 +1825,10 @@ Cell e; {				/* include extra parameters	   */
 
 	case OFFSET    : return preCompOffset(offsetOf(e));
 
-#if BIGNUMS
 	case POSNUM    :
 	case ZERONUM   :
 	case NEGNUM    :
-#endif
-#if NPLUSK
 	case ADDPAT    :
-#endif
 	case EXT       :
 	case TUPLE     :
 	case NAME      :

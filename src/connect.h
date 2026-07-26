@@ -46,9 +46,7 @@ extern Name  nameIf,	  nameSel;
 extern Name  nameCompAux;
 extern Name  namePmInt,	  namePmFlt;	/* primitives for pattern matching */
 extern Name  namePmInteger;
-#if NPLUSK
 extern Name  namePmNpk,	  namePmSub;	/* primitives for (n+k) patterns   */
-#endif
 extern Name  nameBlackHole;		/* For GC-detected black hole	   */
 extern Name  nameInd;			/* For dict indirection		   */
 extern Name  nameAnd,	  nameOr;	/* For optimisation of && and ||   */
@@ -85,7 +83,6 @@ extern Name  nameMFix;			/* for translating mdo-notation	   */
 extern Name  namePrint;			/* printing primitive		   */
 extern Name  nameNPrint;		/* internal printer                */
 
-#if    IO_MONAD
 extern Type   typeIO;		        /* For the IO monad, IO 	   */
 extern Type   typeProgIO;		/* For the IO monad, IO ()	   */
 extern Name   nameIORun;	        /* IO monad executor		   */
@@ -96,14 +93,11 @@ extern Name   nameIOError, nameUserErr; /* primitives required for IOError */
 extern Name   namePermDenied;
 extern Name   nameAlreadyExists, nameAlreadyInUse, nameDoesNotExist, nameIsFull;
 extern Name   nameIllegal;
-#endif
 
 #define IOArity		1		/* arity of IO actions             */
 
-#if IO_HANDLES
 extern Name   nameEOFErr;
 extern Name   nameProtocolError;
-#endif
 
 #if DOTNET
 extern Name   nameNetException;
@@ -142,9 +136,7 @@ extern Text  textDotnet;
 extern Text  textPrelude;
 extern Text  textUserPrelude;
 extern Text  textNum;			/* used to process default decls   */
-#if    NPLUSK
 extern Text  textPlus;			/* Used to recognise n+k patterns  */
-#endif
 extern Name  nameNoRec;			/* The empty record		   */
 extern Type  typeNoRow;			/* The empty row		   */
 extern Type  typeRec;			/* Record formation		   */
@@ -369,10 +361,8 @@ extern  Name   nextCfun		(Name,Name);
 extern  Name   cfunByNum	(Name,Int);
 extern  Void   unwind           (Cell);
 extern  Void   run              (Addr,StackPtr);
-#if !WANT_FIXED_SIZE_TABLES
 extern DynTable* dynMemory;
 extern void    growMemory       (Void);
-#endif
 
 extern  Void   eval             (Cell);
 extern  Cell   evalWithNoError  (Cell);
@@ -394,7 +384,6 @@ extern  Void   abandon		(String,Cell);
 extern  Void   outputString	(FILE *);
 extern  Void   dialogue		(Cell);
 extern  Cell   consChar		(Char);
-#if BIGNUMS
 extern  Bignum bigInt		(Int);
 extern  Bignum bigDouble	(double);
 extern  Bignum bigNeg		(Bignum);
@@ -404,10 +393,7 @@ extern  Bignum bigStr		(String);
 extern  Cell   bigOut		(Bignum,Cell,Bool);
 extern  Bignum bigShift		(Bignum,Int,Int);
 extern  Int    bigCmp		(Bignum,Bignum);
-#endif
-#if IO_MONAD
 extern Void   setHugsArgs       (Int,String[]);
-#endif
 
 extern  Void   machdep          (Int);
 extern  String findPathname     (String);
@@ -427,14 +413,7 @@ extern  Void   plugins          (Int);
 extern  Bool   havePlugin       (String);
 extern  List   calcFunDepsPreds (List);
 extern  Inst   findInstFor      (Cell,Int);
-#if MULTI_INST
-extern  List   findInstsFor     (Cell,Int);
-#endif
 
-#if HUGS_FOR_WINDOWS
-extern  Void saveInputState	(Void);
-extern  Void restoreInputState	(Void);
-#endif
 
 #define NUMARGS         16               /* max num of args; must be 2^n    */
 #define appId(seq,arg)  (seq)*NUMARGS+(arg)

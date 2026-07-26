@@ -231,14 +231,12 @@ Cell e; {
 			  }
 			  break;
 
-#if BIGNUMS
 	case NEGNUM     :
 	case ZERONUM    :
 	case POSNUM     : xs = bigOut(e,NIL,d>=UMINUS_PREC);
 			  for (; nonNull(xs); xs=tl(xs))
 			      putChr(charOf(arg(hd(xs))));
 			  break;
-#endif
 
 	case DOUBLECELL : {   Double f = (Double)doubleOf(e);
 			      if (f<0 && d>=UMINUS_PREC) putChr('(');
@@ -442,14 +440,12 @@ Cell e; {
     }
 
     switch (whatIs(h)) {
-#if NPLUSK
 	case ADDPAT     : if (args==1)
 			      putInfix(d,textPlus,syntaxOf(namePlus),
 					 arg(e),mkInt(intValOf(fun(e))));
 			  else
 			      putStr("ADDPAT");
 			  return;
-#endif
 
 	case TUPLE      : OPEN(args>tupleOf(h) && d>=FUN_PREC);
 			  putTuple(tupleOf(h),e);
@@ -803,7 +799,6 @@ Int  co; {
 
 	case STRCELL    : unlexStrConst(textOf(e));
 			  break;
-#if BIGNUMS
 	case NEGNUM     :
 	case ZERONUM    :
 	case POSNUM     : {   List xs = bigOut(e,NIL,d>=UMINUS_PREC);
@@ -811,7 +806,6 @@ Int  co; {
 				  putChr(charOf(arg(hd(xs))));
 			  }
 			  break;
-#endif
 	case LETREC     : OPEN(d>WHERE_PREC);
 			  co += pPutLocals(fst(snd(e)),co);
 			  pPut(WHERE_PREC+1, snd(snd(e)), co);
@@ -1066,13 +1060,11 @@ Int  co; {
     Int arity = 0;
 
     switch (whatIs(d)) {
-#if NPLUSK
 	case ADDPAT   : pPutOffset(co+1);
 			putChr('+');
 			putInt(intValOf(d));
 			arity = 1;
 			break;
-#endif
 
 	case NAME     : {   Int i = 0;
 			    arity = name(d).arity;
@@ -1484,9 +1476,6 @@ String t;  {
 
     printingObservations = TRUE;
     outputStream = stdout;
-#if HUGS_FOR_WINDOWS
-    { int svColor = SetForeColor(MAGENTA);
-#endif
     putStr("\n>>>>>>> Observations <<<<<<");
     newLine(0);
 
@@ -1504,9 +1493,6 @@ String t;  {
 
     newLine(0);
     printingObservations = FALSE;
-#if HUGS_FOR_WINDOWS
-    SetForeColor(svColor); }
-#endif
 }
 
 Bool printObsList(header, indent, funPrint)

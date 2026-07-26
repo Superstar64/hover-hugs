@@ -24,11 +24,7 @@ static Int numTyvars;			/* no. type vars currently in use  */
 static Int maxTyvars = 0;
 static Int nextGeneric;			/* number of generics found so far */
 
-#if    FIXED_SUBST
-Tyvar  tyvars[NUM_TYVARS];		/* storage for type variables	   */
-#else
 Tyvar  *tyvars = 0;			/* storage for type variables	   */
-#endif
 Int    typeOff;				/* offset of result type 	   */
 Type   typeIs;				/* skeleton of result type	   */
 Int    typeFree;			/* freedom in instantiated type	   */
@@ -111,7 +107,6 @@ static Bool local kvarToTypeBind	(Tyvar *,Type,Int);
 
 Void emptySubstitution() {		/* clear current substitution	   */
     numTyvars   = 0;
-#if !FIXED_SUBST
     /* If the table has grown larger than NUM_TYVARS, free 'tyvars'.
      * If not, keep it around as it's bound to get used again.
      */
@@ -122,7 +117,6 @@ Void emptySubstitution() {		/* clear current substitution	   */
 	    tyvars = 0;
 	}
     }
-#endif
     nextGeneric = 0;
     genericVars = NIL;
     typeIs      = NIL;
@@ -132,12 +126,6 @@ Void emptySubstitution() {		/* clear current substitution	   */
 
 static Void local expandSubst(n)	/* add further n type variables to */
 Int n; {				/* current substituion		   */
-#if FIXED_SUBST
-    if (numTyvars+n>NUM_TYVARS) {
-	ERRMSG(0) "Too many type variables in type checker"
-	EEND;
-    }
-#else
     if (numTyvars+n>maxTyvars) {	/* need to expand substitution	   */
 	Int   newMax = maxTyvars+NUM_TYVARS;
 	Tyvar *newTvs;
@@ -171,7 +159,6 @@ Int n; {				/* current substituion		   */
 	tyvars    = newTvs;
 	maxTyvars = newMax;
     }
-#endif
 }
 
 Int newTyvars(n)		        /* allocate new type variables	   */
@@ -294,11 +281,7 @@ Type t; {				/* to explicitly scoped vars	   */
 Tyvar *getTypeVar(t,o)			/* get number of type variable	   */
 Type t; 				/* represented by (t,o) [if any].  */
 Int  o; {
-#if FAST_WHATIS1
     switch (whatIs1(t)) {
-#else
-    switch (whatIs(t)) {
-#endif
 	case INTCELL   : return tyvar(intOf(t));
 	case OFFSET    : return tyvar(o+offsetOf(t));
 	case VARIDCELL :
@@ -1243,7 +1226,6 @@ Int   *ao; {				/* expansion returned in (*at,*ao) */
     }
 }
 
-#if IO_MONAD
 Type getProgType(ks,type)		/* Extract t, if type is of the    */
 List ks;				/* form IO t, otherwise return     */
 Type type; {				/* NULL cell			   */
@@ -1263,7 +1245,6 @@ Type type; {				/* NULL cell			   */
     emptySubstitution();
     return result ? arg(type) : 0;
 }
-#endif
 
 /* --------------------------------------------------------------------------
  * Matching predicates:
@@ -1422,34 +1403,6 @@ Int   o; {				/* match is found, then tyvars from*/
     return NIL;
 }
 
-#if MULTI_INST
-List findInstsFor(pi,o)			/* Find matching instance for pred */
-Cell  pi;				/* (pi,o), or otherwise NIL.  If a */
-Int   o; {				/* match is found, then tyvars from*/
-    Class c = getHead(pi);		/* typeOff have been initialized to*/
-    List  ins;				/* allow direct use of specifics.  */
-    List  res = NIL;
-
-    if (!isClass(c))
-	return NIL;
-
-    for (ins=cclass(c).instances; nonNull(ins); ins=tl(ins)) {
-	Inst in   = hd(ins);
-	Int  beta = newKindedVars(inst(in).kinds);
-	if (matchPred(pi,o,inst(in).head,beta)) {
-	    res = cons (pair (beta, in), res);
-	    continue;
-	}
-	else
-	    numTyvars = beta;
-    }
-    if (res == NIL) {
-	unrestrictBind();
-    }
-
-    return rev(res);
-}
-#endif
 
 /* --------------------------------------------------------------------------
  * Improvement:
@@ -1947,9 +1900,7 @@ Int what; {
 		       break;
 
        case EXIT     : 
-#if !FIXED_SUBST
 	               free(tyvars);
-#endif
 	               break;
     }
 }

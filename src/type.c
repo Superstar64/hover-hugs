@@ -95,7 +95,6 @@ Name nameGt;				/* for readsPrec		   */
 Class classMonadRec;			/* Recursive monads		   */
 Name nameMFix;
 
-#if    IO_MONAD
 Type   typeIO;			        /* For the IO monad, IO 	   */
 Type   typeProgIO;			/* For the IO monad, IO a	   */
 
@@ -103,11 +102,8 @@ Name   nameIOError, nameUserErr;	/* loosely coupled IOError cfuns   */
 Name   namePermDenied;
 Name   nameAlreadyExists, nameAlreadyInUse, nameDoesNotExist, nameIsFull;
 Name   nameIllegal;
-#endif
-#if    IO_HANDLES
 Name   nameEOFErr;
 Name   nameProtocolError;
-#endif
 Name   nameArithException;
 Name   nameArrayException;
 Name   nameErrorCall;
@@ -461,10 +457,6 @@ static Cell   local scFind	      (Cell,Cell,Int,Cell,Int,Int);
 static Cell   local scEntail	      (List,Cell,Int,Int);
 static Cell   local entail	      (List,Cell,Int,Int);
 static Cell   local inEntail	      (List,Cell,Int,Int);
-#if MULTI_INST
-static Cell   local inEntails	      (List,Cell,Int,Int);
-static Bool   local instCompare	      (Inst, Inst);
-#endif
 static Cell   local lacksNorm	      (Type,Int,Cell);
 
 static List   local scSimplify	      (List);
@@ -478,9 +470,6 @@ static Void   local normPreds	      (Int);
 static Bool   local resolveDefs	      (List,Bool);
 static Bool   local resolveVar	      (Int,Bool);
 static Class  local classConstraining (Int,Cell,Int);
-#if MULTI_INST
-static Bool   local instComp_         (Inst,Inst);
-#endif
 
 /* --------------------------------------------------------------------------
  * Predicate assignments:
@@ -808,12 +797,7 @@ Int  d; {
 #endif
     } else {
 	ev =
-#if MULTI_INST
-             multiInstRes ? inEntails(ps,pi,o,d) :
-			    inEntail(ps,pi,o,d);
-#else
              inEntail(ps,pi,o,d);
-#endif
 #if EXPLAIN_INSTANCE_RESOLUTION
 	if (nonNull(ev) && showInstRes) {
 	    int i;
@@ -911,157 +895,6 @@ Int  d; {
     }
 }
 
-#if MULTI_INST
-static Cell local inEntails(ps,pi,o,d)	/* Calc evidence for (pi,o) from ps*/
-List ps;				/* using a top-level instance	   */
-Cell pi;				/* entailment			   */
-Int  o;
-Int  d; {
-#if EXPLAIN_INSTANCE_RESOLUTION
-    int i;
-#endif
-    int k = 0;
-    Cell ins;				/* Class predicates		   */
-    Inst in, in_;
-    Cell e_;
-
-    if (d++ >= cutoff)
-	cutoffExceeded(pi,o,ps);
-
-    if (isAp(pi) && isExt(fun(pi))) {	/* Lacks predicates		   */
-	Cell e  = fun(pi);
-	Cell l;
-	l  = lacksNorm(arg(pi),o,e);
-	if (isNull(l) || isInt(l))
-	    return l;
-	else {
-	    List qs = ps;
-	    for (; nonNull(qs); qs=tl(qs)) {
-		Cell qi = fst3(hd(qs));
-		if (isAp(qi) && fun(qi)==e) {
-		    Cell lq = lacksNorm(arg(qi),intOf(snd3(hd(qs))),e);
-		    if (isAp(lq) && intOf(fst(l))==intOf(fst(lq))) {
-			Int f = intOf(snd(l)) - intOf(snd(lq));
-			return (f==0) ? thd3(hd(qs)) : ap2(nameAddEv,
-							   mkInt(f),
-							   thd3(hd(qs)));
-		    }
-		}
-	    }
-	    return NIL;
-	}
-    }
-    else {
-
-#if EXPLAIN_INSTANCE_RESOLUTION
-    if (showInstRes) {
-	for (i = 0; i < d; i++)
-	  fputc(' ', stdout);
-	fputs("inEntails: ", stdout);
-	printContext(stdout,copyPreds(ps));
-	fputs(" ||- ", stdout);
-	printPred(stdout, copyPred(pi, o));
-	fputc('\n', stdout);
-    }
-#endif
-
-    ins = findInstsFor(pi,o);
-    for (; nonNull(ins); ins=tl(ins)) {
-        in = snd(hd(ins));
-	if (nonNull(in)) {
-	    Int  beta = fst(hd(ins));
-	    Cell e    = inst(in).builder;
-	    Cell es   = inst(in).specifics;
-
-#if EXPLAIN_INSTANCE_RESOLUTION
-	    if (showInstRes) {
-		for (i = 0; i < d; i++)
-		  fputc(' ', stdout);
-		fputs("try ", stdout);
-		printContext(stdout, es);
-		fputs(" => ", stdout);
-		printPred(stdout, inst(in).head);
-		fputc('\n', stdout);
-	    }
-#endif
-
-	    for (; nonNull(es); es=tl(es)) {
-		Cell ev = entail(ps,hd(es),beta,d);
-		if (nonNull(ev))
-		    e = ap(e,ev);
-		else {
-		    e = NIL;
-		    break;
-		}
-	    }
-#if EXPLAIN_INSTANCE_RESOLUTION
-	    if (showInstRes)
-		for (i = 0; i < d; i++)
-		  fputc(' ', stdout);
-#endif
-	    if (nonNull(e)) {
-#if EXPLAIN_INSTANCE_RESOLUTION
-		if (showInstRes)
-		    fprintf(stdout, "Sat\n");
-#endif
-		if (k > 0) {
-		    if (instCompare (in_, in)) {
-		        ERRMSG(0) "Multiple satisfiable instances for "
-			ETHEN
-			ERRPRED(copyPred(pi, o));
-			ERRTEXT "\nin_ " ETHEN ERRPRED(inst(in_).head);
-			ERRTEXT "\nin  " ETHEN ERRPRED(inst(in).head);
-			ERRTEXT "\n"
-			EEND;
-		    }
-		}
-		if (k++ == 0) {
-		    e_ = e;
-		    in_ = in;
-		}
-		continue;
-	    } else {
-#if EXPLAIN_INSTANCE_RESOLUTION
-		if (showInstRes)
-		    fprintf(stdout, "not Sat\n");
-#endif
-		continue;
-	    }
-	}
-#if EXPLAIN_INSTANCE_RESOLUTION
-	if (showInstRes) {
-	    for (i = 0; i < d; i++)
-	      fputc(' ', stdout);
-	    fprintf(stdout, "not Sat.\n");
-	}
-#endif
-    }
-    if (k > 0)
-	return e_;
-#if EXPLAIN_INSTANCE_RESOLUTION
-    if (showInstRes) {
-	for (i = 0; i < d; i++)
-	  fputc(' ', stdout);
-	fprintf(stdout, "all not Sat.\n");
-    }
-#endif
-    return NIL;
-    }
-}
-
-static Bool local instComp_(ia,ib)	/* See if ia is an instance of ib  */
-Inst ia, ib;{
-    Int alpha = newKindedVars(inst(ia).kinds);
-    Int beta  = newKindedVars(inst(ib).kinds);
-    return matchPred(inst(ia).head,alpha,inst(ib).head,beta);
-}
-
-static Bool local instCompare (ia, ib)
-Inst ia, ib;
-{
-    return instComp_(ia, ib) && instComp_(ib, ia);
-}
-#endif
 
 Cell provePred(ks,ps,pi)                /* Find evidence for predicate pi  */
 Kinds ks;                               /* assuming ps.  If ps is null,    */
@@ -1292,13 +1125,6 @@ static Void local reducePreds() {	/* Context reduce predicates: uggh!*/
 	Cell pi = fst3(hd(p));
 	Int  o  = intOf(snd3(hd(p)));
 	Inst in = NIL;
-#if MULTI_INST
-	List ins = NIL;
-	if (multiInstRes) {
-	    ins = findInstsFor(pi,o);
-	    in = nonNull(ins) && isNull(tl(ins)) ? snd(hd(ins)) : NIL;
-	} else
-#endif
 	    in = findInstFor(pi,o);
 	preds   = tl(preds);
 	if (nonNull(in)) {
@@ -1788,7 +1614,6 @@ Cell e; {
 	case TUPLE	: typeTuple(e);
 			  break;
 
-#if BIGNUMS
 	case POSNUM	:
 	case ZERONUM	:
 	case NEGNUM	: {   Int alpha = newTyvars(1);
@@ -1797,7 +1622,6 @@ Cell e; {
 					   assumeEvid(predNum,alpha)),
 					   e);
 			  }
-#endif
 	case INTCELL	: {   Int alpha = newTyvars(1);
 			      inferType(aVar,alpha);
 			      return ap(ap(nameFromInt,
@@ -1918,12 +1742,10 @@ Cell e; {
 	case LAZYPAT	: snd(e) = typeExpr(l,snd(e));
 			  break;
 
-#if NPLUSK
 	case ADDPAT	: {   Int alpha = newTyvars(1);
 			      inferType(typeVarToVar,alpha);
 			      return ap(e,assumeEvid(predIntegral,alpha));
 			  }
-#endif
 
 	default 	: internal("typeExpr");
    }
@@ -2531,10 +2353,8 @@ Cell e; {
     Cell mon	      = ap(mkInt(beta),aVar);
     Cell m	      = assumeEvid(predMonad,beta);
     tyvar(beta)->kind = starToStar;
-#if !MONAD_COMPS
     bindTv(beta,typeList,0);
     m = nameListMonad;
-#endif
 
     typeComp(l,mon,snd(e),snd(snd(e)));
     bindTv(alpha,typeIs,typeOff);
@@ -2551,10 +2371,8 @@ Cell e; {
     Cell m	      = assumeEvid(predMonad,beta);
     Cell new;
     tyvar(beta)->kind = starToStar;
-#if !MONAD_COMPS
     bindTv(beta,typeList,0);
     m = nameListMonad;
-#endif
 
     new = typeZComp(l,mon,snd(e),snd(snd(e)));
     bindTv(alpha,typeIs,typeOff);
@@ -4202,9 +4020,7 @@ Int what; {
 		       mark(predMonad);
 		       mark(predMonadRec);
 
-#if IO_MONAD
 		       mark(typeProgIO);
-#endif
 		       break;
 
 	case INSTALL : typeChecker(RESET);
@@ -4347,10 +4163,8 @@ Void linkPreludeTC() {			/* Hook to tycons and classes in   */
 	classMonad      = linkClass("Monad");
 	predMonad       = ap(classMonad,aVar);
 
-#if IO_MONAD
 	typeIO          = linkTycon("IO");
 	typeProgIO      = ap(typeIO,aVar);
-#endif
 
 	/* The following primitives are referred to in derived instances and
 	 * hence require types; the following types are a little more general
@@ -4418,7 +4232,6 @@ Void linkPreludeCM() {			/* Hook to cfuns and mfuns in	   */
 	nameThen        = linkName(">>");
 	nameMFail       = linkName("fail");
 
-#if IO_MONAD
         /* The constructor names better match up with the defn
 	   of IOErrorType in Prelude. 
 	*/
@@ -4434,7 +4247,6 @@ Void linkPreludeCM() {			/* Hook to cfuns and mfuns in	   */
 	nameUserErr        = linkName("UserError");
 #ifdef DOTNET
 	nameNetException   = linkName("DotNetException");
-#endif
 #endif
 
 	nameArithException = linkName("ArithException");

@@ -41,83 +41,6 @@
  *-------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------
- * Configuration options
- *
- * Most configuration options are arguments to the configure script
- * (try running "configure --help").  The following options are either
- * experimental or require changes to "Prelude.hs", the standard libraries
- * and demos and therefore cannot be modified using the configure script.
- * Most users should leave them alone!
- *
- *   HASKELL_ARRAYS to include support for Haskell array primitives.
- *   IO_MONAD	    to include the IO monad primitives and support.
- *   IO_HANDLES     to include the IO file operations.
- *   IO_REFS	    Ref type for IO_MONAD, and simple operations.
- *   FLUSHEVERY	    to force a fflush after every char in putStr/hPutStr.
- *   NPLUSK	    to include support for (n+k) patterns.
- *   BIGNUMS	    to include support for Integer bignums.
- *   FIXED_SUBST    to force a fixed size for the current substitution.
- *   DYN_TABLES	    to allocate tables dynamically, currently just a memory
- *		    saving trick, but this may be extended at a later stage
- *		    to allow at least some of the tables to be extended
- *		    dynamically at run-time to avoid exhausted space errors.
- *   GC_STABLEPTRS  to include support for safely passing Haskell
- *                  pointers over to C
- *                  (only required if you use callbacks in the foreign
- *                  language interface)
- *   GC_MALLOCPTRS  to include support for automatic deallocation of 
- *                  C objects when Haskell is done with them.
- *   GC_WEAKPTRS    to include support for weak pointers.
- *   STABLE_NAMES   stable names a la Simon PJ
- *   MONAD_COMPS    to allow monad comprehensions.
- *   REDIRECT_OUTPUT ability to redirect stdout/stderr to a buffer.
- *                  Only necessary for the Hugs server interface
- *                  (which is used in the Netscape plugin and the standalone
- *                  evaluator). 
- *   WORD_OPS       to include operations on unsigned ints
- *   ADDR_OPS       to include operations on addresses
- *   PROVIDE_INT64  to include 64 bit Ints
- *   SHORT_CIRCUIT_COERCIONS to try to apply these rewrites at runtime:
- *                    integerToInt (intToInteger x) -> x
- *                    rationalToFloat  (fromDouble {dict} x) -> doubleToFloat x
- *                    rationalToDouble (fromDouble {dict} x) -> x
- *   FAST_WHATIS    to use a macro instead of a func for whatIs(), for speed
- *   FAST_WHATIS1   to use whatIs1(), a faster version of whatIs(), for speed
- *-------------------------------------------------------------------------*/
-
-#define HASKELL_ARRAYS	 1
-#define IO_MONAD	 1
-#define IO_HANDLES       1
-#define IO_REFS		 1 /* Experimental IO Ref type			   */
-#define FLUSHEVERY	 1
-#define NPLUSK		 1 /* Warning: There are those that would prefer 0 */
-#define BIGNUMS		 1 /* Experimental bignum implementation           */
-#define FIXED_SUBST	 0 /* Warning: This may not be appropriate for PCs */
-#define DYN_TABLES	 SMALL_HUGS /* For dynamically allocated tables	   */
-#define GC_STABLEPTRS    1 /* May be required by external libraries        */
-#define GC_MALLOCPTRS    1 /* May be required by external libraries        */
-#define GC_WEAKPTRS      1
-#define STABLE_NAMES     1
-#define MONAD_COMPS	 0
-#define REDIRECT_OUTPUT  (!HUGS_FOR_WINDOWS)
-#define WORD_OPS         1
-#define ADDR_OPS         1
-#define PROVIDE_INT64    1
-#define TIME_MODULE      1
-#define DIRECTORY_MODULE 1
-#define MULTI_LINEFEED   1 /* Platform-independent linefeed handling        */
-#define MULTI_INST       0
-#define WANT_FIXED_SIZE_TABLES 0 /* use fixed-size tables for internal structs */
-                                 /* (as opposed to dynamically growable ones)  */
-
-#define UNICODE_CHARS    1 /* Char is Unicode (ISO-10646) */
-
-#define SHORT_CIRCUIT_COERCIONS 1
-
-#define FAST_WHATIS      1
-#define FAST_WHATIS1     1	 /* can only use if FAST_WHATIS is 1 */
-
-/*---------------------------------------------------------------------------
  * Platform-dependent settings:
  *-------------------------------------------------------------------------*/
 
@@ -132,9 +55,6 @@ int macsystem(char *filenames);
  *  also required API definitions
  *-------------------------------------------------------------------------*/
 
-#if HUGS_FOR_WINDOWS
-# include "winhugs/Winhugs.h"
-#endif
 
 
 /*---------------------------------------------------------------------------
@@ -218,11 +138,7 @@ int macsystem(char *filenames);
  *-------------------------------------------------------------------------*/
 
 # include <string.h>
-#if HUGS_FOR_WINDOWS
-#define strCompare stricmp
-#else
 #define strCompare strcmp
-#endif
 
 # include <ctype.h>
 #ifndef isascii
@@ -457,9 +373,7 @@ typedef void*    Pointer;
 #define STD_EMPTY_MODULE      "Hugs"
 #endif
 
-#if IO_MONAD
 #define NUM_HANDLES	   40
-#endif
 #define NUM_TUPLES         100
 #define NUM_OFFSETS        1024
 #define NUM_LAT1_CHARS     256
@@ -469,9 +383,6 @@ typedef void*    Pointer;
 #define DEF_PROFINTDIV	   10		/* hpsize/this cells between samples*/
 #endif
 
-#if     SMALL_HUGS			/* the McDonalds mentality :-)	   */
-#define Pick(s,r,l)	   s
-#endif
 #if     REGULAR_HUGS
 #define Pick(s,r,l)	   r
 #endif
@@ -521,15 +432,9 @@ typedef void*    Pointer;
 #define NUM_MODULE         NUM_SCRIPTS
 
 
-#if DYN_TABLES				/* Tables may be alloc'd at runtime*/
-#define DECTABLE(tab)	   far *tab	/* macros for declaration & defn   */
-#define DYNDECTABLE(tab)   DECTABLE(tab)
-#define DEFTABLE(tab,sz)   far *tab = 0
-#else					/* or at compile-time:		   */
 #define DECTABLE(tab)	   tab[]
 #define DYNDECTABLE(tab)   far *tab
 #define DEFTABLE(tab,sz)   tab[sz]
-#endif
 
 #define minRecovery	   Pick(1000,  1000,       1000)
 #define bitsPerWord	   Pick(16,    32,         32)

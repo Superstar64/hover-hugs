@@ -166,11 +166,7 @@ enum { START = 0,
        CLOSE_PAREN };
 static Int hereState = START;
 
-#if MULTI_LINEFEED
 #define FOPEN_MODE                "rb"
-#else
-#define FOPEN_MODE                "r"
-#endif
 
 /* --------------------------------------------------------------------------
  * Single character input routines:
@@ -262,26 +258,6 @@ String prompt; {                       /* standard in (i.e. console/kbd)   */
 	c0 = c1 = EOF;
 }
 
-#if HUGS_FOR_WINDOWS
-/* These variables and functions are used to save the current */
-/* state of the input, to implement auto load of files        */
-static Int    	saveReading;
-static int    	savec0, savec1;
-
-Void saveInputState(Void)
-{
-    saveReading = reading;
-    savec0 = c0;
-    savec1 = c1;
-}
-
-Void restoreInputState(Void)
-{
-    reading = saveReading;
-    c0 = savec0;
-    c1 = savec1;
-}
-#endif
 
 static Bool local fileInput(nm,len)     /* prepare to input characters from*/
 String nm;                              /* named file (specified length is */
@@ -409,7 +385,6 @@ static Int local nextLine()
         lineBuffer[lineLength] = (ch = FGetChar(inputStream));
         if (ch == EOF)
             break;
-#if MULTI_LINEFEED
         if ((char)ch == '\r') {
             ch = fgetc(inputStream);
 	    /* ToDo: verify that this behaves correctly re EOF */
@@ -419,7 +394,6 @@ static Int local nextLine()
             lineLength++;
             break;
         } else 
-#endif
         if ((char)ch == '\n') {
             lineLength++;
             break;
@@ -661,33 +635,19 @@ Int r; {                               /* from input of the form 0c{digs}  */
 	return mkInt(0);               /* if it had been written "0 c..."  */
     else {
 	Int  n = 0;
-#if BIGNUMS
 	Cell big = NIL;
-#endif
 	skip();
 	do {
-#if BIGNUMS
 	    if (nonNull(big))
 		big = bigShift(big,d,r);
 	    else if (overflows(n,r,d,MAXPOSINT))
 		big = bigShift(bigInt(n),d,r);
 	    else
-#else
-	    if (overflows(n,r,d,MAXPOSINT)) {
-		ERRMSG(row) "Integer literal out of range"
-		EEND;
-	    }
-	    else
-#endif
 		n = r*n + d;
 	    skip();
 	    d = readHexDigit(c0);
 	} while (d>=0 && d<r);
-#if BIGNUMS
 	return nonNull(big) ? big : mkInt(n);
-#else
-	return mkInt(n);
-#endif
     }
 }
 
@@ -754,13 +714,7 @@ static Cell local readNumber() {        /* read numeric constant           */
     if (floatingPt) {
 	return mkDouble(stringToDouble(tokenStr));
     } else if (intTooLarge) {
-#if BIGNUMS
 	return bigStr(tokenStr);
-#else
-	ERRMSG(row) "Integer literal out of range"
-	EEND;
-	return NIL;
-#endif
     } else
 	return mkInt(n);
 }
@@ -883,12 +837,6 @@ Bool isStrLit; {                       /* TRUE => enable \& and gaps       */
     if (c0=='\\') {                    /* escape character?                */
 	return readEscapeChar(isStrLit,TRUE);
     }
-#if !UNICODE_CHARS
-    if (!isLatin1(c0)) {
-	ERRMSG(row) "Non Latin-1 character `\\%d' in constant", ((int)c0)
-	EEND;
-    }
-#endif
     skip();                            /* normal character?                */
     return c;
 }
@@ -1147,11 +1095,7 @@ Char   sys; {                          /* character for shell escape       */
     if (c0=='\n')                      /* look for blank command lines     */
 	return NOCMD;		      					   
     if (c0==EOF)                       /* look for end of input stream     */
-#if HUGS_FOR_WINDOWS
-	return NOCMD;
-#else
 	return QUIT;
-#endif
     if (c0==sys) {                     /* single character system escape   */
 	skip();			      					   
 	return SYSTEM;		      					   

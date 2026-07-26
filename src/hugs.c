@@ -54,9 +54,6 @@ static Void   local browse	      (Void);
 static Void   local initialize        (Int, String []);
 static Void   local clearEvalModule   (Void);
 
-#if HUGS_FOR_WINDOWS
-static Void   local autoReloadFiles   (Void);
-#endif
 
 /* --------------------------------------------------------------------------
  * Optional timer hooks:
@@ -150,9 +147,6 @@ String argv[]; {
      */
     hugsEdit      = strCopy(fromEnv("EDITOR",NULL));
     if (hugsEdit == NULL) {
-#if HUGS_FOR_WINDOWS
-      hugsEdit = WinHugsPickDefaultEditor();
-#else
       UINT rc;
       int notePadLen = strlen(DEFAULT_EDITOR);
       char* notePadLoc;
@@ -172,7 +166,6 @@ String argv[]; {
 	strcat(notePadLoc, DEFAULT_EDITOR);
 	hugsEdit = strCopy(notePadLoc);
       }
-#endif
     }
 #elif __MWERKS__ && macintosh
     hugsEdit      = NULL;
@@ -220,27 +213,6 @@ static Void printBanner()
 {
 #if SMALL_BANNER
     Printf("Hugs98 - http://haskell.org/hugs - %s\n", versionString);
-#elif HUGS_FOR_WINDOWS
-    INT svColor;
-    svColor = SetForeColor(BLUE);    Printf( "__   __ __  __  ____   ___");
-                                     Printf("      _______________________________________________\n");
-    SetForeColor(svColor);
-    svColor = SetForeColor(RED);     Printf("||   || ||  || ||  || ||__ ");
-    SetForeColor(svColor);           Printf("     Hugs 98: Based on the Haskell 98 standard\n");
-    svColor = SetForeColor(BLUE);    Printf("||___|| ||__|| ||__||  __||");
-    SetForeColor(svColor);           Printf("     Copyright (c) 1994-2005\n");
-    svColor = SetForeColor(RED);     Printf("||---||         ___||      ");
-    SetForeColor(svColor);           Printf("     World Wide Web: ");
-    WinHugsHyperlink("http://haskell.org/hugs");
-    Printf("\n");
-    svColor = SetForeColor(BLUE);    Printf("||   ||                    ");
-    SetForeColor(svColor);           Printf("     Bugs: ");
-    WinHugsHyperlink("http://hackage.haskell.org/trac/hugs");
-    Printf("\n");
-    svColor = SetForeColor(RED);     Printf("||   || ");
-    SetForeColor(svColor);           Printf("Version: %-14s",versionString);
-    svColor = SetForeColor(BLUE);    Printf(" _______________________________________________\n\n");
-    SetForeColor(svColor);
 #else
     Printf("__   __ __  __  ____   ___      _________________________________________\n");
     Printf("||   || ||  || ||  || ||__      Hugs 98: Based on the Haskell 98 standard\n");
@@ -405,9 +377,6 @@ static Void local load() {           /* read filenames from command line   */
 				     /* to be read                         */
     clearEvalModule();
     while ((s=readFilename())!=0) {
-#if HUGS_FOR_WINDOWS
-	WinHugsAddMruFile(s);
-#endif
 	addScriptName(s,TRUE);
     }
     readScripts(1);
@@ -525,14 +494,8 @@ static Void local showtype() {         /* print type of expression (if any)*/
     defaultDefns = evalDefaults;
     type = typeCheckExp(printTypeUseDefaults);
     printExp(stdout,inputExpr);
-#if HUGS_FOR_WINDOWS
-    { INT svColor = SetForeColor(BLUE);
-#endif
     Printf(" :: ");
     printType(stdout,type);
-#if HUGS_FOR_WINDOWS
-    SetForeColor(svColor); }
-#endif
     Putchar('\n');
 }
 
@@ -959,17 +922,6 @@ String moduleName; {
     consoleInput(promptBuffer);
 }
 
-#if HUGS_FOR_WINDOWS
-static Void local autoReloadFiles() {
-    if (autoLoadFiles) {
-      InAutoReloadFiles = TRUE;
-      saveInputState();
-      readScripts(1);
-      restoreInputState();
-      InAutoReloadFiles = FALSE;
-    }
-}
-#endif
 
 /* --------------------------------------------------------------------------
  * main read-eval-print loop, with error trapping:
@@ -995,17 +947,11 @@ String argv[]; {
     __try {
 #endif
 
-#ifdef HUGS_FOR_WINDOWS
-    initInterpreter();
-    InAutoReloadFiles = FALSE;
-    WinHugsMessagePump();
-#else
     for (;;) {
 	initInterpreter();
 	if (doCommand())
 	    break;
     }
-#endif
 
     breakOn(FALSE);
     
@@ -1071,9 +1017,6 @@ Bool doCommand()		    /* read and execute a command      */
 	    case EDIT   : editor();
 			  break;
 	    case FIND   : 
-#if HUGS_FOR_WINDOWS
-			  autoReloadFiles();
-#endif
                           find();
 			  break;
 	    case LOAD   : forgetAllScripts();
@@ -1088,9 +1031,6 @@ Bool doCommand()		    /* read and execute a command      */
 			  setModule();
 			  break;
 	    case EVAL   : 
-#if HUGS_FOR_WINDOWS
-			  autoReloadFiles();
-#endif
 #if USE_THREADS
                           startEvaluatorThread();
 			  loopInBackground();
@@ -1099,9 +1039,6 @@ Bool doCommand()		    /* read and execute a command      */
 #endif
 			  break;
 	    case TYPEOF : 
-#if HUGS_FOR_WINDOWS
-			  autoReloadFiles();
-#endif
                           showtype();
 			  break;
 	    case BROWSE : browse();
@@ -1111,9 +1048,6 @@ Bool doCommand()		    /* read and execute a command      */
 			  break;
 #endif
 	    case NAMES  : 
-#if HUGS_FOR_WINDOWS
-			  autoReloadFiles();
-#endif
                           listNames();
 			  break;
 	    case HELP   : menu();
@@ -1128,9 +1062,6 @@ Bool doCommand()		    /* read and execute a command      */
 	    case CHGDIR : changeDir();
 			  break;
 	    case INFO   : 
-#if HUGS_FOR_WINDOWS
-			  autoReloadFiles();
-#endif
                           info();
 			  break;
 	    case PNTVER: Printf("-- Hugs Version %s\n", versionString);

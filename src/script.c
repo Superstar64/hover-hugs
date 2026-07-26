@@ -118,30 +118,6 @@ Int numLoadedScripts() { /* return number of currently loaded scripts */
   return numScripts;
 }
 
-#if HUGS_FOR_WINDOWS
-/* UI pokes around the script stack, give it access... */
-Void setNumLoadedScripts(s)
-Script s; {
-  numScripts=s;
-}
-
-Void setScriptHwMark(s)
-Script s; {
-  namesUpto = s;
-}
-
-Void setScriptName(s,scr)
-Script s;
-String scr; {
-  scriptTable[s].fileName = scr;
-}
-
-Void setScriptRealName(s,scr)
-Script s;
-String scr; {
-  scriptTable[s].realName = scr;
-}
-#endif
 
 /* --------------------------------------------------------------------------
  * Loading script files:
@@ -181,10 +157,6 @@ Bool   sch; {              /* TRUE => requires pathname search*/
 static Bool local addScript(fname,len)  /* read single script file */
 String fname;                           /* name of script file     */
 Long   len; {                           /* length of script file   */
-#if HUGS_FOR_WINDOWS         /* Set clock cursor while loading   */
-    allowBreak();
-    SetCursor(LoadCursor(NULL, IDC_WAIT));
-#endif
 
     if (!quiet) {
 	Printf("Reading file \"%s\":\n",fname);  FlushStdout();
@@ -285,9 +257,6 @@ String argv[]; {
     for (i=1; i<argc; ++i) {
       if (argv[i] && argv[i][0] && !isOption(argv[i])) {
 	    addScriptName(argv[i],TRUE);
-#if HUGS_FOR_WINDOWS
-	    SetWorkingDir(argv[i]);
-#endif
       }
     }
 
@@ -335,9 +304,6 @@ Int n; {                   /* loading everything after and    */
     Time timeStamp;        /* including the first script which*/
     Long fileSize;         /* has been either changed or added*/
 
-#if HUGS_FOR_WINDOWS
-    SetCursor(LoadCursor(NULL, IDC_WAIT));
-#endif
 
     for (; n<numScripts; n++) {         /* Scan previously loaded scripts  */
 	getFileInfo(scriptTable[n].fileName, &timeStamp, &fileSize);
@@ -371,22 +337,11 @@ Int n; {                   /* loading everything after and    */
 
 Void whatScripts() {       /* list scripts in current session */
     int i;
-#if HUGS_FOR_WINDOWS
-    if (!InAutoReloadFiles) {
-#endif
     Printf("\nHugs session for:");
     for (i=0; i<numScripts; ++i) {
-#if HUGS_FOR_WINDOWS
-	Putchar('\n');
-	WinHugsFilename(scriptTable[i].fileName, 0);
-#else
 	Printf("\n%s",scriptTable[i].fileName);
-#endif
     }
     Putchar('\n');
-#if HUGS_FOR_WINDOWS
-    }
-#endif
 }
 
 Void script(what)

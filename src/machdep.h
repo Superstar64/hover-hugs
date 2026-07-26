@@ -32,10 +32,6 @@ extern Void getFileInfo (String, Time *, Long *);
 
 #if USE_REGISTRY
 
-#if HUGS_FOR_WINDOWS
-extern Int    readRegInt     (String,Int);
-extern Bool   writeRegInt    (String,Int);
-#endif
 
 extern String readRegString       (HKEY, String, String, String);
 extern Bool   writeRegString      (String,String);

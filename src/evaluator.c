@@ -94,7 +94,6 @@ Module m; {        /* evaluate expr and print value    */
 #if WANT_TIMER
     updateTimers();
 #endif
-#if IO_MONAD
     if ((t = getProgType(ks,type)) != 0) {
         if (displayIO) {
             Cell printer = namePrint;
@@ -116,7 +115,6 @@ Module m; {        /* evaluate expr and print value    */
 	}
     }
     else
-#endif
     {   Cell printer = namePrint;
 	if (useShow) {
 	    Cell d = resolvePred(ks,ap(classShow,bd));
@@ -162,14 +160,8 @@ Module m; {        /* evaluate expr and print value    */
 	}
 	drop();
 	if (whnfHead == nameRight) {
-#if HUGS_FOR_WINDOWS
-	    INT svColor = SetForeColor(BLUE);
-#endif
 	    Printf(" :: ");
 	    printType(stdout,pop());
-#if HUGS_FOR_WINDOWS
-	    SetForeColor(svColor);
-#endif
 	}
     }
     else {

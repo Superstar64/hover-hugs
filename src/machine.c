@@ -68,12 +68,9 @@ typedef union {
 
 typedef MemCell far *Memory;
 static  Memory      memory;
-#if !WANT_FIXED_SIZE_TABLES
 /* (Dynamically) growable memory. */
 DynTable* dynMemory = NULL;
-#endif
 
-#if !WANT_FIXED_SIZE_TABLES
 void
 growMemory(void)
 {
@@ -82,7 +79,6 @@ growMemory(void)
     if (memory==0)
 	fatal("Cannot allocate program memory");
 }
-#endif
 
 #define intAt(m)    memory[m].mint
 #if !BREAK_FLOATS
@@ -177,9 +173,7 @@ static Addr  local dissCellAddr (Addr,String);
 static Void  local build        (Cell,Int);
 static Void  local buildGuards  (List,Int);
 static Int   local buildLoc     (List,Int);
-#if BIGNUMS
 static Void  local buildBignum  (Bignum);
-#endif
 static Void  local buildName	(Cell);
 
 static Void  local make         (Cell,Int,Label,Label);
@@ -693,12 +687,10 @@ Int  co; {                              /* perform no evaluation           */
 	case TUPLE     : asCELL(e);
 			 break;
 
-#if BIGNUMS
 	case ZERONUM   :
 	case POSNUM    :
 	case NEGNUM    : buildBignum(e);
 			 break;
-#endif
 
 	case INTCELL   : asINTEGER(intOf(e));
 			 break;
@@ -751,7 +743,6 @@ Int  co; {
     return n;
 }
 
-#if BIGNUMS
 static Void local buildBignum(b)        /* Generate code to build bignum   */
 Bignum b; {
     if (b==ZERONUM) {
@@ -769,7 +760,6 @@ Bignum b; {
 	asMKAP(1);
     }
 }
-#endif
 
 static Void local buildName(e)		/* Build name, taking account of   */
 Cell e; {				/* special cases, as necessary.	   */
@@ -878,13 +868,11 @@ Label d; {
 			 asGOTO(d);
 			 break;
 
-#if BIGNUMS
 	case ZERONUM   :
 	case POSNUM    :
 	case NEGNUM    : buildBignum(e);
 			 asGOTO(d);
 			 break;
-#endif
 
 	case INTCELL   : asINTEGER(intOf(e));
 			 asGOTO(d);
@@ -946,15 +934,11 @@ Label  f, d; {
 			  make(arg(fun(discr)),co,SHOULDNTFAIL,RUNON);
 			  asCELL(namePmInt);
 		      }
-#if BIGNUMS
 		      else if (h==nameFromInteger) {
 			  buildBignum(arg(discr));
 			  make(arg(fun(discr)),co,SHOULDNTFAIL,RUNON);
 			  asCELL(namePmInteger);
 		      }
-#else
-		      /* ToDo: should this be the same as fromInt? */
-#endif
 		      else if (h==nameFromDouble) {
 			  asDOUBLE(doubleOf(arg(discr)));
 			  make(arg(fun(discr)),co,SHOULDNTFAIL,RUNON);
@@ -965,7 +949,6 @@ Label  f, d; {
 		      asTEST(nameTrue,f);
 		      make(thd3(nc),co,f,d);
 		      break;
-#if NPLUSK
 	case ADDPAT : asINTEGER(snd(h));
 		      make(arg(discr),co,SHOULDNTFAIL,RUNON);
 		      asCELL(namePmNpk);
@@ -976,7 +959,6 @@ Label  f, d; {
 		      make(thd3(nc),co+1,f,d);
 		      --srsp;
 		      break;
-#endif
     }
 }
 
@@ -1844,13 +1826,9 @@ Void machine(what)
 Int what; {
     switch (what) {
 	case INSTALL : 
-#if WANT_FIXED_SIZE_TABLES
-	               memory  = (Memory)farCalloc(NUM_ADDRS,sizeof(MemCell));
-#else
 		       /* prelude.h defines NUM_ADDRS; 0 is the upper bound (=> unbounded.) */
 		       dynMemory = allocDynTable(sizeof(Memory), NUM_ADDRS, 0, "memory");
 		       memory    = (Memory)(dynMemory->data);
-#endif
 		       if (memory==0)
 			   fatal("Cannot allocate program memory");
 		       instrNone(iFAIL);
@@ -1870,11 +1848,7 @@ Int what; {
 	               break;
 
         case EXIT    : 
-#if WANT_FIXED_SIZE_TABLES
-	               free(memory);
-#else
 		       if (dynMemory) freeDynTable(dynMemory);
-#endif
 	               break;
     }
 }

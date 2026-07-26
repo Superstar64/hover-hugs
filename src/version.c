@@ -40,11 +40,7 @@
 String versionString = VERSION_STRING;
 
 #if USE_REGISTRY
-#if HUGS_FOR_WINDOWS
-#define HUGSROOT ("SOFTWARE\\Haskell\\Hugs\\Winhugs" VERSION_STRING "\\")
-#else
 #define HUGSROOT ("SOFTWARE\\Haskell\\Hugs\\" VERSION_STRING "\\")
-#endif
 
 String hugsRegRoot = HUGSROOT;
 #endif

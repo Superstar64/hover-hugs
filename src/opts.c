@@ -33,9 +33,6 @@ Bool haskell98 = TRUE;		 /* TRUE => Haskell 98 compatibility*/
 #if EXPLAIN_INSTANCE_RESOLUTION
 Bool showInstRes = FALSE;
 #endif
-#if MULTI_INST
-Bool multiInstRes = FALSE;
-#endif
 
 Bool printTypeUseDefaults = FALSE;
 
@@ -98,14 +95,8 @@ struct options toggle[] = {     /* List of command line toggles    */
     Option('I', 1, "Display results of IO programs",        &displayIO),
     Option('T', 1, "Apply 'defaulting' when printing types", &printTypeUseDefaults),
 /* Conditional toggles: */
-#if HUGS_FOR_WINDOWS
-    Option('A', 1, "Auto load files",		   	    &autoLoadFiles),
-#endif
 #if EXPLAIN_INSTANCE_RESOLUTION
     Option('x', 1, "Explain instance resolution",           &showInstRes),
-#endif
-#if MULTI_INST
-    Option('m', 0, "Use multi instance resolution",         &multiInstRes),
 #endif
 #if DEBUG_CODE
     Option('D', 1, "Debug: show generated G code",          &debugCode),
@@ -525,9 +516,6 @@ String s; {
 	    hpSize = MAXIMUMHEAP;
 	if (heapBuilt() && hpSize != heapSize) {
 #define HEAP_RESIZE_MSG "Change to heap size will not take effect until you rerun Hugs"
-#if HUGS_FOR_WINDOWS
-	    InfoBox(HEAP_RESIZE_MSG);
-#endif
 #if USE_REGISTRY
 	    FPrintf(stderr,HEAP_RESIZE_MSG "\n");
 #else

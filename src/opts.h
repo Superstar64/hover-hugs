@@ -62,14 +62,8 @@ extern Bool profiling;                 /* TRUE => perform profiling.      */
 extern Int  profInterval;              /* interval between samples        */
 #endif
 
-#if HUGS_FOR_WINDOWS
-extern Bool autoLoadFiles;	       /* TRUE => reload files before eval*/
-#endif
 #if EXPLAIN_INSTANCE_RESOLUTION
 extern Bool  showInstRes;              /* TRUE => show instance resolution */
-#endif
-#if MULTI_INST
-extern Bool  multiInstRes;             /* TRUE => use multi inst resolution */
 #endif
 #if DEBUG_CODE
 extern Bool  debugCode;		        /* TRUE => print G-code to screen  */
@@ -80,9 +74,6 @@ extern Bool  debugSC;			/* TRUE => print SC to screen  */
 extern Bool   rootOpt;                  /* TRUE => enable root optimisation*/
 extern Bool  hereDocs;                  /* TRUE => enable `here documents' */
 
-#if HUGS_FOR_WINDOWS
-extern Bool  autoLoadFiles;             /* TRUE => automatically reloaded modified files */
-#endif
 
 #if SUPPORT_PREPROCESSOR
 extern String preprocessor;             /* preprocessor command            */

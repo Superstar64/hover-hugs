@@ -739,12 +739,8 @@ Name c; {				/* CDICTS parameters		   */
 	t = monotypeOf(t);
     }
     if ((w=whatIs(t))==QUAL) {
-#if FAST_WHATIS			  /* decompose expression for whatIs macro */
 	t=snd(snd(t));
 	w = whatIs(t);
-#else
-	w = whatIs(t=snd(snd(t)));
-#endif
     }
     if (w==CDICTS) {
 	a -= length(fst(snd(t)));
@@ -2594,11 +2590,6 @@ Inst in; {
 		    continue;
 		}
 	    }
-#if MULTI_INST
-	    if (multiInstRes && nonNull(inst(in).specifics)) {
-		break;
-	    } else {
-#endif
 		ERRMSG(inst(in).line) "Overlapping instances for class \"%s\"",
 				      textToStr(cclass(c).text)
 		ETHEN
@@ -2609,9 +2600,6 @@ Inst in; {
 						   ERRPRED(pi);
 		ERRTEXT "\n"
 		EEND;
-#if MULTI_INST
-	    }
-#endif
 	}
 	prev = ins;			/* No overlap detected, so move on */
 	ins  = tl(ins);			/* to next instance		   */
@@ -4417,11 +4405,9 @@ Cell p; {
 	case CONIDCELL :
 	case CONOPCELL : return checkApPat(line,0,p);
 
-#if BIGNUMS
 	case ZERONUM   :
 	case POSNUM    :
 	case NEGNUM    :
-#endif
 	case WILDCARD  :
 	case STRCELL   :
 	case CHARCELL  :
@@ -4457,7 +4443,6 @@ Cell p; {
 static Cell local checkMaybeCnkPat(l,p)/* Check applicative pattern with   */
 Int  l;				       /* the possibility of n+k pattern   */
 Cell p; {
-#if NPLUSK
     Cell h = getHead(p);
 
     if (argCount==2 && isVar(h) && textOf(h)==textPlus) {	/* n+k	   */
@@ -4479,7 +4464,6 @@ Cell p; {
 	arg(p)		 = checkPat(l,v);
 	return p;
     }
-#endif
     return checkApPat(l,0,p);
 }
 
@@ -5189,12 +5173,10 @@ Cell e; {				/* :: OpExp			   */
 				if (nneg&1)		/* for literals    */
 				    arg(temp) = mkInt(-intOf(arg(temp)));
 			    }
-#if BIGNUMS
 			    else if (isBignum(arg(temp))) {
 				if (nneg&1)
 				    arg(temp) = bigNeg(arg(temp));
 			    }
-#endif
 			    else if (isDouble(arg(temp))) {
 				if (nneg&1)
 				    arg(temp) = mkDouble(-doubleOf(arg(temp)));
@@ -5673,11 +5655,9 @@ Cell e; {
 			  }
 			  break;
 
-#if BIGNUMS
 	case ZERONUM	:
 	case POSNUM	:
 	case NEGNUM	:
-#endif
 	case IPVAR	:
 	case NAME	:
 	case TUPLE	:

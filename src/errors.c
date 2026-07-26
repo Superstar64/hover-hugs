@@ -30,17 +30,11 @@ Void stopAnyPrinting() {  /* terminate printing of expression,*/
 	Putchar('\n');
 	if (showStats) {
 #define plural(v)   v, (v==1?"":"s")
-#if HUGS_FOR_WINDOWS
-	    { int svColor = SetForeColor(BLUE);
-#endif
 	    Printf("(%lu reduction%s, ",plural(numReductions));
 	    Printf("%lu cell%s",plural(numCells));
 	    if (numGcs>0)
 		Printf(", %u garbage collection%s",plural(numGcs));
 	    Printf(")\n");
-#if HUGS_FOR_WINDOWS
-	    SetForeColor(svColor); }
-#endif
 #undef plural
 	}
         printObserve(ALLTAGS);
@@ -71,14 +65,9 @@ Int l; {
      */
     if (scriptFile) {
 	setLastEdit(scriptFile,l);
-#ifdef HUGS_FOR_WINDOWS
-	FPrintf(errorStream," ");
-	WinHugsFilename(scriptFile, l);
-#else
 	FPrintf(errorStream," \"%s\"",scriptFile);
 	if (l)
 	    FPrintf(errorStream,":%d",l);
-#endif
 	scriptFile = 0;
     }
     FPrintf(errorStream," - ");
@@ -102,21 +91,12 @@ Void errAbort() {                       /* altern. form of error handling  */
 
 Void internal(msg)                      /* handle internal error           */
 String msg; {
-#if HUGS_FOR_WINDOWS
-    char buf[300];
-    sprintf(buf,"INTERNAL ERROR: %s",msg);
-    ErrorBox(buf);
-#endif
     failed();
     stopAnyPrinting();
     Printf("INTERNAL ERROR: %s\n",msg);
 
     Printf("Please report this Hugs bug to ");
-#if HUGS_FOR_WINDOWS
-    WinHugsHyperlink("http://hackage.haskell.org/trac/hugs");
-#else
     Printf("http://hackage.haskell.org/trac/hugs");
-#endif
     Printf("\n");
 
     FlushStdout();
@@ -128,11 +108,6 @@ String msg; {
 
 Void fatal(msg)                         /* handle fatal error              */
 String msg; {
-#if HUGS_FOR_WINDOWS
-    char buf[300];
-    sprintf(buf,"FATAL ERROR: %s",msg);
-    ErrorBox(buf);
-#endif
     FlushStdout();
     Printf("\nFATAL ERROR: %s\n",msg);
     everybody(EXIT);
@@ -143,16 +118,9 @@ String msg; {
  * Break interrupt handler:
  * ------------------------------------------------------------------------*/
 sigHandler(breakHandler) {              /* respond to break interrupt      */
-#if HUGS_FOR_WINDOWS
-    ErrorBox("Interrupted!");
-#endif
-#if HUGS_FOR_WINDOWS
-    FPrintf(errorStream,"{Interrupted!}\n");
-#else
     Hilite();
     Printf("{Interrupted!}\n");
     Lolite();
-#endif
     breakOn(TRUE);  /* reinstall signal handler - redundant on BSD systems */
 		    /* but essential on POSIX (and other?) systems         */
     everybody(BREAK);
@@ -173,7 +141,6 @@ sigHandler(breakHandler) {              /* respond to break interrupt      */
  * tweaking these functions.
  * ------------------------------------------------------------------------*/
 
-#if REDIRECT_OUTPUT && !HUGS_FOR_WINDOWS
 static Bool disableOutput = FALSE;      /* redirect output to buffer?      */
 
 #include <stdarg.h>
@@ -295,4 +262,3 @@ FILE* fp; {
     }
 }
 
-#endif /* REDIRECT_OUTPUT && !HUGS_FOR_WINDOWS */

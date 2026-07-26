@@ -43,12 +43,8 @@ static Cell local indirectChain         (Cell);
 static Bool local isMarked		(Cell);
 static Cell local lowLevelLastIn        (Cell);
 static Cell local lowLevelLastOut       (Cell);
-#if IO_HANDLES
 static Void local freeHandle            (Int);
-#endif
-#if GC_STABLEPTRS
 static Void local resetStablePtrs       (Void);
-#endif
 static Observe  local newObserve        (Text);
 static Void     local appendObs         (Cell,Cell);
 static Breakpt  local addBreakpt        (String);
@@ -285,16 +281,9 @@ Addr getMem(n)                         /* Get some more memory             */
 Int n; {
     Addr newAddr = addrHw;
     addrHw += n;
-#if WANT_FIXED_SIZE_TABLES
-    if (addrHw>=NUM_ADDRS) {
-	ERRMSG(0) "Program code storage space exhausted"
-	EEND;
-    }
-#else
     while (addrHw>=(Int)(dynMemory->maxIdx)) {
 	growMemory();
     }
-#endif
     return newAddr;
 }
 
@@ -1044,31 +1033,20 @@ static Class classHw;                  /* next unused class                */
 static List  classes;                  /* list of classes in current scope */
 static Inst  instHw;                   /* next unused instance record      */
 
-#if WANT_FIXED_SIZE_TABLES
-struct strClass DEFTABLE(tabClass,NUM_CLASSES); /* table of class records  */
-#else
 /* (Dynamically) growable tables holding the class and instance info */
 static DynTable* dynTabClass = NULL;
 static DynTable* dynTabInst = NULL;
 
 struct strClass *tabClass;
-#endif
 struct strInst  *tabInst;           /* (pointer to) table of instances  */
 
 
 Class newClass(t)                      /* add new class to class table     */
 Text t; {
-#if WANT_FIXED_SIZE_TABLES
-    if (classHw-CLASSMIN >= NUM_CLASSES) {
-	ERRMSG(0) "Class storage space exhausted"
-	EEND;
-    }
-#else
     if (classHw-CLASSMIN >= (Int)(dynTabClass->maxIdx)) {
       growDynTable(dynTabClass);
       tabClass = (struct strClass*)(dynTabClass->data);
     }
-#endif
 
     cclass(classHw).text       = t;
     cclass(classHw).line       = 0;
@@ -1152,17 +1130,10 @@ Cell c; {				/* class in class list		   */
 }
 
 Inst newInst() {                       /* Add new instance to table        */
-#if WANT_FIXED_SIZE_TABLES
-    if (instHw-INSTMIN >= NUM_INSTS) {
-	ERRMSG(0) "Instance storage space exhausted"
-	EEND;
-    }
-#else
     if (instHw-INSTMIN >= (Int)(dynTabInst->maxIdx)) {
         growDynTable(dynTabInst);
 	tabInst = (struct strInst*)(dynTabInst->data);
     }
-#endif
     inst(instHw).kinds	    = NIL;
     inst(instHw).head	    = NIL;
     inst(instHw).specifics  = NIL;
@@ -1610,39 +1581,23 @@ Int val, mx; {
 #endif
 
 static Script scriptHw;                 /* next unused script number       */
-#if WANT_FIXED_SIZE_TABLES
-static script scripts[NUM_SCRIPTS];     /* storage for script records      */
-#else
 static script* scripts = NULL;
 static DynTable* dynTabScripts = NULL;  /* storage for script records      */
-#endif
 
 Script startNewScript(f)                /* start new script, keeping record */
 String f; {                             /* of status for later restoration  */
-#if WANT_FIXED_SIZE_TABLES
-    if (scriptHw >= NUM_SCRIPTS) {
-	ERRMSG(0) "Too many script files in use"
-	EEND;
-    }
-#else
     if (scriptHw >= (Int)(dynTabScripts->maxIdx)) {
       growDynTable(dynTabScripts);
       scripts = (script*)(dynTabScripts->data);
     }
-#endif
 #if DEBUG_SHOWUSE
     showUse("Text",   textHw,           NUM_TEXT);
     showUse("Addr",   addrHw,           NUM_ADDRS);
     showUse("Module", moduleHw-MODMIN,  NUM_MODULE);
     showUse("Tycon",  tyconHw-TYCMIN,   NUM_TYCON);
     showUse("Name",   nameHw-NAMEMIN,   NUM_NAME);
-#if WANT_FIXED_SIZE_TABLES
-    showUse("Class",  classHw-CLASSMIN, NUM_CLASSES);
-    showUse("Inst",   instHw-INSTMIN,   NUM_INSTS);
-#else
     showUse("Class",  classHw-CLASSMIN, dynTabClass->maxIdx);
     showUse("Inst",   instHw-INSTMIN,   dynTabInst->maxIdx);
-#endif
     showUse("Ext",    extHw-EXTMIN,     NUM_EXT);
 #endif
 
@@ -1848,12 +1803,10 @@ Int     cellsRecovered;                 /* number of cells recovered       */
 static  Cell freeList;                  /* free list of unused cells       */
 static  Cell lsave, rsave;              /* save components of pair         */
 
-#if GC_WEAKPTRS
 static List weakPtrs;			/* list of weak ptrs		   */
 					/* reconstructed during every GC   */
 List   finalizers = NIL;
 List   liveWeakPtrs = NIL;
-#endif
 
 #if GC_STATISTICS
 
@@ -1895,7 +1848,6 @@ static Int markCount, stackRoots;
 
 #endif /* !GC_STATISTICS */
 
-#if FAST_WHATIS
 
 unsigned char whatCode[N_WHATCODE];  /* array of whatIs codes */
 
@@ -1920,7 +1872,6 @@ static Void initFastWhat(Void) {
 
 #undef fillWhatCode
 
-#endif /* FAST_WHATIS */
 
 Cell pair(l,r)                          /* Allocate pair (l, r) from       */
 Cell l, r; {                            /* heap, garbage collecting first  */
@@ -1973,7 +1924,6 @@ mc: switch (fst(c)) {
 			if (isGenPair(c))
 			    goto mc;
 			return c;
-#if GC_WEAKPTRS
 	case WEAKCELL :
 			{
 			  register int place = placeInSet(c);
@@ -1988,7 +1938,6 @@ mc: switch (fst(c)) {
 			  }
 			  return c;
 			}
-#endif
     }
 
     {   register int place = placeInSet(c);
@@ -2030,7 +1979,6 @@ mb: if (!isPair(c))
     switch (fst(c)) {
 	case INDIRECT : snd(t) = c = indirectChain(c);
 			goto mb;
-#if GC_WEAKPTRS
 	case WEAKCELL :
 			{
 			  register int place = placeInSet(c);
@@ -2044,7 +1992,6 @@ mb: if (!isPair(c))
 			  }
 			  return orig;
 			}
-#endif
     }
 
     {   register int place = placeInSet(c);
@@ -2136,25 +2083,16 @@ Void garbageCollect()     {             /* Run garbage collector ...       */
     gcStarted();
     for (i=0; i<marksSize; ++i)         /* initialise mark set to empty    */
 	marks[i] = 0;
-#if GC_WEAKPTRS
     weakPtrs = NIL;                     /* clear list of weak pointers     */
-#endif
     everybody(MARK);                    /* Mark all components of system   */
 
-#if IO_HANDLES
-#if WANT_FIXED_SIZE_TABLES
-    for (i=0; i<(Int)NUM_HANDLES; ++i)  /* release any unused handles      */
-#else
     for (i=0; i<(Int)num_handles; ++i)  /* release any unused handles      */
-#endif
 	if (nonNull(handles[i].hcell)) {
 	    register int place = placeInSet(handles[i].hcell);
 	    register int mask  = maskInSet(handles[i].hcell);
 	    if ((marks[place]&mask)==0)
 		freeHandle(i);
 	}
-#endif
-#if GC_MALLOCPTRS
     for (i=mallocPtr_hw-1; i >= 0; i--) { /* release any unused mallocptrs   */
 	if (isPair(mallocPtrs[i].mpcell)) {
 	    register int place = placeInSet(mallocPtrs[i].mpcell);
@@ -2163,12 +2101,10 @@ Void garbageCollect()     {             /* Run garbage collector ...       */
 		incMallocPtrRefCnt(i,-1);
 	}
     }
-#endif /* GC_MALLOCPTRS */
 #ifdef DOTNET
     markDotNetPtrs(marks);
 #endif /* DOTNET */
 
-#if GC_WEAKPTRS
     /* After GC completes, we scan the list of weak pointers that are
      * still live and zap their contents unless the contents are still
      * live (by some other means).
@@ -2257,7 +2193,6 @@ Void garbageCollect()     {             /* Run garbage collector ...       */
 	finalizers = revOnto(newFins,finalizers);
     }
 
-#endif /* GC_WEAKPTRS */
     gcScanning();                       /* scan mark set                   */
     mask      = 1;
     place     = 0;
@@ -2435,45 +2370,6 @@ Cell c; {                               /* except that Cells refering to   */
 /* rather high.  The recoded version below attempts to improve the average */
 /* performance for whatIs() using a binary search for part of the analysis */
 
-#if !FAST_WHATIS
-Cell whatIs(c)                         /* identify type of cell            */
-register Cell c; {
-    if (isPair(c)) {
-	register Cell fstc = fst(c);
-	return isTag(fstc) ? fstc : AP;
-    }
-    if (c<TUPMIN)    return c;
-    if (c>=INTMIN)   return INTCELL;
-
-    if (c>=NAMEMIN) if (c>=CLASSMIN)    if (c>=CHARMIN) return CHARCELL;
-					else            return CLASS;
-		    else                if (c>=INSTMIN) return INSTANCE;
-					else            return NAME;
-    else            if (c>=MODMIN)      if (c>=TYCMIN)  return TYCON;
-					else            return MODULE;
-		    else		if (c>=OFFMIN)  return OFFSET;
-					else		return (c>=EXTMIN) ?
-								EXT : TUPLE;
-
-/*  if (isPair(c)) {
-	register Cell fstc = fst(c);
-	return isTag(fstc) ? fstc : AP;
-    }
-    if (c>=INTMIN)   return INTCELL;
-    if (c>=CHARMIN)  return CHARCELL;
-    if (c>=CLASSMIN) return CLASS;
-    if (c>=INSTMIN)  return INSTANCE;
-    if (c>=NAMEMIN)  return NAME;
-    if (c>=TYCMIN)   return TYCON;
-    if (c>=MODMIN)   return MODULE;
-    if (c>=OFFMIN)   return OFFSET;
-#if TREX
-    if (c>=EXTMIN)   return EXT;
-#endif
-    if (c>=TUPMIN)   return TUPLE;
-    return c;*/
-}
-#endif
 
 #if DEBUG_PRINTER
 /* A very, very simple printer.
@@ -2739,7 +2635,6 @@ Int n; {
 	   : pair(INTCELL,n);
 }
 
-#if UNICODE_CHARS
 
 /* --------------------------------------------------------------------------
  * Unicode Characters: NUM_SHORT_CHARS is the number of one-cell characters.
@@ -2768,14 +2663,11 @@ Char c; {
 	   : pair(CHARCELL,c);
 }
 
-#endif	/* UNICODE_CHARS */
 
-#if BIGNUMS
 Bool isBignum(c)                       /* cell holds bignum value?         */
 Cell c; {
     return c==ZERONUM || (isPair(c) && (fst(c)==POSNUM || fst(c)==NEGNUM));
 }
-#endif
 
 #if SIZEOF_INTP == SIZEOF_INT
 typedef union {Int i; Pointer p;} IntOrPointer;
@@ -3211,26 +3103,17 @@ List args; {
  * Handle table - declared here for the GC to access.
  * ------------------------------------------------------------------------*/
 
-#if IO_HANDLES
-#if WANT_FIXED_SIZE_TABLES
-struct strHandle DEFTABLE(handles,NUM_HANDLES);
-#else
 DynTable* dynTabHandles = NULL;
 
 struct strHandle *handles;
 unsigned long     num_handles = 0;
-#endif
 
 /* --------------------------------------------------------------------------
  * Freeing a handle.
  * ------------------------------------------------------------------------*/
 static Void local freeHandle(n)         /* release handle storage when no  */
 Int n; {                                /* heap references to it remain    */
-#if WANT_FIXED_SIZE_TABLES
-    if (0<=n && n<(Int)NUM_HANDLES && nonNull(handles[n].hcell)) {
-#else
     if (0<=n && n<(Int)num_handles && nonNull(handles[n].hcell)) {
-#endif
 	if (n>HSTDERR && handles[n].hmode!=HCLOSED && handles[n].hfp) {
 	    fclose(handles[n].hfp);
 	    handles[n].hfp = 0;
@@ -3239,9 +3122,7 @@ Int n; {                                /* heap references to it remain    */
 	handles[n].hcell      = NIL;
     }
 }
-#endif
 
-#if GC_MALLOCPTRS
 /* --------------------------------------------------------------------------
  * Malloc Ptrs:
  * ------------------------------------------------------------------------*/
@@ -3321,7 +3202,6 @@ Int i; {
 	}
     }
 }
-#endif /* GC_MALLOCPTRS */
 
 /* --------------------------------------------------------------------------
  * Stable pointers
@@ -3333,7 +3213,6 @@ Int i; {
  * table of stable pointers.
  * ------------------------------------------------------------------------*/
 
-#if GC_STABLEPTRS
 
 /* Each entry in the stable pointer table is either a heap pointer
  * or is not currently allocated.
@@ -3383,29 +3262,13 @@ Int i; {
 }
 
 #undef SPT
-#endif /* GC_STABLEPTRS */
 
 /* --------------------------------------------------------------------------
  * storage control:
  * ------------------------------------------------------------------------*/
 
-#if DYN_TABLES
-static void far* safeFarCalloc (Int,Int);
-static void far* safeFarCalloc(n,s)     /* allocate table storage and check*/
-Int n, s; {                             /* for non-null return             */
-    void far* tab = farCalloc(n,s);
-    if (tab==0) {
-	ERRMSG(0) "Cannot allocate run-time tables"
-	EEND;
-    }
-    return tab;
-}
-#define TABALLOC(v,t,n)                 v=(t far*)safeFarCalloc(n,sizeof(t));
-#define TABFREE(v) free(v)
-#else
 #define TABALLOC(v,t,n)
 #define TABFREE(v)
-#endif
 
 DynTable* allocDynTable(eltSize, maxIdx, hWater, tabName)
 unsigned long eltSize;
@@ -3510,9 +3373,7 @@ Int what; {
 	ptr = tmp;
       }
       
-#if !WANT_FIXED_SIZE_TABLES      
       if (dynTabScripts) freeDynTable(dynTabScripts);
-#endif
     }
 }
 
@@ -3541,7 +3402,6 @@ Int what; {
 			   profile = 0;
 		       }
 #endif
-#if IO_HANDLES
 		       handles[HSTDIN].hmode  = HREAD;
 		       handles[HSTDIN].hbufMode = HUNKNOWN_BUFFERING;
 		       handles[HSTDOUT].hmode = HAPPEND;
@@ -3552,14 +3412,11 @@ Int what; {
 		       handles[HSTDIN].hBinaryMode = FALSE;
 		       handles[HSTDOUT].hBinaryMode = FALSE;
 		       handles[HSTDERR].hBinaryMode = FALSE;
-#endif /* IO_HANDLES */
 #ifdef DOTNET
 		       zeroDotNetTable();
 #endif
 #if !HSCRIPT
-#if GC_STABLEPTRS
 		       resetStablePtrs();
-#endif
 #endif
 		       consGC = TRUE;
 		       lsave  = NIL;
@@ -3640,30 +3497,22 @@ Int what; {
 		       mark(lsave);
 		       mark(rsave);
 		       end("Last expression", 3);
-#if IO_HANDLES
 		       start();
 		       mark(handles[HSTDIN].hcell);
 		       mark(handles[HSTDOUT].hcell);
 		       mark(handles[HSTDERR].hcell);
 		       end("Standard handles", 3);
-#endif
 
-#if GC_STABLEPTRS
 		       start();
 		       for (i=0; i<NUM_STABLEPTRS; ++i)
 			   mark(stablePtrTable[i]);
 		       end("Stable pointers", NUM_STABLEPTRS);
-#endif
 
-#if GC_WEAKPTRS
 		       mark(finalizers);
-#endif
 
-#if GC_MALLOCPTRS
 		       for (i=0; i<mallocPtr_hw; ++i)
 			   if (isPair(mallocPtrs[i].mpcell))
 			       mark(mallocPtrs[i].finalizers);
-#endif
 
 		       if (consGC) {
 			   start();
@@ -3712,7 +3561,6 @@ Int what; {
 			   EEND;
 		       }
 		       
-#if !WANT_FIXED_SIZE_TABLES
 		       dynTabScripts = allocDynTable(sizeof(script),10,0,"scripts");
 		       scripts = (script*)(dynTabScripts->data);
 		       dynTabClass = allocDynTable(sizeof(struct strClass),10,NUM_CLASSES,"class");
@@ -3723,7 +3571,6 @@ Int what; {
 		       dynTabHandles = allocDynTable(sizeof(struct strHandle),4, 0, "handles");
 		       handles = (struct strHandle*)(dynTabHandles->data);
 		       num_handles = dynTabHandles->maxIdx;
-#endif
 		       TABALLOC(text,      char,             NUM_TEXT)
 		       TABALLOC(tyconHash, Tycon,            TYCONHSZ)
 		       TABALLOC(tabTycon,  struct strTycon,  NUM_TYCON)
@@ -3737,13 +3584,8 @@ Int what; {
                        TABALLOC(tabBreakpt,struct strBreakpt, NUM_BRKPTS)
 		       clearStack();
 
-#if IO_HANDLES
 		       TABALLOC(handles,   struct strHandle, NUM_HANDLES)
-#if WANT_FIXED_SIZE_TABLES
-		       for (i=0; i<(Int)NUM_HANDLES; i++)
-#else
 		       for (i=0; i<(Int)num_handles; i++)
-#endif
 			   handles[i].hcell = NIL;
 
 		       handles[HSTDIN].hcell  = ap(HANDCELL,HSTDIN);
@@ -3752,7 +3594,6 @@ Int what; {
 		       handles[HSTDOUT].hfp   = stdout;
 		       handles[HSTDERR].hcell = ap(HANDCELL,HSTDERR);
 		       handles[HSTDERR].hfp   = stderr;
-#endif
 
 		       textHw        = 0;
 		       nextNewText   = NUM_TEXT;
@@ -3773,22 +3614,16 @@ Int what; {
 		       for (i=0; i<TYCONHSZ; ++i)
 			   tyconHash[i] = NIL;
 
-#if GC_WEAKPTRS
 		       finalizers   = NIL;
 		       liveWeakPtrs = NIL;
-#endif
-#if GC_MALLOCPTRS
 		       /* The high-water mark for the table points at the
 		        * next available slot in the table
 		        */
 		       mallocPtr_hw = 0;
 		       for (i=0; i<NUM_MALLOCPTRS; i++)
 			   mallocPtrs[i].mpcell = NIL;
-#endif
 
-#if GC_STABLEPTRS
 		       resetStablePtrs();
-#endif
 
 		       extHw	= EXTMIN;
 		       nameHw	= NAMEMIN;
@@ -3798,21 +3633,10 @@ Int what; {
 		       classHw  = CLASSMIN;
 		       instHw   = INSTMIN;
 
-#if WANT_FIXED_SIZE_TABLES
-		       tabInst  = (struct strInst far *)
-				    farCalloc(NUM_INSTS,sizeof(struct strInst));
-
-		       if (tabInst==0) {
-			   ERRMSG(0) "Cannot allocate instance tables"
-			   EEND;
-		       }
-#endif
 
 		       scriptHw = 0;
 
-#if FAST_WHATIS
 		       initFastWhat();
-#endif
 		       break;
 	case EXIT    : 
 	               /* Let go of dynamic storage */
@@ -3821,12 +3645,9 @@ Int what; {
 #if PROFILING
 		       if (heapThd) free(heapThd);
 #endif
-#if !WANT_FIXED_SIZE_TABLES
 		       if (dynTabClass)   freeDynTable(dynTabClass);
 		       if (dynTabInst)    freeDynTable(dynTabInst);
 		       if (dynTabHandles) freeDynTable(dynTabHandles);
-#else
-#endif
 		       TABFREE(text);
 		       TABFREE(tyconHash);
 		       TABFREE(tabTycon);

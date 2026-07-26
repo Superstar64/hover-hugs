@@ -29,11 +29,7 @@ typedef struct {			/* Each type variable contains:	   */
     Kind kind;				/* kind annotation		   */
 } Tyvar;
 
-#if     FIXED_SUBST			/* storage for type variables	   */
-extern	Tyvar		tyvars[];
-#else
 extern  Tyvar		*tyvars;	/* storage for type variables	   */
-#endif
 extern	Int		typeOff;	/* offset of result type 	   */
 extern	Type		typeIs;		/* skeleton of result type	   */
 extern  Int		typeFree;	/* freedom in instantiated type	   */

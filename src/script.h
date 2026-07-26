@@ -50,12 +50,6 @@ extern Void readScripts       (Int);
 
 extern Void script     (int);
 
-#if HUGS_FOR_WINDOWS
-extern Void setNumLoadedScripts (Script);
-extern Void setScriptHwMark     (Script);
-extern Void setScriptName       (Script,String);
-extern Void setScriptRealName   (Script,String);
-#endif
 
 
 #endif /* __SCRIPT_H__ */

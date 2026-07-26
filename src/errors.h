@@ -25,7 +25,6 @@ extern Void stopAnyPrinting (Void);
  * effect on output of Haskell programs (which should use hPutStr and friends).
  *-------------------------------------------------------------------------*/
 
-#if REDIRECT_OUTPUT
 extern Void   hugsPrintf            (const char *, ...);
 extern Void   hugsPutchar           (int);
 extern Void   hugsFlushStdout       (Void);
@@ -46,34 +45,12 @@ extern Void   hugsPutc      	    (int, FILE*);
 #define FPrintf              hugsFPrintf
 #define Putc                 hugsPutc
 
-#else /* !REDIRECT_OUTPUT */
-
-#define Printf               printf
-#define Putchar              putchar
-#define FlushStdout()        fflush(stdout)
-#define EnableOutput(f)      doNothing()
-#define ClearOutputBuffer()  0
-
-#define FFlush               fflush
-#define FPrintf              fprintf
-#define Putc                 putc
-#endif /* REDIRECT_OUTPUT */
 
 /*-------------------------------------------------------------------------*/
 
-#if HUGS_FOR_WINDOWS
-/* output to stderr uses RED color already */
-#undef  Hilite
-#undef  Lolite
-#define Hilite()         doNothing()
-#define Lolite()         doNothing()
-#define SetForeColor(c)  WinHugsColor(c);
-#define errorStream	 stderr
-#else
 #define Hilite()         doNothing()
 #define Lolite()         doNothing()
 #define errorStream	 stdout
-#endif
 
 #define ERRMSG(l)	 Hilite(); errHead(l); FPrintf(errorStream,
 #define EEND       	 ); Lolite(); errFail()

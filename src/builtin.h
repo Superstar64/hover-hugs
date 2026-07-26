@@ -560,10 +560,8 @@ extern Cell   mkIOError (Cell *,Name,String,String,Cell *);
  * This may lead to syntax errors if used where a statement is required - such
  * errors can be fixed by adding braces round the call.  Blech!
  * ------------------------------------------------------------------------*/
-#if IO_MONAD
 #define IOArg(n)    primArg((n)+IOArity)
 #define IOReturn(r) { updapRoot(primArg(1),r); return; }
 #define IOFail(r)   throwException(ap(nameIOException,r))
-#endif
 
 #endif /* __BUILTIN_H__ */

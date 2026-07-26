@@ -29,7 +29,6 @@
 #endif
 
 /* Header files needed to compile the IO primitives */
-#if IO_MONAD
 
 # include <sys/types.h>
 # include <sys/stat.h>
@@ -52,7 +51,6 @@
 
 # include <fcntl.h>
 
-#endif /* IO_MONAD */
 
 #include "builtin.h"
 
@@ -86,9 +84,7 @@ Name nameCompAux;                       /* auxiliary function for compares */
 Name namePmInt,   namePmFlt;            /* primitives for pattern matching */
 Name nameReturnIO;
 Name namePmInteger;
-#if NPLUSK
 Name namePmNpk,   namePmSub;            /* primitives for (n+k) patterns   */
-#endif
 Name nameRecExt,  nameRecBrk;           /* Extend and break a record       */
 Name nameRecSel,  nameRecShw;           /* Select and show a record        */
 Name nameRecEq;				/* Compare records		   */
@@ -96,7 +92,6 @@ Name nameAddEv;				/* Add up evidence		   */
 
 Name nameRationalToFloat;
 Name nameRationalToDouble;
-#if SHORT_CIRCUIT_COERCIONS
 Name nameFloatToRational;
 Name nameDoubleToRational;
 Name nameDoubleToRatio;
@@ -105,7 +100,6 @@ Name nameIntToFloat;
 Name nameIntToDouble;
 Name nameDoubleToFloat;
 Name nameFloatToDouble;
-#endif
 
 /* --------------------------------------------------------------------------
  * Local function prototypes:
@@ -163,7 +157,6 @@ PROTO_PRIM(primDummyCvt);
 PROTO_PRIM(primRationalToFloat);
 PROTO_PRIM(primRationalToDouble);
 
-#if WORD_OPS
 PROTO_PRIM(primMaxWord);
 PROTO_PRIM(primPlusWord);
 PROTO_PRIM(primMinusWord);
@@ -205,7 +198,6 @@ PROTO_PRIM(primW32toW);
 
 PROTO_PRIM(primW32toW64);
 PROTO_PRIM(primW64toW32);
-#endif
 
 PROTO_PRIM(primFreeHFunPtr);
 
@@ -355,7 +347,6 @@ static struct primitive builtinPrimTable[] = {
   {"primBitInt",        1, primBitInt},
   {"primTestInt",       2, primTestInt},
 
-#if WORD_OPS
   {"primMaxWord",       0, primMaxWord},
   {"primPlusWord",      2, primPlusWord},
   {"primMinusWord",     2, primMinusWord},
@@ -397,23 +388,9 @@ static struct primitive builtinPrimTable[] = {
 
   {"primWord32ToWord64",2, primW32toW64},
   {"primWord64ToWord32",1, primW64toW32},
-#endif
 
   {"freeHaskellFunPtr", 1+IOArity, primFreeHFunPtr},
 
-#if !BIGNUMS                            /* Implement Integer as Int        */
-  {"primPlusInteger",   2, primPlusInt},
-  {"primMinusInteger",  2, primMinusInt},
-  {"primMulInteger",    2, primMulInt},
-  {"primQrmInteger",    2, primQrmInt},
-  {"primNegInteger",    1, primNegInt},
-  {"primIntToInteger",  1, primDummyCvt},
-  {"primIntegerToInt",  1, primDummyCvt},
-  {"primIntegerToFloat",1, primIntToFloat},
-  {"primIntegerToDouble",1,primIntToDouble},
-  {"primEqInteger",     2, primEqInt},
-  {"primCmpInteger",    2, primCmpInt},
-#endif
 
   {"primPlusFloat",     2, primPlusFloat},
   {"primMinusFloat",    2, primMinusFloat},
@@ -852,7 +829,6 @@ primFun(primShiftInt) {
  * Unsigned arithmetic primitives:
  * ------------------------------------------------------------------------*/
 
-#if WORD_OPS
 CAFWord(primMaxWord,MAXHUGSWORD)       /* maximum integer CAF              */
 WordWord2Word(primPlusWord,x+y)        /* Word addition primitive          */
 WordWord2Word(primMinusWord,x-y)       /* Word subtraction primitive       */
@@ -960,13 +936,11 @@ primFun(primW32toW64) {
     updateRoot(pair(I64CELL,pair(mkInt(x),mkInt(y))));
 }
 
-#endif /* WORD_OPS */
 
 /* --------------------------------------------------------------------------
  * Haskell Integer (bignum) primitives:
  * ------------------------------------------------------------------------*/
 
-#if BIGNUMS
 /* --------------------------------------------------------------------------
  * Functions for manipulating Haskell Integers (bignums).
  *
@@ -1033,9 +1007,7 @@ static struct primitive bignumPrimTable[] = {
  * Bignum control:
  * ------------------------------------------------------------------------*/
 
-#if SHORT_CIRCUIT_COERCIONS
 static Name nameIntToInteger;
-#endif
 
 static Void bignumControl (Int);
 static Void bignumControl(what)
@@ -1045,11 +1017,9 @@ Int what; {
 		       mark(bigRem);
 		       break;
 	case INSTALL : 
-#if SHORT_CIRCUIT_COERCIONS
 #define predef(nm,str) nm=newName(findText(str),NIL); name(nm).defn=PREDEFINED
 		       predef(nameIntToInteger, "primIntToInteger");
 #undef predef
-#endif
 	case RESET   : bn     = NIL;
 		       bigRem = NIL;
 		       break;
@@ -1298,14 +1268,12 @@ primFun(primIntToInteger) {		/* Conversion :: Int -> Integer	   */
 }
 
 primFun(primIntegerToInt) {		/* Conversion :: Integer -> Int	   */
-#if SHORT_CIRCUIT_COERCIONS
     /* Optimisation: we try to short-circuit trivial conversions */
     Cell x = followInd(primArg(1));
     if (isAp(x) && followInd(fun(x)) == nameIntToInteger) {
 	updateRoot(arg(x));
 	return;
     } else
-#endif
     {
 	eval(primArg(1));
 	whnfHead = bigToInt(whnfHead);
@@ -1951,7 +1919,6 @@ primFun(primQrmInteger) {		/* Integer quotient and remainder  */
 }
 
 /*-------------------------------------------------------------------------*/
-#endif
 
 /* --------------------------------------------------------------------------
  * Coercion primitives:
@@ -1996,7 +1963,6 @@ primFun(primDummyCvt) {                /* dummy (identity) conversion      */
 }
 
 primFun(primRationalToFloat) {
-#if SHORT_CIRCUIT_COERCIONS
     /* Optimisation: we try to short-circuit trivial conversions */
     Cell x = followInd(primArg(1));
     if (isAp(x)) {
@@ -2020,12 +1986,10 @@ primFun(primRationalToFloat) {
 	    }
 	}
     }
-#endif
     updapRoot(nameRationalToFloat,primArg(1));
 }
 
 primFun(primRationalToDouble) {
-#if SHORT_CIRCUIT_COERCIONS
     /* Optimisation: we try to short-circuit trivial conversions */
     Cell x = followInd(primArg(1));
     if (isAp(x)) {
@@ -2048,7 +2012,6 @@ primFun(primRationalToDouble) {
 	    }
 	}
     }
-#endif
     updapRoot(nameRationalToDouble,primArg(1));
 }
 
@@ -2111,11 +2074,7 @@ Float2FloatPre(primLog10Float,log10(x),x>0) /* Float logarithm (base 10) prim*/
 Float2Int(primFloatToInt,(Int) x)      /* Adhoc Float --> Int conversion   */
 Double2Int(primDoubleToInt,(Int) x)    /* Adhoc Double --> Int conversion  */
 
-#if BIGNUMS
 CAFBignum(primFloatRadix,bigInt(HUGS_FLT_RADIX)) /* Float radix primitive  */
-#else                                    
-CAFInt(primFloatRadix,HUGS_FLT_RADIX)  /* from K&R2, I hope it's portable  */
-#endif
 
 CAFInt(primFloatDigits,HUGS_FLT_MANT_DIG)/* Float sig. digits primitive    */
 				       /* again, courtesy K&R2             */
@@ -2137,13 +2096,8 @@ primFun(primFloatDecode) {             /* Float decode primitive           */
     f  = frexp((double)(f),&n);        /* 0.5   <= f < 1                   */
     f  = ldexp(f,HUGS_FLT_MANT_DIG);   /* 2^m-1 <= f < 2^m, m=HUGS_FLT_MANT_DIG*/
     n -= HUGS_FLT_MANT_DIG;
-#if BIGNUMS
     push(bigDouble(f));
     updapRoot(ap(mkTuple(2),top()),mkInt(n));
-#else
-    push(mkInt((Int)f));
-    updapRoot(ap(mkTuple(2),top()),mkInt(n));
-#endif
 }
 
 primFun(primFloatEncode) {             /* Float encode primitive           */
@@ -2151,11 +2105,7 @@ primFun(primFloatEncode) {             /* Float encode primitive           */
     Float f;                           /* Ugly hack, don't use Hugs for    */
     IntArg(n,1);                       /* numerical work                   */
     eval(primArg(2));                  /* get integer                      */
-#if BIGNUMS                                    
     f = (Float)bigToDouble(whnfHead);  /* and turn it into a float         */
-#else                                          
-    f = (Float) whnfInt;               /* and turn it into a float         */
-#endif
     updateRoot(mkFloat(ldexp(f,n)));
 }
 
@@ -2167,13 +2117,8 @@ primFun(primDoubleDecode) {            /* Double decode primitive           */
     f  = frexp((double)(f),&n);        /* 0.5   <= f < 1                   */
     f  = ldexp(f,HUGS_DBL_MANT_DIG);   /* 2^m-1 <= f < 2^m, m=HUGS_DBL_MANT_DIG*/
     n -= HUGS_DBL_MANT_DIG;
-#if BIGNUMS
     push(bigDouble(f));
     updapRoot(ap(mkTuple(2),top()),mkInt(n));
-#else
-    push(mkInt((Int)f));
-    updapRoot(ap(mkTuple(2),top()),mkInt(n));
-#endif
 }
 
 primFun(primDoubleEncode) {            /* Double encode primitive          */
@@ -2181,11 +2126,7 @@ primFun(primDoubleEncode) {            /* Double encode primitive          */
     Double f;                          /* Ugly hack, don't use Hugs for    */
     IntArg(n,1);                       /* numerical work                   */
     eval(primArg(2));                  /* get integer                      */
-#if BIGNUMS                                    
     f = (Double)bigToDouble(whnfHead); /* and turn it into a double        */
-#else                                          
-    f = (Double)whnfInt;               /* and turn it into a double        */
-#endif
     DoubleResult(ldexp(f,n));
 }
 
@@ -2512,13 +2453,11 @@ Int  d; {				/* precedence level		   */
 			}
 			break;
 
-#if BIGNUMS
 	case NEGNUM   :
 	case ZERONUM  :
 	case POSNUM   : out = rev(bigOut(whnfHead,NIL,d>=UMINUS_PREC));
 			pr  = nameNPrint;
 			break;
-#endif
 
 	case INTCELL  : {   Int digit;
 
@@ -2599,17 +2538,13 @@ Int  d; {				/* precedence level		   */
 			pr = nameNPrint;
 			break;
 
-#if HASKELL_ARRAYS
 	case ARRAY    : outStr("{array}");
 			pr = nameNPrint;
 			break;
-#endif
 
-#if IO_REFS
 	case MUTVAR   : outStr("{mutable variable}");
 			pr = nameNPrint;
 			break;
-#endif
 
 	case HUGSOBJECT: 
 			outStr("{Cell ...}");
@@ -2620,11 +2555,9 @@ Int  d; {				/* precedence level		   */
 			pr = nameNPrint;
 			break;
  
-#if IO_HANDLES
 	case HANDCELL : outStr("{handle}");
 			pr = nameNPrint;
 			break;
-#endif
 
         case OBSERVE  : outStr("printer.c: printer(): OBSERVE");
                         break;
@@ -2941,7 +2874,6 @@ FILE *fp; {                             /* and print it on fp              */
  * IO monad implementation
  * ------------------------------------------------------------------------*/
 
-#if IO_MONAD
 /* --------------------------------------------------------------------------
  * Implementation of the Haskell IO monad.
  *
@@ -2967,13 +2899,10 @@ Name nameIOBind;		        /* bind IO code                    */
 Name namePutStr;		        /* Prelude.putStr                  */
 
 static Name namePass;			/* auxiliary:: \f b a -> f a b     */
-#if IO_HANDLES
 static Name nameHreader;	        /* auxiliary function		   */
-#endif
 static Cell hugsProgName;		/* value of getProgName            */
 static Cell hugsArgs;			/* value of getArgs                */
 
-#if IO_HANDLES
 static Void   local throwErrno     (String,Bool,Int,Cell *);
 static String local toIOErrorDescr (int,Bool);
 static Name   local toIOError      (int);
@@ -2987,15 +2916,8 @@ static Void   local setRWState     (Int,Int);
 static Void   local checkOpen      (Int,String);
 static Void   local checkReadable  (Int,String);
 static Void   local checkWritable  (Int,String);
-#endif
 
-#if IO_HANDLES
-# if WANT_FIXED_SIZE_TABLES
-#  define MAX_HANDLES NUM_HANDLES
-# else
 #  define MAX_HANDLES num_handles
-# endif
-#endif
 
 extern Void local pushString       (String);
 
@@ -3011,9 +2933,7 @@ Int what; {
 		       setCurrModule(modulePrelude);
 #define pFun(n,s,t)    addPrim(0,n=newName(findText(s),NIL),t,modulePrelude,NIL)
 		       pFun(namePass,	 "_pass",    "passIO");
-#if    IO_HANDLES
 		       pFun(nameHreader, "_hreader", "hreader");
-#endif
 #undef pFun
 #define predef(nm,str) nm=newName(findText(str),NIL); name(nm).defn=PREDEFINED
 		       predef(nameIORun,    "hugsIORun");
@@ -3042,7 +2962,6 @@ PROTO_PRIM(primGetArgs);
 PROTO_PRIM(primSetProgName);
 PROTO_PRIM(primSetArgs);
 
-#if IO_HANDLES
 static Void local fopenPrim   (StackPtr,Bool,String);
 static int local getIOMode    (Cell);
 
@@ -3087,14 +3006,11 @@ PROTO_PRIM(primHSetEcho);
 
 PROTO_PRIM(primIOEql);
 PROTO_PRIM(primIOHash);
-#endif
 
-#if IO_REFS
 PROTO_PRIM(primNewRef);
 PROTO_PRIM(primDerefRef);
 PROTO_PRIM(primAssignRef);
 PROTO_PRIM(primEqRef);
-#endif
 
 PROTO_PRIM(primMakeSP);
 PROTO_PRIM(primDerefSP);
@@ -3110,7 +3026,6 @@ PROTO_PRIM(primEqFP);
 PROTO_PRIM(primTouchFP);
 PROTO_PRIM(primFPToP);
 
-#if GC_WEAKPTRS
 PROTO_PRIM(primWeakPtrEq);
 PROTO_PRIM(primMkWeak);
 PROTO_PRIM(primDeRefWeak);
@@ -3118,14 +3033,11 @@ PROTO_PRIM(primReplaceFinalizer);
 PROTO_PRIM(primFinalize);
 PROTO_PRIM(primRunFinalizer);
 PROTO_PRIM(primFinalizerWaiting);
-#endif
 
-#if STABLE_NAMES
 PROTO_PRIM(primMakeSN);
 PROTO_PRIM(primDerefSN);
 PROTO_PRIM(primHashSN);
 PROTO_PRIM(primEqSN);
-#endif
 
 #ifdef HSCRIPT
 PROTO_PRIM(primGetCurrentScript);
@@ -3169,7 +3081,6 @@ static struct primitive iomonadPrimTable[] = {
   {"primSetProgName",   1+IOArity, primSetProgName},
   {"primSetArgs",       1+IOArity, primSetArgs},
 
-#if IO_HANDLES
   {"hGetChar",		1+IOArity, primHGetChar},
   {"hPutChar",		2+IOArity, primHPutChar},
   {"hPutStr",		2+IOArity, primHPutStr},
@@ -3206,14 +3117,11 @@ static struct primitive iomonadPrimTable[] = {
   {"hIsTerminalDevice",	1+IOArity, primHIsTerminalDevice},
   {"hGetEcho",		1+IOArity, primHGetEcho},
   {"hSetEcho",		2+IOArity, primHSetEcho},
-#endif
 
-#if IO_REFS
   {"newRef",            1+IOArity, primNewRef},
   {"getRef",		1+IOArity, primDerefRef},
   {"setRef",		2+IOArity, primAssignRef},
   {"eqRef",		2, primEqRef},
-#endif
 
   {"makeStablePtr",	1+IOArity, primMakeSP},
   {"deRefStablePtr",	1+IOArity, primDerefSP},
@@ -3230,7 +3138,6 @@ static struct primitive iomonadPrimTable[] = {
   {"touchForeignPtr",	1+IOArity, primTouchFP},
   {"unsafeForeignPtrToPtr", 1, primFPToP},
 
-#if GC_WEAKPTRS
   {"weakPtrEq",		2, primWeakPtrEq},
   {"mkWeak",		3+IOArity, primMkWeak},
   {"deRefWeak",		1+IOArity, primDeRefWeak},
@@ -3238,14 +3145,11 @@ static struct primitive iomonadPrimTable[] = {
   {"finalize",		1+IOArity, primFinalize},
   {"runFinalizer",	0+IOArity, primRunFinalizer},
   {"finalizerWaiting",	0+IOArity, primFinalizerWaiting},
-#endif
 
-#if STABLE_NAMES
   {"makeStableName",	1+IOArity, primMakeSN},
   {"deRefStableName",	1, primDerefSN},
   {"hashStableName",	1, primHashSN},
   {"eqStableName",	2, primEqSN},
-#endif
   
 #ifdef HSCRIPT
   {"getCurrentScript",  0+IOArity, primGetCurrentScript},
@@ -3298,7 +3202,6 @@ primFun(primPass) {			/* Auxiliary function		   */
  * Handle operations:
  * ------------------------------------------------------------------------*/
 
-#if IO_HANDLES
 
 static
 Int local newHandle(sCell,loc) /* return a free Handle or throw an IOError */
@@ -3312,7 +3215,6 @@ String loc; {
 	garbageCollect();                       /* succeed, garbage collect*/
 	for (i=0; i<(Int)MAX_HANDLES && nonNull(handles[i].hcell); ++i)
 	    ;                                   /* and try again ...       */
-#if !WANT_FIXED_SIZE_TABLES
 	if (i >= (Int)MAX_HANDLES) {
 	    Int j;
 	    growDynTable(dynTabHandles);
@@ -3323,7 +3225,6 @@ String loc; {
 		handles[j].hcell = NIL;
 	    }
 	}
-#endif
     }
 
     if (i>=(Int)MAX_HANDLES) {                  /* ... before we give up   */
@@ -3459,11 +3360,9 @@ static Void local hPutChar(Char c, Int h, String fname) {
 				      FPutChar(c, handles[h].hfp);
     if (retval == EOF)
 	throwErrno(fname, TRUE, h, NULL);
-#if FLUSHEVERY
     if (h <= 2) { /* Only flush the standard handles */
 	fflush(handles[h].hfp);
     }
-#endif
 }
 
 /* If the stream is read-write, set the state, otherwise do nothing */
@@ -3565,7 +3464,6 @@ Cell   *mbF;	/* a FilePath or NULL */
 }
 
 
-#endif
 /* --------------------------------------------------------------------------
  * IO Errors (more defined for file ops)
  * ------------------------------------------------------------------------*/
@@ -3637,21 +3535,12 @@ primFun(primGC) {			/* force a GC right now            */
     IOReturn(nameUnit);
 }
 
-#if BIGNUMS
 #include <time.h>
 
 primFun(primGetRandomSeed) {		/* generate a random seed          */
     IOReturn(bigInt(clock()));
 }
 
-#else
-
-primFun(primGetRandomSeed) {		/* generate a random seed          */
-    ERRMSG(0) "getRandomSeed is not implemented on this architecture"
-    EEND;
-}
-
-#endif
 				     
 primFun(primGetEnv) {                 /* primGetEnv :: String -> IO String */
     String s = evalName(IOArg(1));    /* Eval name	                   */
@@ -3733,7 +3622,6 @@ primFun(primSetArgs) {                  /* primSetArgs :: [String] -> IO () */
  * File IO
  * ------------------------------------------------------------------------*/
 
-#if IO_HANDLES
 
 #define HandleArg(nm,offset)  \
     eval(primArg(offset));    \
@@ -3788,11 +3676,6 @@ primFun(primHPutStr) {			/* print string on handle	   */
 	hPutChar(charOf(whnfHead),h,"IO.hPutStr");
 	eval(pop());
     }
-#if !FLUSHEVERY
-    if (h <= 2) { /* Only flush the standard handles */
-	fflush(handles[h].hfp);
-    }
-#endif
     IOReturn(nameUnit);
 }
 
@@ -4349,13 +4232,11 @@ primFun(primHSetEcho) {
 	setEchoTerminal(fd, echo);
 }
 
-#endif /* IO_HANDLES */
 
 /* --------------------------------------------------------------------------
  * Mutable variables
  * ------------------------------------------------------------------------*/
 
-#if IO_REFS
 
 #if CHECK_TAGS
 #define checkRef() if (MUTVAR != whatIs(whnfHead)) internal("Ref expected")
@@ -4388,7 +4269,6 @@ primFun(primEqRef) {			/* Ref a -> Ref a -> Bool	   */
     checkRef();
     updateRoot(pop()==whnfHead ? nameTrue : nameFalse);
 }
-#endif
 
 /* --------------------------------------------------------------------------
  * Stable Pointers
@@ -4520,7 +4400,6 @@ primFun(primFPToP) {		/* ForeignPtr a -> Ptr a                   */
     PtrResult(derefMP(whnfHead));
 }
 
-#if STABLE_NAMES
 /* --------------------------------------------------------------------------
  * Stable Names
  * ------------------------------------------------------------------------*/
@@ -4544,9 +4423,7 @@ primFun(primEqSN) {		/* StableName a -> StableName a -> Bool	   */
     eval(primArg(1));
     updateRoot(pop()==whnfHead ? nameTrue : nameFalse);
 }
-#endif
 
-#if GC_WEAKPTRS
 /* --------------------------------------------------------------------------
  * Weak Pointers
  * ------------------------------------------------------------------------*/
@@ -4644,7 +4521,6 @@ primFun(primRunFinalizer) {		/* IO ()			   */
 primFun(primFinalizerWaiting) {		/* IO Boolean			   */
   IOBoolResult(!isNull(finalizers));
 }
-#endif /* GC_WEAKPTRS */
 
 
 #if HSCRIPT
@@ -4713,13 +4589,11 @@ primFun(primIOHash) {                      /* :: Eval a => a -> ST Mem Int */
 }
 
 /*-------------------------------------------------------------------------*/
-#endif
 
 /* --------------------------------------------------------------------------
  * Time and CPUTime module implementations
  * ------------------------------------------------------------------------*/
 
-#if TIME_MODULE
 /*
  * Primitives needed to implement the Haskell 98 Time & CPUTime modules.
  *
@@ -4895,13 +4769,11 @@ primFun(primGetCPUUsage) { /* IO (Int,Int,Int,Int) */
 		mkInt(sysNSec)));
 }
 
-#endif
 
 /* --------------------------------------------------------------------------
  * Directory module implementation
  * ------------------------------------------------------------------------*/
 
-#if DIRECTORY_MODULE
 /*
  * Primitives needed to implement the Haskell 98 Directory module.
  *
@@ -5391,7 +5263,6 @@ primFun(primGetModTime) { /* FilePath -> IO Int{-time_t-} - get the mod. time of
     throwErrno("Directory.getModificationTime", TRUE, NO_HANDLE, &IOArg(1));
   IOReturn(mkInt(st.st_mtime));
 }
-#endif
 
 /* --------------------------------------------------------------------------
  * Error catching primitives
@@ -5664,13 +5535,11 @@ primFun(primClassifyCell) {          /* classifyCell                       */
 	    case TUPLE    : result = ap(nameHugsTuple,mkInt(tupleOf(whnfHead)));
 			    break;
 
-#if BIGNUMS
 	    case ZERONUM  : 
 	    case POSNUM   : 
 	    case NEGNUM   : 
 			    result = ap(nameHugsInteger, whnfHead);
 			    break;
-#endif
 
 	    case INTCELL  : result = ap(nameHugsInt, whnfHead);
 			    break;
@@ -5684,20 +5553,14 @@ primFun(primClassifyCell) {          /* classifyCell                       */
 	    case DOUBLECELL: result = ap(nameHugsDouble, whnfHead);
 			    break;
 
-#if IO_HANDLES
 	    case HANDCELL : result = ap(nameHugsPrim, mkStr(findText("{handle}")));
 			    break;
-#endif
 
-#if IO_REFS
 	    case MUTVAR   : result = ap(nameHugsPrim, mkStr(findText("{ref}")));
 			    break;
-#endif
 
-#if HASKELL_ARRAYS
 	    case ARRAY    : result = ap(nameHugsPrim, mkStr(findText("{primitive array}")));
 			    break;
-#endif
 
 	    case HUGSOBJECT : 
 			    /* ToDo: fix so that debugger can examine itself */
@@ -5836,7 +5699,6 @@ primFun(primAddrAt) {                 /* Obtain address at address         */
  * Array primitives:
  * ------------------------------------------------------------------------*/
 
-#if HASKELL_ARRAYS
 /* --------------------------------------------------------------------------
  * Haskell array primitives.
  *
@@ -5861,13 +5723,11 @@ PROTO_PRIM(primSubscript);
 PROTO_PRIM(primBounds);
 PROTO_PRIM(primElems);
 PROTO_PRIM(primEltUndef);
-#if IO_MONAD
 PROTO_PRIM(primIONewArr);
 PROTO_PRIM(primIOReadArr);
 PROTO_PRIM(primIOWriteArr);
 PROTO_PRIM(primIOFreeze);
 PROTO_PRIM(primIOArrEq);
-#endif
 
 static struct primitive arrayPrimTable[] = {
   {"primArray",		3, primArray},
@@ -5879,14 +5739,12 @@ static struct primitive arrayPrimTable[] = {
   {"primBounds",	1, primBounds},
   {"primElems",		1, primElems},
   {"eltUndef",		0, primEltUndef},
-#if IO_MONAD
   {"IONewArr",		3+IOArity, primIONewArr},
   {"IOReadArr",		2+IOArity, primIOReadArr},
   {"IOWriteArr",	3+IOArity, primIOWriteArr},
   {"IOFreeze",		1+IOArity, primIOFreeze},
   {"IOBounds",	        1, primBounds},
   {"IOArrEq",	        2, primIOArrEq},
-#endif
   {0,			0, 0}
 };
 
@@ -6147,7 +6005,6 @@ primFun(primEltUndef) {
     throwException(ap(nameArrayException, ap(nameUndefinedElement, nameNil)));
 }
 
-#if IO_MONAD
 primFun(primIONewArr) {			/* :: (a,a)			   */
     declArr;				/*    -> Int			   */
     aNewSet(3+IOArity,2+IOArity,IOArg(1));/*	 -> b			   */
@@ -6181,7 +6038,6 @@ primFun(primIOArrEq) {		        /* :: IOArray a b                 */
     BoolResult(primArg(1)==primArg(2));
 }
 
-#endif /* IO_MONAD */
 
 /* Retire macros used in the implementation of arrays -------------------- */
 
@@ -6205,7 +6061,6 @@ primFun(primIOArrEq) {		        /* :: IOArray a b                 */
 #undef aRetForIO
 
 /*-------------------------------------------------------------------------*/
-#endif
 
 /* --------------------------------------------------------------------------
  * Char primitives:
@@ -6938,21 +6793,11 @@ Int what; {
 
 		       registerPrims(&builtinPrims);
 		       registerPrims(&printerPrims);
-#if HASKELL_ARRAYS
 		       registerPrims(&arrayPrims);
-#endif
-#if BIGNUMS
 		       registerPrims(&bignumPrims);
-#endif
-#if IO_MONAD
 		       registerPrims(&iomonadPrims);
-#endif
-#if TIME_MODULE
 		       registerPrims(&timePrims);
-#endif
-#if DIRECTORY_MODULE
 		       registerPrims(&dirPrims);
-#endif
 #if INTERNAL_PRIMS
 		       registerPrims(&internalPrims);
 #endif
@@ -7011,13 +6856,10 @@ Int what; {
 		       predef(namePmInteger,    "primPmInteger");
 		       predef(namePmFlt,        "primPmFlt");
 		       predef(nameReturnIO,     "primretIO");
-#if NPLUSK
 		       predef(namePmNpk,        "primPmNpk");
 		       predef(namePmSub,        "primPmSub");
-#endif
 		       predef(nameRationalToDouble, "rationalToDouble");
 		       predef(nameRationalToFloat,  "rationalToFloat");
-#if SHORT_CIRCUIT_COERCIONS
 		       predef(nameFloatToRational,  "floatToRational");
 		       predef(nameDoubleToRational, "doubleToRational");
 		       predef(nameDoubleToRatio,    "doubleToRatio");
@@ -7026,7 +6868,6 @@ Int what; {
 		       predef(nameIntToDouble,      "primIntToDouble");
 		       predef(nameDoubleToFloat,    "primDoubleToFloat");
 		       predef(nameFloatToDouble,    "primFloatToDouble");
-#endif
 #undef  predef
 		       break;
 

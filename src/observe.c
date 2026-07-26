@@ -110,9 +110,6 @@ extPrimFun(primBkpt) {			/* check if break enabled          */
     updateRoot(pop());
 }
 
-#if !IO_REFS
-#error primitive "setBkpt" unavailable as IO_REFS not enabled 
-#else
 extPrimFun(primSetBkpt) {			
     String s = evalName(IOArg(2));
     eval(IOArg(1));
@@ -120,5 +117,4 @@ extPrimFun(primSetBkpt) {
     setBreakpt(s, whnfHead == nameTrue);
     IOReturn(nameUnit);
 }
-#endif
 
