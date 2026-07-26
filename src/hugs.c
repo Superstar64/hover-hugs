@@ -167,8 +167,6 @@ String argv[]; {
 	hugsEdit = strCopy(notePadLoc);
       }
     }
-#elif __MWERKS__ && macintosh
-    hugsEdit      = NULL;
 #else
     hugsEdit      = strCopy(fromEnv("EDITOR",NULL));
 #endif

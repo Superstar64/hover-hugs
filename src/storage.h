@@ -978,14 +978,7 @@ extern	StackPtr sp;
 
 extern  Void hugsStackOverflow (Void);
 
-#if __MWERKS__ && macintosh
-#include <Memory.h>
-#define STACK_HEADROOM 16384
-#define STACK_CHECK if (StackSpace() <= STACK_HEADROOM) \
-		      internal("Macintosh function parameter stack overflow.");
-#else
 #define STACK_CHECK
-#endif
 
 /* --------------------------------------------------------------------------
  * Script file control:

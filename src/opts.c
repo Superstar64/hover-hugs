@@ -192,10 +192,6 @@ Void optionInfo(Void) {                 /* Print information about command */
     Printf(" -c%d",cutoff);
     Printf("\nSearch path     : -P");
     printString(hugsPath);
-#if __MWERKS__ && macintosh
-    Printf("\n{Hugs}          : %s",hugsdir());
-    Printf("\n{Current}       : %s",currentDir());
-#endif
     Printf("\nSource suffixes : -S");
     printString(hugsSuffixes);
     Printf("\nEditor setting  : -E");

@@ -162,11 +162,7 @@ int macsystem(char *filenames);
 			  sigaddset(&mask, SIGINT); \
 			  sigprocmask(SIG_UNBLOCK, &mask, NULL); \
 			}
-#if __MWERKS__ && macintosh
 # define allowBreak()   doNothing()
-#else
-# define allowBreak()   doNothing()
-#endif
 
 
 

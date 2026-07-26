@@ -66,15 +66,6 @@
 #include <unix.h>
 #endif
 
-#if __MWERKS__ && macintosh
-#include <SIOUX.h>
-
-/*	The variable time_release should be set to a value which gives
-	good cooperative multitasking.
-*/
-int time_release = 20000;
-int allow_break_count = 0;
-#endif
 
 /* --------------------------------------------------------------------------
  * Prototypes for registry reading
@@ -153,9 +144,7 @@ String f;
 Bool   isReg; {
     struct stat scbuf;
     return (  !stat(f,&scbuf) 
-#if !(defined macintosh)	/* Macintosh files always have read permission */
 	   && (scbuf.st_mode & S_IREAD) /* readable     */
-#endif
 	   && ( !isReg || (scbuf.st_mode & S_IFREG)) /* regular file */
 	   );
 }
@@ -167,9 +156,6 @@ Bool   isReg; {
 
 static String local homeDir	  (void);
 
-#if __MWERKS__ && macintosh
-static String local currentDir	  (void);
-#endif
 
 #if HSCRIPT
 static String local hscriptDir    (Void);
@@ -195,10 +181,6 @@ static Bool   local isPathSep     (String);
 #endif
 static Bool   local scanSubDirs   (String);
 
-#if __MWERKS__ && macintosh
-typedef char FileName[FILENAME_MAX + 1];
-FileName macHugsDir; /* Directory where Hugs was found. */
-#endif
 
 #if DOS_FILENAMES
 # define SLASH                   '\\'
@@ -236,14 +218,6 @@ static String homeDir() {
     return getenv("HOME");
 }
 
-#if __MWERKS__ && macintosh
-static String currentDir() {
-    static FileName dir = "\0";
-    getcwd(dir, FILENAME_MAX);
-    dir[strlen(dir) - 1] = '\0';
-    return dir;
-}
-#endif
 
 #if HSCRIPT    
 static String local hscriptDir() {  /* Directory containing hscript.dll	   */
@@ -425,9 +399,6 @@ struct shellVariable {
 static struct shellVariable shell_var[] = {
     { "Hugs",		&hugsdir },
     { "Home",		&homeDir },
-#if __MWERKS__ && macintosh
-    { "Current",	&currentDir },
-#endif
 #if HSCRIPT
     { "HScript",	&hscriptDir },
 #endif
@@ -1608,17 +1579,6 @@ Bool local
 initSystem()
 {
   /* Called right away by main()  */
-#if __MWERKS__ && macintosh
-    strcpy(macHugsDir,currentDir());
-    SIOUXSettings.autocloseonquit   = true;
-    SIOUXSettings.asktosaveonclose  = false;
-    SIOUXSettings.columns           = 80;
-    SIOUXSettings.rows              = 40; 
-    SIOUXSettings.tabspaces         = 8;
-    SIOUXSettings.enabledraganddrop = true;
-    SIOUXSetTitle("\pHugs 98");
-    
-#endif
     setlocale(LC_CTYPE, "");
     return TRUE;
 }

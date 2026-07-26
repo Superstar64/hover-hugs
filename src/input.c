@@ -572,11 +572,7 @@ static Void local closeAnyInput() {    /* Close input stream, if open,     */
  * Parser: Uses table driven parser generated from parser.y using yacc
  * ------------------------------------------------------------------------*/
 
-# if __MWERKS__ && macintosh
-#include "parser.tab.c"
-#else
 #include "parser.c"
-#endif
 
 /* --------------------------------------------------------------------------
  * Single token input routines:

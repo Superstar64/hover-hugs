@@ -26,9 +26,7 @@ String nm; {               /* or just line may be zero        */
      * is often desirable.
      */
     if (!hugsEdit 
-#if !(defined(macintosh))
         || *hugsEdit == '\0'
-#endif
 	             ) {
 	ERRMSG(0) "Hugs is not configured to use an editor"
 	EEND;

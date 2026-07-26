@@ -76,10 +76,8 @@ Void done() {                          /* Goal has now been achieved       */
     else
 	for (; charCount>0; charCount--) {
 	    Putchar('\b');
-#if !(__MWERKS__ && macintosh)
 	    Putchar(' ');
 	    Putchar('\b');
-#endif
 	}
     aiming = FALSE;
     FlushStdout();

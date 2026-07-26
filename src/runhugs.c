@@ -72,9 +72,6 @@ char* argv[]; {
       fflush(stderr);
       exit(1);
     }
-#if __MWERKS__ && macintosh
-    argc = ccommand(&argv);
-#endif
 
 #if defined(FFI_COMPILER)
     generateFFI = TRUE;
