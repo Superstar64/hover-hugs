@@ -29,7 +29,7 @@ LIBS		= -lreadline -lncurses -lm -ldl
 
 HFILES		= HsFFI.h builtin.h char.h command.h config.h connect.h \
 		  errors.h evaluator.h goal.h machdep.h module.h observe.h \
-		  options.h opts.h output.h prelude.h script.h server.h \
+		  opts.h output.h prelude.h script.h server.h \
 		  storage.h strutil.h subst.h unitable.h
 CFILES		= hugs.c runhugs.c server.c edit.c observe.c \
 		  builtin.c char.c compiler.c errors.c evaluator.c ffi.c \

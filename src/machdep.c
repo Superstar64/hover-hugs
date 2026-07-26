@@ -523,7 +523,7 @@ Cell *CStackBase;                       /* Retain start of C control stack */
 Void gcCStack() {                       /* Garbage collect elements off    */
     Cell stackTop = NIL;                /* C stack                         */
     Cell *ptr = &stackTop;
-#if SIZEOF_INTP == 2
+#if __SIZEOF_POINTER__ == 2
     if (((long)(ptr) - (long)(CStackBase))&1)
 	fatal("gcCStack");
 #elif STACK_ALIGNMENT == 2 /* eg Macintosh 68000 */
@@ -546,7 +546,7 @@ Void gcCStack() {                       /* Garbage collect elements off    */
     GuessDirection;
 #endif
 
-#if SIZEOF_INTP==4 && STACK_ALIGNMENT == 2 /* eg Macintosh 68000 */
+#if __SIZEOF_POINTER__==4 && STACK_ALIGNMENT == 2 /* eg Macintosh 68000 */
     ptr = (Cell *)((long)(&stackTop) + 2);
     StackGrowsDown;
 #endif

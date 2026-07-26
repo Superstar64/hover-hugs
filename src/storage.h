@@ -247,7 +247,7 @@ extern unsigned char whatCode[];
 #endif
 #define EXTCOPY	     16		  /* Copy of an Ext:	      snd :: Text  */
 #define MPCELL       17		  /* Malloc Ptr Cell:         snd :: Int   */
-#if SIZEOF_INTP == SIZEOF_INT
+#if __SIZEOF_POINTER__ == __SIZEOF_INT__
 #define PTRCELL      18           /* C Heap Pointer:          snd ::Pointer*/
 #endif
 #define IPCELL       19		  /* Imp Param Cell:	      snd :: Text  */
@@ -409,7 +409,7 @@ extern void growDynTable       (DynTable*);
 #define DOUBLECELL   97		  /* DOUBLECELL snd :: (Int,Int)	   */
 #define I64CELL      98           /* Int/Word64 snd :: (Int,Int)           */
 
-#if SIZEOF_INTP != SIZEOF_INT
+#if __SIZEOF_POINTER__ != __SIZEOF_INT__
 #define PTRCELL      99           /* C Heap Pointer snd :: (Int,Int)       */
 #endif
 

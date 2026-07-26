@@ -1,17 +1,13 @@
 #pragma once
 
-// Manually written configuration file
-// This is used to make Hug's conditional checks happy
-// Hopefully this can be phased out at some point
+// Refurbished Hugs configuration file
 
-#include "options.h"
+#define HUGSPATH ".:{Home}/lib/hugs/packages/*:{Hugs}/packages/*"
+#define HUGSSUFFIXES ".hs:.lhs"
+#define HUGSDIR "/usr/local/lib/hugs"
 
-#define SIZEOF_DOUBLE __SIZEOF_DOUBLE__
-#define SIZEOF_FLOAT __SIZEOF_FLOAT__
-#define SIZEOF_INT __SIZEOF_INT__
-#define SIZEOF_INTP __SIZEOF_POINTER__
 
-// Flags one might be good to make toggleable later
+// Flags that were preserved from the autoconf script (hopefully at least)
 
 /* Define to 1 if you want to use the primitives which let you examine Hugs
    bytecodes (requires INTERNAL_PRIMS). */

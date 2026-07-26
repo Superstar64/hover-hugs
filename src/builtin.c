@@ -2471,7 +2471,7 @@ Int  d; {				/* precedence level		   */
 			    char buffer[32];
 			    char spec[16];
 			    /* Fall into line with how GHC shows Addrs  */
-			    sprintf(spec,"0x%%.%dx", (SIZEOF_INTP)*2);
+			    sprintf(spec,"0x%%.%dx", (__SIZEOF_POINTER__)*2);
 			    sprintf(buffer,spec,(long)p);
 			    outStr(buffer);
 			    pr  = nameNPrint;

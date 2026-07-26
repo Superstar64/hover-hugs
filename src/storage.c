@@ -2641,7 +2641,7 @@ Cell c; {
     return c==ZERONUM || (isPair(c) && (fst(c)==POSNUM || fst(c)==NEGNUM));
 }
 
-#if SIZEOF_INTP == SIZEOF_INT
+#if __SIZEOF_POINTER__ == __SIZEOF_INT__
 typedef union {Int i; Pointer p;} IntOrPointer;
 Cell mkPtr(p)
 Pointer p;
@@ -2659,7 +2659,7 @@ Cell c;
     x.i = snd(c);
     return x.p;
 }
-#elif SIZEOF_INTP == 2*SIZEOF_INT
+#elif __SIZEOF_POINTER__ == 2*__SIZEOF_INT__
 typedef union {struct {Int i1; Int i2;} i; Pointer p;} IntOrPointer;
 Cell mkPtr(p)
 Pointer p;

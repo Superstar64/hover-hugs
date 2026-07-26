@@ -15,7 +15,6 @@
 #define __PRELUDE_H__
 
 #include "config.h"
-#include "options.h"
 #include <stdio.h>
 
 # include <stdlib.h>
@@ -142,7 +141,7 @@
  *-------------------------------------------------------------------------*/
 
 /* Can we fit floats into ints? */
-#define BREAK_FLOATS (SIZEOF_FLOAT > SIZEOF_INT)
+#define BREAK_FLOATS (__SIZEOF_FLOAT__ > __SIZEOF_INT__)
 
 
 #define FloatImpType	   float
@@ -152,7 +151,7 @@
 #define FloatFMT	   "%.7g"
 
 /* Is double too big for two ints?  (if so, use float instead) */
-#define DOUBLE_IS_FLOAT (SIZEOF_DOUBLE > 2*SIZEOF_INT)
+#define DOUBLE_IS_FLOAT (__SIZEOF_DOUBLE__ > 2*__SIZEOF_INT__)
 
 #if DOUBLE_IS_FLOAT
 #define DoubleImpType	   FloatImpType
