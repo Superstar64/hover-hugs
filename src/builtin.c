@@ -2161,9 +2161,6 @@ primFun(primFloatEncode) {             /* Float encode primitive           */
     Float f;                           /* Ugly hack, don't use Hugs for    */
     IntArg(n,1);                       /* numerical work                   */
     eval(primArg(2));                  /* get integer                      */
-#if DJGPP2                                     
-    _fpreset();                        /* Get round a possible DJGPP bug?  */
-#endif                                         
 #if BIGNUMS                                    
     f = (Float)bigToDouble(whnfHead);  /* and turn it into a float         */
 #else                                          
@@ -2194,9 +2191,6 @@ primFun(primDoubleEncode) {            /* Double encode primitive          */
     Double f;                          /* Ugly hack, don't use Hugs for    */
     IntArg(n,1);                       /* numerical work                   */
     eval(primArg(2));                  /* get integer                      */
-#if DJGPP2                                     
-    _fpreset();                        /* Get round a possible DJGPP bug?  */
-#endif                                         
 #if BIGNUMS                                    
     f = (Double)bigToDouble(whnfHead); /* and turn it into a double        */
 #else                                          

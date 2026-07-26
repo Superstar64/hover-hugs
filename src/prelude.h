@@ -40,12 +40,6 @@
  * test to the configure script.
  *-------------------------------------------------------------------------*/
 
-#if defined __DJGPP__ && __DJGPP__==2
-# define DJGPP2 1
-#else
-# define DJGPP2 0
-#endif
-
 #if defined __MSDOS__ && __MSDOS__ && !DJGPP2
 # define DOS 1
 #else
