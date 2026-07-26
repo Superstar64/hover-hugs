@@ -253,11 +253,6 @@ int macsystem(char *filenames);
  * Environment variables and the registry
  *-------------------------------------------------------------------------*/
 
-/* On Win32 we can use the registry to supplement info in environment 
- * variables.
- */
-#define USE_REGISTRY (HAVE_WINDOWS_H && !__MSDOS__)
-
 /*---------------------------------------------------------------------------
  * File operations:
  *-------------------------------------------------------------------------*/

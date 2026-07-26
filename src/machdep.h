@@ -13,8 +13,6 @@
 
 # include <time.h>
 
-#if USE_REGISTRY
-#endif
 
 /* --------------------------------------------------------------------------
  * Find information about a file:
@@ -30,13 +28,6 @@ extern Void getFileInfo (String, Time *, Long *);
  * Prototypes for registry reading
  * ------------------------------------------------------------------------*/
 
-#if USE_REGISTRY
-
-
-extern String readRegString       (HKEY, String, String, String);
-extern Bool   writeRegString      (String,String);
-extern String readRegChildStrings (HKEY, String, String, String);
-#endif /* USE_REGISTRY */
 
 /* --------------------------------------------------------------------------
  * Search for script files on the HUGS path:

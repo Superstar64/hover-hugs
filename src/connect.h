@@ -154,9 +154,6 @@ extern Name  nameShowRecRowCls;         /* Trex.ShowRecRow class           */
 extern Name  nameEqRecRowCls;           /* Trex.EqRecRow class             */
 
 extern String versionString;		/* String containing version name  */
-#if USE_REGISTRY
-extern String hugsRegRoot;		/* Root in registry for windows    */
-#endif
 extern String scriptFile;               /* Name of current script (if any) */
 
 extern Type  typeArrow;			/* Builtin type constructors	   */

@@ -39,8 +39,3 @@
 
 String versionString = VERSION_STRING;
 
-#if USE_REGISTRY
-#define HUGSROOT ("SOFTWARE\\Haskell\\Hugs\\" VERSION_STRING "\\")
-
-String hugsRegRoot = HUGSROOT;
-#endif

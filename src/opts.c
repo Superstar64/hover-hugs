@@ -119,9 +119,6 @@ Void setOptions(Void)  /* change command line options from Hugs command line */
 	  EEND;
       }
     } while ((s=readFilename())!=0);
-#if USE_REGISTRY
-    writeRegString("Options", optionsToStr());
-#endif
   } else {
     optionInfo();
   }
@@ -512,11 +509,7 @@ String s; {
 	    hpSize = MAXIMUMHEAP;
 	if (heapBuilt() && hpSize != heapSize) {
 #define HEAP_RESIZE_MSG "Change to heap size will not take effect until you rerun Hugs"
-#if USE_REGISTRY
-	    FPrintf(stderr,HEAP_RESIZE_MSG "\n");
-#else
 	    FPrintf(stderr,"Cannot change heap size\n");
-#endif
 #undef HEAP_RESIZE_MSG
             FFlush(stderr);
 	} else {
@@ -616,16 +609,6 @@ Void readOptionSettings() {
     FileName hugsPrefsFile = "\0";
 #endif
 
-#if USE_REGISTRY
-    readOptions(readRegString(HKEY_LOCAL_MACHINE,hugsRegRoot,"Options",""), TRUE);
-    if (!fromEnv("IGNORE_USER_REGISTRY",NULL)) {
-      /* If IGNORE_USER_REGISTRY exist as an env var, don't consult
-       * the user portion of the Registry. Emergency workaround if it has
-       * somehow become invalid.
-       */
-      readOptions(readRegString(HKEY_CURRENT_USER, hugsRegRoot,"Options",""), TRUE);
-    }
-#endif /* USE_REGISTRY */
 #if USE_PREFERENCES_FILE
     if (f=fopen(PREFS_FILE_NAME,"r")) {
            /* is preferences file in the {Current} folder? */
