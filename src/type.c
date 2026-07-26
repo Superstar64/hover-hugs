@@ -50,9 +50,6 @@ Type typeForeign;
 Type typeStable;
 Type typeBool;
 Type typeString;
-#ifdef DOTNET
-Type typeObject;
-#endif
 
 static Type typeInteger; 
 static Type typeMaybe;
@@ -124,9 +121,6 @@ Type  typeNoRow;			/* Empty row			   */
 Type  typeRec;				/* Record formation		   */
 Name  nameNoRec;			/* Empty record			   */
 
-#if DOTNET
-Name   nameNetException;
-#endif
 
 
 /* --------------------------------------------------------------------------
@@ -4130,9 +4124,6 @@ Void linkPreludeTC() {			/* Hook to tycons and classes in   */
 	typeForeignP = linkTycon("ForeignPtr");
 	typeForeign  = linkTycon("ForeignObj"); /* deprecated */
 	typeStable   = linkTycon("StablePtr");
-#ifdef DOTNET
-	typeObject   = linkTycon("Object");
-#endif
 	typeBool     = linkTycon("Bool");
 	typeString   = linkTycon("String");
 	typeInteger  = linkTycon("Integer");
@@ -4245,9 +4236,6 @@ Void linkPreludeCM() {			/* Hook to cfuns and mfuns in	   */
 	nameIllegal        = linkName("IllegalOperation");
 	namePermDenied     = linkName("PermissionDenied");
 	nameUserErr        = linkName("UserError");
-#ifdef DOTNET
-	nameNetException   = linkName("DotNetException");
-#endif
 
 	nameArithException = linkName("ArithException");
 	nameArrayException = linkName("ArrayException");

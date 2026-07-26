@@ -1302,11 +1302,6 @@ unw:switch (whatIs(n)) {                /* unwind spine of application     */
 				 } while (--ar>0);
 
 				 saveProducer(n);
-#ifdef DOTNET
-				 if (name(n).foreignInfo != NIL) 
-				    primInvoker(root,n);
-				 else
-#endif
 				 if (name(n).primDef)       /* reduce      */
 				     (*name(n).primDef)(root);
 				 else
@@ -1322,11 +1317,6 @@ unw:switch (whatIs(n)) {                /* unwind spine of application     */
 				     StackPtr root = sp;
 				     push(n);               /* save CAF    */
 				     saveProducer(n);
-#ifdef DOTNET
-				     if (name(n).foreignInfo != NIL) 
-				       primInvoker(root,n);
-				     else
-#endif
 				     if (name(n).primDef)
 					 (*name(n).primDef)(sp);
 				     else
@@ -1415,11 +1405,6 @@ unw:switch (whatIs(n)) {                /* unwind spine of application     */
                 }
 
                 saveProducer(n);
-#ifdef DOTNET
-		if (name(n).foreignInfo != NIL) 
-		  primInvoker(root,n);
-		else
-#endif
                 if (name(n).primDef){      /* reduce      */
                     (*name(n).primDef)(root);
                 }   
@@ -1446,11 +1431,6 @@ unw:switch (whatIs(n)) {                /* unwind spine of application     */
                     StackPtr root = sp;
                     push(n);               /* save CAF    */
                     saveProducer(n);
-#ifdef DOTNET
-		    if (name(n).foreignInfo != NIL)
-		      primInvoker(root,n);
-		    else
-#endif
                     if (name(n).primDef)
                         (*name(n).primDef)(sp);
                     else

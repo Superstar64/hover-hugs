@@ -134,9 +134,6 @@ Text   textExport;                      /* export                          */
 #if STDCALL_SUPPORTED
 Text   textStdcall;                     /* stdcall                         */
 #endif
-#ifdef DOTNET
-Text   textDotnet;                      /* dotnet                          */
-#endif
 
 Text   textNum;                         /* Num                             */
 Text   textPrelude;                     /* Prelude / Hugs.Prelude          */
@@ -1803,9 +1800,6 @@ Int what; {
 		       textThreadsafe = findText("threadsafe");
 #if STDCALL_SUPPORTED		       
 		       textStdcall    = findText("stdcall");
-#endif
-#ifdef DOTNET
-		       textDotnet     = findText("dotnet");
 #endif
 		       textAsMod      = findText("as");
 		       textWildcard   = findText("_");

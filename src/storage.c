@@ -50,10 +50,6 @@ static Void     local appendObs         (Cell,Cell);
 static Breakpt  local addBreakpt        (String);
 static Breakpt  local findBreakpt       (String);
 
-#ifdef DOTNET
-extern Void markDotNetPtrs(Int* masks);
-extern Void zeroDotNetTable();
-#endif
 
 /* --------------------------------------------------------------------------
  * Text storage:
@@ -527,9 +523,6 @@ Cell parent; {
     name(nameHw).extFun       = 0;
     name(nameHw).foreignId    = -1; 
     name(nameHw).foreignFlags = FFI_NOSAFETY | FFI_CCONV_UNKNOWN;
-#ifdef DOTNET
-    name(nameHw).foreignInfo  = NIL;
-#endif
     name(nameHw).primDef      = 0;
     name(nameHw).code         = 0;
     name(nameHw).mod          = currentModule;
@@ -2101,9 +2094,6 @@ Void garbageCollect()     {             /* Run garbage collector ...       */
 		incMallocPtrRefCnt(i,-1);
 	}
     }
-#ifdef DOTNET
-    markDotNetPtrs(marks);
-#endif /* DOTNET */
 
     /* After GC completes, we scan the list of weak pointers that are
      * still live and zap their contents unless the contents are still
@@ -3412,9 +3402,6 @@ Int what; {
 		       handles[HSTDIN].hBinaryMode = FALSE;
 		       handles[HSTDOUT].hBinaryMode = FALSE;
 		       handles[HSTDERR].hBinaryMode = FALSE;
-#ifdef DOTNET
-		       zeroDotNetTable();
-#endif
 #if !HSCRIPT
 		       resetStablePtrs();
 #endif
@@ -3432,9 +3419,6 @@ Int what; {
 			   mark(name(i).defn);
 			   mark(name(i).type);
 			   mark(name(i).clashes);
-#ifdef DOTNET
-			   mark(name(i).foreignInfo);
-#endif
 		       }
 		       end("Names", nameHw-NAMEMIN);
                        start();

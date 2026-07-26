@@ -52,9 +52,6 @@ typedef Cell	     Ext;			 /* extension label	   */
 typedef Int          Observe;                    /* observation            */
 typedef Int          Breakpt;                    /* Breakpoint             */
 
-#ifdef DOTNET
-extern  Void         primInvoker (StackPtr,Name);
-#endif
 
 /* --------------------------------------------------------------------------
  * Text storage:
@@ -127,17 +124,7 @@ extern  Text         subText            (String,Int);
 #define FFI_TYPE_FUNPTR   16
 #define FFI_TYPE_FOREIGN  17
 #define FFI_TYPE_STABLE   18
-#ifdef DOTNET
-#define FFI_TYPE_OBJECT   19
-#define FFI_TYPE_STRING   20
-#endif
 
-#ifdef DOTNET
-#define FFI_DOTNET_STATIC 1
-#define FFI_DOTNET_FIELD  2
-#define FFI_DOTNET_CTOR   4
-#define FFI_DOTNET_METHOD 8
-#endif
 
 
 /* --------------------------------------------------------------------------
@@ -265,9 +252,6 @@ extern unsigned char whatCode[];
 #endif
 #define IPCELL       19		  /* Imp Param Cell:	      snd :: Text  */
 #define IPVAR	     20		  /* ?x:		      snd :: Text  */
-#if DOTNET
-#define NPCELL       21		  /* .NET Ptr Cell:           snd :: Int   */
-#endif
 /* CHARCELL is the whatIs code for chars; if UNICODE_CHARS is set, it
  * is also used for box cells representing character values greater than
  * or equal to NUM_SMALL_CHARS, in the same way as INTCELL.
@@ -676,9 +660,6 @@ struct strName {
     Text extFun;                        /* for foreign import/export       */
     Int  foreignId;                     /* per module identifier           */
     Int  foreignFlags;                  /* encoding safety + calling conv  */
-#ifdef DOTNET
-    Cell foreignInfo;                   /* (funName,libName,isStatic,isIO,resultType, [paramType])       */
-#endif
     Prim primDef;
     Name nextNameHash;
 #if PROFILING

@@ -99,9 +99,6 @@ extern Name   nameIllegal;
 extern Name   nameEOFErr;
 extern Name   nameProtocolError;
 
-#if DOTNET
-extern Name   nameNetException;
-#endif
 
 extern Name   namePrimThrow;
 
@@ -128,9 +125,6 @@ extern Text  textThreadsafe;
 extern Text  textExport;
 #if STDCALL_SUPPORTED
 extern Text  textStdcall;
-#endif
-#ifdef DOTNET
-extern Text  textDotnet;
 #endif
 
 extern Text  textPrelude;
@@ -181,9 +175,6 @@ extern Type  typeForeign;
 extern Type  typeStable;
 extern Type  typeBool;
 extern Type  typeString;
-#ifdef DOTNET
-extern Type  typeObject;
-#endif
 
 #define fn(from,to)  ap(ap(typeArrow,from),to)	/* make type: from -> to   */
 

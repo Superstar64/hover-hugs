@@ -317,9 +317,6 @@ typedef void*    Pointer;
 #define MAXHUGSWORD        Pick(0xffffU, 0xffffffffU, 0xffffffffU)
 #define NUM_STABLEPTRS	   Pick(10,     100,        10000)
 #define NUM_MALLOCPTRS	   Pick(10,     100,        10000)
-#ifdef DOTNET
-#define NUM_DOTNETPTRS	   Pick(10,     100,        10000)
-#endif
 #define NUM_DTUPLES	   Pick(3,      5,          5)
 
 /* Some infinite computations generate an infinite depth of alternations

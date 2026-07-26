@@ -3912,9 +3912,6 @@ Text t; {
   /* also support the stdcall calling convention */
   if (t == textStdcall) return FFI_CCONV_STDCALL;
 #endif
-#ifdef DOTNET
-  if (t == textDotnet) return FFI_CCONV_DOTNET;
-#endif
   return FFI_CCONV_UNKNOWN;
 }
 
@@ -4083,9 +4080,6 @@ Name p; {
     List argTys    = NIL;
 
     Bool generate_stub = generate_ffi
-#ifdef DOTNET
-      ||  (name(p).foreignFlags & FFI_CCONV_DOTNET != 0)
-#endif
       ;
 
     emptySubstitution();
@@ -4199,46 +4193,19 @@ Name p; {
         Text libn     = -1;
         Text cid      = -1;
         Bool isLabel  = FALSE;
-#ifdef DOTNET
-	Int  methFlags = FFI_DOTNET_METHOD;
-#endif
 
         if ((e = matchToken("static",ext))) {
 	    isStatic = TRUE;
-#ifdef DOTNET
-	    methFlags |= FFI_DOTNET_STATIC;
-#endif
             ext = skipSpaces(e);
         }
-#ifdef DOTNET
-	if ( name(p).foreignFlags & FFI_CCONV_DOTNET ) {
-	    if ( e = matchToken("ctor", ext) ) {
-		methFlags = ((methFlags & ~FFI_DOTNET_METHOD) | FFI_DOTNET_CTOR) ;
-		ext = skipSpaces(e);
-	    } else if ( e = matchToken("field", ext) ) {
-		methFlags = ((methFlags & ~FFI_DOTNET_METHOD) | FFI_DOTNET_FIELD) ;
-		ext = skipSpaces(e);
-	    } else if ( e = matchToken("method", ext) ) {
-		/* redundant */
-		methFlags |= FFI_DOTNET_METHOD;
-		ext = skipSpaces(e);
-	    }
-	} else {
-#endif
         if ((e = matchFname(ext))) {
             fn = subText(ext,e-ext);
             ext = skipSpaces(e);
         }
-#ifdef DOTNET
-	}
-#endif
 
         if ((e = matchToken("&",ext))) {
             isLabel = TRUE;
             ext = skipSpaces(e);
-#ifdef DOTNET
-	    if ( name(p).foreignFlags & FFI_CCONV_DOTNET ) goto no_dnet_label;
-#endif
         }
 
         if ((e = matchToken("[",ext))) {
@@ -4246,7 +4213,7 @@ Name p; {
             if (*ext != ']' || ext == e) goto cantparse;
             libn = subText(e,ext-e);
             ext = skipSpaces(ext+1);
-#if !defined(SILENTLY_IGNORE_FFI_LIB_SPECS) && !defined(DOTNET)
+#if !defined(SILENTLY_IGNORE_FFI_LIB_SPECS)
             ERRMSG(line) "Hugs doesn't use library specifications."
             EEND;
 #endif
@@ -4286,11 +4253,7 @@ Name p; {
                     = length(argTys)
                     + (isIO ? IOArity : 0);
                 implementForeignImport(line,p,name(p).foreignId,
-#ifndef DOTNET
 				       fn,
-#else
-				       (Text)methFlags,
-#endif
 				       cid,isStatic,
 				       libn, argTys,isIO,t);
                 name(p).extFun = cid;
@@ -4318,11 +4281,6 @@ Name p; {
     ERRMSG(line) "foreign import & must have type 'Ptr a' or 'FunPtr a'"
     EEND;
 
-#ifdef DOTNET
-  no_dnet_label:
-    ERRMSG(line) "foreign import & with 'dotnet' calling convention not supported."
-    EEND;
-#endif
 }
 
 static Void local checkForeignExport(p)       /* Check foreign export      */
