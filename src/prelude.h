@@ -257,21 +257,6 @@ int macsystem(char *filenames);
  * File operations:
  *-------------------------------------------------------------------------*/
 
-
-
-#ifndef FILENAME_MAX	   /* should already be defined in an ANSI compiler*/
-# define FILENAME_MAX 256
-#elif   FILENAME_MAX < 256
-# undef  FILENAME_MAX
-# define FILENAME_MAX 256
-#elif   FILENAME_MAX > 8192
-	/* Systems with no limit on path length (e.g. the Hurd), will have */
-	/* FILENAME_MAX impossibly large.  Ideally we should dynamically   */
-	/* allocate/grow these buffers and not use FILENAME_MAX at all.    */
-# undef  FILENAME_MAX
-# define FILENAME_MAX 8192
-#endif
-
 /* Hack, hack: if you have dos.h, you probably have a DOS filesystem */
 /* No dos.h but a DOS filesystem */
 #define DOS_FILENAMES              HAVE_DOS_H
