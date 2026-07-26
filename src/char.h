@@ -116,7 +116,6 @@ extern	Int	uni_gencat	(Char);
 
 #  define MAX_CHAR_ENCODING 6
 
-#if CHAR_ENCODING
 extern	int	fputc_mb	(Char, FILE *);
 extern	int	fgetc_mb	(FILE *);
 extern	Void	addc_mb		(Char, String *);
@@ -129,15 +128,5 @@ extern	Char	extc_mb		(String *);
 
 #define	charIsRepresentable(c)	TRUE
 
-#else /* !CHAR_ENCODING */
-
-#define	FPutChar(c,f)	(fputc(c, f))
-#define	FGetChar(f)	(getc(f))
-#define	AddChar(c,s)	(*(s)++ = (c))
-#define	ExtractChar(s)	(*(unsigned char *)(s)++)
-
-#define	charIsRepresentable(c)	isLatin1(c)
-
-#endif /* !CHAR_ENCODING */
 
 #endif /* CHAR_H */

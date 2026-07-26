@@ -3580,12 +3580,10 @@ Int what; {
 		       handles[HSTDOUT].hbufMode = HUNKNOWN_BUFFERING;
 		       handles[HSTDERR].hmode = HAPPEND;
 		       handles[HSTDERR].hbufMode = HUNKNOWN_BUFFERING;
-#if CHAR_ENCODING
 		       handles[HSTDIN].hLookAhead = -1;
 		       handles[HSTDIN].hBinaryMode = FALSE;
 		       handles[HSTDOUT].hBinaryMode = FALSE;
 		       handles[HSTDERR].hBinaryMode = FALSE;
-#endif /* CHAR_ENCODING */
 #endif /* IO_HANDLES */
 #ifdef DOTNET
 		       zeroDotNetTable();

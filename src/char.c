@@ -330,14 +330,12 @@ Int uni_gencat(Char c) {
  * Multibyte character incodings.
  * ------------------------------------------------------------------------*/
 
-#if CHAR_ENCODING
 int fputc_mb(Char c, FILE *f) {
     char buf[MAX_CHAR_ENCODING];
     String s = buf;
     addc_mb(c, &s);
     return fwrite(buf, s-buf, 1, f)==1 ? c : EOF;
 }
-#endif /* CHAR_ENCODING */
 
 /*
  * The UTF-FSS (aka UTF-8) encoding of UCS, as described in the following

@@ -40,9 +40,6 @@
  * test to the configure script.
  *-------------------------------------------------------------------------*/
 
-/* using a (possibly multi-byte) encoding of Chars in Strings and I/O? */
-# define CHAR_ENCODING 1
-
 /*---------------------------------------------------------------------------
  * Configuration options
  *

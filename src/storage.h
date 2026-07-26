@@ -1164,11 +1164,9 @@ struct strHandle {		/* Handle description and status flags	   */
     Int   hbufMode;             /* Buffering mode.                         */
     Int   hbufSize;             /* < 0 => not yet known.                   */
     Int   hRWState;		/* State of a READWRITE handle (see below) */
-#if CHAR_ENCODING
     Bool  hBinaryMode;		/* TRUE => Handle opened in binary mode    */
     Char  hLookAhead;		/* Char read by hLookAhead (or <0 if none) */
     				/* This is only used in text mode.         */
-#endif
 };
 
 #define HCLOSED		0000	/* no I/O permitted			   */

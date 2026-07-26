@@ -3409,10 +3409,8 @@ String loc; {
     handles[i].hbufMode = HUNKNOWN_BUFFERING;
     handles[i].hbufSize = (-1);
     setRWState(i, RW_NEUTRAL);
-#if CHAR_ENCODING
     handles[i].hBinaryMode = binary;
     handles[i].hLookAhead = -1;
-#endif
     return (handles[i].hcell = ap(HANDCELL,i));
 }
 
@@ -3442,16 +3440,13 @@ String loc; {
     handles[i].hbufMode = HANDLE_NOTBUFFERED;
     handles[i].hbufSize = 0;
     setRWState(i, RW_NEUTRAL);
-#if CHAR_ENCODING
     handles[i].hBinaryMode = binary;
     handles[i].hLookAhead = -1;
-#endif
     return (handles[i].hcell = ap(HANDCELL,i));
 }
 
 static Char local hGetChar(Int h, String fname) {
     Int c;
-#if CHAR_ENCODING
     if (handles[h].hLookAhead>=0) {
 	c = handles[h].hLookAhead;
 	handles[h].hLookAhead = -1;
@@ -3460,12 +3455,8 @@ static Char local hGetChar(Int h, String fname) {
     } else {
 	c = FGetChar(handles[h].hfp);
     }
-#else /* !CHAR_ENCODING */
-    c = FGetChar(handles[h].hfp);
-#endif
     if (c==EOF && !feof(handles[h].hfp))
 	throwErrno(fname, TRUE, h, NULL);
-#if CHAR_ENCODING
     else if (c==BAD_CHAR) {
 	IOFail(mkIOError(&handles[h].hcell,
 			 nameProtocolError,
@@ -3473,18 +3464,13 @@ static Char local hGetChar(Int h, String fname) {
 			 "input contains non-character data - use binary I/O for binary data",
 			 NULL));
     }
-#endif /* CHAR_ENCODING */
     return c;
 }
 
 static Void local hPutChar(Char c, Int h, String fname) {
     Int retval;
-#if CHAR_ENCODING
     retval = handles[h].hBinaryMode ? putc(c, handles[h].hfp) :
 				      FPutChar(c, handles[h].hfp);
-#else
-    retval = FPutChar(c, handles[h].hfp);
-#endif
     if (retval == EOF)
 	throwErrno(fname, TRUE, h, NULL);
 #if FLUSHEVERY
@@ -3960,10 +3946,8 @@ primFun(primHIsEOF) {	/* Test for end of file on handle  */
 		    peeking at the next char isn't likely
 		    to produce a different outcome! */
 	IOBoolResult(isEOF);
-#if CHAR_ENCODING
     } else if (handles[h].hLookAhead>=0) {
 	IOReturn(nameFalse);
-#endif
     } else {
 	Int c;
 
@@ -4060,12 +4044,10 @@ primFun(primHLookAhead) { /* Peek at the next char */
     HandleArg(h,1+IOArity);
 
     checkReadable(h, "IO.hLookAhead");
-#if CHAR_ENCODING
     if (handles[h].hLookAhead>=0) {
 	IOReturn(mkChar(handles[h].hLookAhead));
 	return;
     }
-#endif
     setRWState(h, RW_READING);
     if (feof(handles[h].hfp) ||
 	(c = hGetChar(h, "IO.hLookAhead")) == EOF) {
@@ -4076,14 +4058,10 @@ primFun(primHLookAhead) { /* Peek at the next char */
 			 "end of file",
 			 NULL));
     }
-#if CHAR_ENCODING
     if (handles[h].hBinaryMode)
 	ungetc(c, handles[h].hfp);
     else
 	handles[h].hLookAhead = c;
-#else
-    ungetc(c, handles[h].hfp);
-#endif
     IOReturn(mkChar(c));
 }
 
@@ -4247,9 +4225,7 @@ primFun(primHSetBinaryMode) {
 
     checkOpen(h, "System.IO.hSetBinaryMode");
 
-#if CHAR_ENCODING
     handles[h].hBinaryMode = binary;
-#endif
     IOReturn(nameUnit);
 }
 
@@ -4270,7 +4246,6 @@ primFun(primHPutBuf) {			/* write binary data from a buffer   */
 			 "illegal buffer size",
 			 NULL));
     }
-#if CHAR_ENCODING
     if (!handles[h].hBinaryMode) {
 	IOFail(mkIOError(&handles[h].hcell,
 			 nameIllegal,
@@ -4278,7 +4253,6 @@ primFun(primHPutBuf) {			/* write binary data from a buffer   */
 			 "not a binary handle",
 			 NULL));
     }
-#endif
     setRWState(h, RW_WRITING);
 
     errno = 0;
@@ -4308,7 +4282,6 @@ primFun(primHGetBuf) {			/* read binary data into a buffer   */
 			 "illegal buffer size",
 			 NULL));
     }
-#if CHAR_ENCODING
     if (!handles[h].hBinaryMode) {
 	IOFail(mkIOError(&handles[h].hcell,
 			 nameIllegal,
@@ -4316,7 +4289,6 @@ primFun(primHGetBuf) {			/* read binary data into a buffer   */
 			 "not a binary handle",
 			 NULL));
     }
-#endif
     setRWState(h, RW_READING);
 
     numRead = (Int)fread(buf, 1, size, handles[h].hfp);
