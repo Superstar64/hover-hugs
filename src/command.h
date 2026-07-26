@@ -45,9 +45,6 @@ extern Command readCommand (struct cmd *, Char, Char);
 #define XPLAIN  18
 #define PNTVER  19
 #define NOCMD   20
-#ifdef __SYMBIAN32__
-#define PRNDIR  21
-#endif
 #define MAIN    22
 
 #if OBSERVATIONS

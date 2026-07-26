@@ -308,9 +308,6 @@ static struct cmd cmds[] = {
  {":xplain", XPLAIN},
 #endif
  {":version", PNTVER},
-#ifdef __SYMBIAN32__
- {":Pwd",PRNDIR},
-#endif
  {"",      EVAL},
  {0,0}
 };
@@ -343,9 +340,6 @@ static Void local menu() {
 #endif
     Printf(":cd dir             change directory\n");
     Printf(":gc                 force garbage collection\n");
-#ifdef __SYMBIAN32__
-    Printf(":Pwd                print working directory\n");
-#endif
     Printf(":version            print Hugs version\n");
     Printf(":quit               exit Hugs interpreter\n");
 }
@@ -403,16 +397,6 @@ static Void local changeDir() {         /* change directory                */
     }
 }
 
-#ifdef __SYMBIAN32__
-/* --------------------------------------------------------------------------
- * Print working directory command:
- * ------------------------------------------------------------------------*/
-
-static Void local printDir() {         /* print directory                */
-    char s[256];
-    printf("%s\n",getcwd(s,255));
-}
-#endif
 
 /* --------------------------------------------------------------------------
  * Commands for loading and removing script files:
@@ -1163,10 +1147,6 @@ Bool doCommand()		    /* read and execute a command      */
 	    case NOCMD  : break;
 	    case MAIN: runmain();
 	    	  break;
-#ifdef __SYMBIAN32__
-        case PRNDIR : printDir();
-              break;
-#endif
 	}
 #if WANT_TIMER
 	updateTimers();

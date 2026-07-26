@@ -40,10 +40,6 @@
  * test to the configure script.
  *-------------------------------------------------------------------------*/
 
-#ifdef __SYMBIAN32__
-#define IS_WIN32 0
-#define IS_WINDOWS 0
-#else
 #if defined(_WIN32) || defined(__WIN32__)
 # define IS_WIN32 1
 # define IS_WINDOWS 1
@@ -53,7 +49,6 @@
 #else
 # define IS_WIN32 0
 # define IS_WINDOWS 0
-#endif
 #endif
 
 /* using a (possibly multi-byte) encoding of Chars in Strings and I/O? */
@@ -374,16 +369,6 @@ int macsystem(char *filenames);
 #endif
 
 
-#ifdef __SYMBIAN32__
-/* Guesswork, really */
-#define HUGS_FLT_RADIX        2
-#define HUGS_FLT_MANT_DIG    24
-#define HUGS_FLT_MIN_EXP   -125
-#define HUGS_FLT_MAX_EXP    128
-#define HUGS_DBL_MANT_DIG    53
-#define HUGS_DBL_MIN_EXP  -1021
-#define HUGS_DBL_MAX_EXP   1024
-#endif
 
 /*---------------------------------------------------------------------------
  * Memory allocation
@@ -396,7 +381,7 @@ int macsystem(char *filenames);
 #if HAVE_ALLOCA_H
 #include <alloca.h>
 #else
-# if HAVE__ALLOCA && !defined(__SYMBIAN32__)
+# if HAVE__ALLOCA
 #  include <malloc.h>
 # endif
 #endif
@@ -454,12 +439,8 @@ int macsystem(char *filenames);
 #endif
 
 /* Hack, hack: if you have dos.h, you probably have a DOS filesystem */
-#ifndef __SYMBIAN32__
 /* No dos.h but a DOS filesystem */
 #define DOS_FILENAMES              HAVE_DOS_H
-#else
-#define DOS_FILENAMES 1
-#endif
 /* ToDo: can we replace this with a feature test? */
 #define MAC_FILENAMES              macintosh
 
