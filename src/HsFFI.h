@@ -15,12 +15,7 @@ typedef unsigned long long hugs_uint64_t;
 typedef signed   long long hugs_int64_t;
 # endif
 
-/* 
- * The ifdef Args is a crude way of testing whether this file is
- * #included into Hugs.  Use it to eliminate non-portable stuff.
- */
-
-#ifdef Args /* #included into Hugs */
+#ifdef HUGS_PROPER /* #included into Hugs */
 
 typedef Int            HsInt;        
 typedef Int8           HsInt8;         
@@ -83,7 +78,7 @@ typedef void*          HsStablePtr;
 #define HS_WORD32_MAX           __UINT32_MAX
 #define HS_WORD64_MAX           __UINT64_MAX
 
-#ifndef Args
+#ifndef HUGS_PROPER
 
 #include <float.h>
 
@@ -119,7 +114,7 @@ typedef int            HugsStablePtr;
 
 typedef void (*HugsPrim) (HugsStackPtr); /* primitive function	   */
 
-#ifndef Args  
+#ifndef HUGS_PROPER  
 struct hugs_primitive {		         /* table of primitives		   */
     char*  ref;				 /* primitive reference string	   */
     int	   arity;			 /* primitive function arity	   */

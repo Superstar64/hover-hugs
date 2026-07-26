@@ -15,7 +15,7 @@
 
 #include "prelude.h"
 
-#ifndef Args
+#ifndef HUGS_PROPER
 #  define Args(x) x
 #endif /* !defined Args */
 

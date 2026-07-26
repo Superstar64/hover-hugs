@@ -22,6 +22,8 @@
 # include <sys/types.h>
 # include <unistd.h>
 
+#define HUGS_PROPER 1
+
 /*---------------------------------------------------------------------------
  * Most of the configuration code from earlier versions of Hugs has been moved
  * into config.h (which is usually automatically generated).  
