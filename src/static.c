@@ -181,9 +181,7 @@ static Void   local withinScope		(List);
 static Void   local leaveScope		(Void);
 static Void   local saveSyntax		(Cell,Cell);
 static Void   local dropNameClash	(Cell);
-#if IPARAM
 static Bool   local checkIBindings      (Int,List);
-#endif
 
 static Void   local depBinding		(Cell);
 static Void   local depDefaults		(Class);
@@ -196,12 +194,10 @@ static Void   local depGuard		(Cell);
 static Void   local depPair		(Int,Cell);
 static Void   local depTriple		(Int,Cell);
 static Void   local depComp		(Int,Cell,List);
-#if ZIP_COMP
 static Void   local depZComp		(Int,Cell,List);
 static Void   local depZCompBranch	(Int,List);
 static List   local intersectBinds	(List bs1,List bs2);
 static List   local getBindVars		(List bs);
-#endif
 static Void   local depCaseAlt		(Int,Cell);
 static Cell   local depVar		(Int,Cell,Bool);
 static Cell   local depQVar		(Int,Cell,Bool);
@@ -211,17 +207,12 @@ static List   local depFields		(Int,Cell,List,Bool);
 static Void   local checkNameAmbigName  (Int,Name,Bool);
 static Void   local checkNameAmbig      (Int,Text,Cell);
 static Cell   local checkTyconAmbig     (Int,Text,Cell);
-#if IPARAM
 static Void   local depWith		(Int,Cell);
 static List   local depDwFlds		(Int,Cell,List);
-#endif
-#if TREX
 static Void   local trexUsed            (Void);
 static Void   local trexLoad            (Void);
 static Cell   local depRecord		(Int,Cell);
-#endif
 
-#if MUDO
 static Void   local mdoLoad             (Void);
 static Void   local mdoUsed             (Void);
 static List   local mdoGetPatVarsLet	(Int,List,List);
@@ -237,7 +228,6 @@ static List   local mdoNoLets		(Triple);
 static Void   local mdoComputeExports	(Triple,Cell);
 static Bool   local mdoUsedInAnySeg	(Text,List);
 /*#define DEBUG_MDO_SEGMENTS*/
-#endif
 
 static List   local tcscc		(List,List);
 static List   local bscc		(List);
@@ -320,9 +310,7 @@ Int    o; {				/* inferred kind (typeIs,typeOff)  */
 #define inferKind(k,o)			typeIs=k; typeOff=o
 
 static List unkindTypes;		/* types in need of kind annotation*/
-#if TREX
 Kind   extKind;				/* Kind of extension, *->row->row  */
-#endif
 
 /* --------------------------------------------------------------------------
  * Static analysis of modules:
@@ -1145,7 +1133,6 @@ Class c; {
     tcDeps	        = NIL;		/* find dependents		   */
     map2Over(depPredExp,cclass(c).line,tyvars,cclass(c).supers);
 
-#ifdef IPARAM
     for ( ss = cclass(c).supers; nonNull(ss); ss=tl(ss) ) {
       if ( isIP(getHead(hd(ss))) ) {
 	    ERRMSG(cclass(c).line)
@@ -1153,7 +1140,6 @@ Class c; {
 	    EEND;
       }
     }
-#endif
 
     h98CheckCtxt(cclass(c).line,"class declaration",FALSE,cclass(c).supers,NIL);
     cclass(c).numSupers = length(cclass(c).supers);
@@ -1326,18 +1312,14 @@ Cell pred; {
 	    tcDeps = cons(c,tcDeps);
 	}
     }
-#if TREX
     else if (isExt(h)) {		/* Lacks predicate		   */
 	if (args!=1) {			/* parser shouldn't let this happen*/
 	    ERRMSG(line) "Wrong number of arguments for lacks predicate"
 	    EEND;
 	}
     }
-#endif
     else
-#if IPARAM
          if (!isIP(h))
-#endif
     {
 	internal("depPredExp");
     }
@@ -1519,11 +1501,9 @@ Class  c; {				/* to each class.		   */
 
 static Int local visitClass(c)		/* visit class defn to check that  */
 Class c; {				/* class hierarchy is acyclic	   */
-#if TREX
     if (isExt(c)) {			/* special case for lacks preds	   */
 	return 0;
     }
-#endif
     if (cclass(c).level < 0) {		/* already visiting this class?	   */
 	ERRMSG(cclass(c).line) "Superclass relation for \"%s\" is cyclic",
 			       textToStr(cclass(c).text)
@@ -1533,14 +1513,10 @@ Class c; {				/* class hierarchy is acyclic	   */
 	Int  lev = 0;
 	cclass(c).level = (-1);
 	for (; nonNull(scs); scs=tl(scs)) {
-#ifdef IPARAM
 	    if ( !isIP(getHead(hd(scs))) ) {
-#endif
 		Int l = visitClass(getHead(hd(scs)));
 		if (l>lev) lev=l;
-#ifdef IPARAM
 	    }
-#endif
 	}
 	cclass(c).level = 1+lev;	/* level = 1 + max level of supers */
     }
@@ -1857,10 +1833,8 @@ Type type; {
 			      return tc;
 			  }
 
-#if TREX
 	case EXT	: trexUsed();
 	                  h98DoesntSupport(line,"extensible records");
-#endif
 	case TYCON	:
 	case TUPLE	: break;
 
@@ -2075,11 +2049,9 @@ List ps; {
 		}
 	    }
 	}
-#if IPARAM
 	else if (isIP(c)) {
 	    fds = cons(pair(NIL,offsetTyvarsIn(arg(pi),NIL)),fds);
 	}
-#endif
     }
     return fds;
 }
@@ -2102,11 +2074,9 @@ List ps; {
 		}
 	    }
 	}
-#if IPARAM
 	else if (isIP(c)) {
 	    fds = cons(pair(NIL,zonkTyvarsIn(arg(pi),NIL)),fds);
 	}
-#endif
     }
     return fds;
 }
@@ -2173,7 +2143,6 @@ Cell c; {
 	case RANK2    : kindConstr(line,alpha,m,snd(snd(c)));
 			return;
 
-#if TREX
 	case EXT      : if (n!=2) {
 			    ERRMSG(line)
 				"Illegal use of row in " ETHEN ERRTYPE(c);
@@ -2181,7 +2150,6 @@ Cell c; {
 			    EEND;
 			}
 			break;
-#endif
 
 	case TYCON    : if (isSynonym(h) && n<tycon(h).arity) {
 			    ERRMSG(line)
@@ -2230,9 +2198,7 @@ Cell c; {
 				 return snd(vt);
 			     }
 			 }
-#if TREX
 	case EXT       : return extKind;
-#endif
     }
 #if DEBUG_KINDS
     Printf("kindAtom(%d,whatIs(%d)) on ",alpha,whatIs(c));
@@ -2248,20 +2214,16 @@ Int  l;
 Int  alpha;
 Int  m;
 Cell pi; {
-#if TREX
     if (isAp(pi) && isExt(fun(pi))) {
 	static String lackspred = "lacks predicate";
 	checkKind(l,alpha,m,arg(pi),NIL,lackspred,ROW,0);
 	return;
     }
-#endif
-#if IPARAM
     if (isAp(pi) && isIP(fun(pi))) {
 	static String ippred = "iparam predicate";
 	checkKind(l,alpha,m,arg(pi),NIL,ippred,STAR,0);
 	return;
     }
-#endif
     {   static String predicate = "class constraint";
 	Class c  = getHead(pi);
 	List  as = getArgs(pi);
@@ -2461,9 +2423,7 @@ Inst in; {
     List tvps = NIL, tvts = NIL;
     List fds = NIL;
 
-#if !HASKELL_98_ONLY
     if (haskell98) {			/* Check for `simple' type	   */
-#endif
 	List tvs = NIL;
 	Cell t   = arg(inst(in).head);
 	for (; isAp(t); t=fun(t)) {
@@ -2478,9 +2438,7 @@ Inst in; {
 		EEND;
 	    }
 	    tvs = cons(arg(t),tvs);
-#if !HASKELL_98_ONLY
 	}
-#endif
 	if (isVar(t)) {
 	    ERRMSG(line)
 		"Syntax error in instance head (constructor expected)"
@@ -2493,9 +2451,7 @@ Inst in; {
     tyvars = typeVarsIn(inst(in).specifics,NIL,NIL,tyvars);
     inst(in).head = depPredExp(line,tyvars,inst(in).head);
 
-#if !HASKELL_98_ONLY
     if (haskell98)
-#endif
     {
     Type h = getHead(arg(inst(in).head));
 	if (isSynonym(h)) {
@@ -2626,7 +2582,6 @@ Inst in; {
 	Int beta  = newKindedVars(inst(hd(ins)).kinds);
 	if (unifyPred(inst(in).head,alpha,inst(hd(ins)).head,beta)) {
 	    Cell pi  = copyPred(inst(in).head,alpha);
-#if !HASKELL_98_ONLY
 	    if ((allowOverlap || allowUnsafeOverlap) && !haskell98) {
 		Bool bef = instCompare(in,hd(ins));
 		Bool aft = instCompare(hd(ins),in);
@@ -2639,7 +2594,6 @@ Inst in; {
 		    continue;
 		}
 	    }
-#endif
 #if MULTI_INST
 	    if (multiInstRes && nonNull(inst(in).specifics)) {
 		break;
@@ -2773,7 +2727,6 @@ Int   n; {
     addDerInst(0,c,NIL,cts,mkTuple(n),n);
 }
 
-#if TREX
 Inst addRecShowInst(c,e)		/* Generate instance for ShowRecRow*/
 Class c;				/* c *must* be ShowRecRow	   */
 Ext   e; {
@@ -2805,7 +2758,6 @@ Ext   e; {
     cclass(c).instances	  = appendOnto(cclass(c).instances,singleton(in));
     return in;
 }
-#endif
 
 /* --------------------------------------------------------------------------
  * Calculation of contexts for derived instances:
@@ -2922,7 +2874,6 @@ Inst in; {				/* of the context for a derived	   */
 	    }
 	    retain = cons(pair(fst(p),qs),retain);
 	}
-#if TREX
 	else if (isExt(fun(fst(p)))) {		/* Lacks predicate	   */
 	    Text   l = extText(fun(fst(p)));
 	    Type   t = arg(fst(p));
@@ -2948,7 +2899,6 @@ Inst in; {				/* of the context for a derived	   */
 		EEND;
 	    }
 	}
-#endif
 	else {					/* Class predicate	   */
 	    Cell pi  = fst(p);
 	    Int  o   = intOf(snd(p));
@@ -4548,7 +4498,6 @@ Cell p; {
 			 }
 			 break;
 
-#if TREX
 	case EXT       : h98DoesntSupport(line,"extensible records");
 	                 trexUsed();
 			 if (args!=2) {
@@ -4556,7 +4505,6 @@ Cell p; {
 			     EEND;
 			 }
 			 break;
-#endif
 
 	case QUALIDENT : if (!isQCon(p)) {
 			    ERRMSG(line)
@@ -4689,10 +4637,8 @@ static List depends;		       /* list of lists of dependents	   */
 /* bindings :: [[([Var],?)]]  -- var equality used on Vars     */
 /* depends  :: [[Var]]        -- pointer equality used on Vars */
 
-#if MUDO
 static List mdepends;		       /* list of dependents for mdo	*/
 /* mdepends :: [Var]          -- var equality used on Vars */
-#endif
 
 #define saveBvars()	 hd(bounds)    /* list of bvars in current scope   */
 #define restoreBvars(bs) hd(bounds)=bs /* restore list of bound variables  */
@@ -5465,9 +5411,7 @@ static Void local clearScope() {       /* initialise dependency scoping    */
     bounds   = NIL;
     bindings = NIL;
     depends  = NIL;
-#if MUDO
     mdepends = NIL;
-#endif
 }
 
 static Void local withinScope(bs)	/* Enter scope of bindings bs	   */
@@ -5533,7 +5477,6 @@ Cell sy; {
     }
 }
 
-#if IPARAM
 static Bool local checkIBindings(line,bs)
 Int line;
 List bs; {
@@ -5565,7 +5508,6 @@ List bs; {
     }
     return hasIParam;
 }
-#endif
 
 /* --------------------------------------------------------------------------
  * As a side effect of the dependency analysis we also make the following
@@ -5635,7 +5577,6 @@ static Cell local depLetRec(isRhs,line,e) /* dependency analysis on a letrec    
 Bool isRhs;
 Int  line;
 Cell e; {                                 /* expr, containing a set of bindings */
-#if IPARAM
     Bool isIP = checkIBindings(line,fst(snd(e)));
                                           /* check that i-param binders aren't */
 	                                  /* mixed with 'normal' ones. */
@@ -5645,7 +5586,6 @@ Cell e; {                                 /* expr, containing a set of bindings 
 	/* Turn it into a WITHEXP */
 	return pair(WITHEXP,pair(snd(snd(e)),fst(snd(e))));
     } else {
-#endif
 
     fst(snd(e)) = eqnsToBindings(fst(snd(e)),NIL,NIL,NIL);
     withinScope(fst(snd(e)));
@@ -5658,9 +5598,7 @@ Cell e; {                                 /* expr, containing a set of bindings 
     }
     leaveScope();
     return e;
-#if IPARAM
     }
-#endif
 }
 
 static Void local depAlt(a)		/* Find dependents of alternative  */
@@ -5718,7 +5656,6 @@ Cell e; {
 
 	case INFIX     : return depExpr(line,tidyInfix(line,snd(e)));
 
-#if TREX
 	case RECSEL	: break;
 
 	case AP		: if (isAp(e) && isAp(fun(e)) && isExt(fun(fun(e)))) {
@@ -5735,19 +5672,13 @@ Cell e; {
 			      fun(a) = depExpr(line,fun(a));
 			  }
 			  break;
-#else
-	case AP 	: depPair(line,e);
-			  break;
-#endif
 
 #if BIGNUMS
 	case ZERONUM	:
 	case POSNUM	:
 	case NEGNUM	:
 #endif
-#if IPARAM
 	case IPVAR	:
-#endif
 	case NAME	:
 	case TUPLE	:
 	case STRCELL	:
@@ -5767,20 +5698,16 @@ Cell e; {
 	case LAMBDA	: depAlt(snd(e));
 			  break;
 
-#if MUDO
 	case MDOCOMP	: mdoUsed();
 	                  depRecComp(line, snd(e), snd(snd(e)));
 			  break;
-#endif
 
 	case DOCOMP	: /* fall-thru */
 	case COMP	: depComp(line,snd(e),snd(snd(e)));
 			  break;
 
-#if ZIP_COMP
 	case ZCOMP	: depZComp(line,snd(e),snd(snd(e)));
 			  break;
-#endif
 
 	case ESIGN	: fst(snd(e)) = depExpr(line,fst(snd(e)));
 			  snd(snd(e)) = checkSigType(line,
@@ -5799,10 +5726,8 @@ Cell e; {
 	case UPDFLDS	: depUpdFlds(line,e);
 			  break;
 
-#if IPARAM
 	case WITHEXP	: depWith(line,e);
 			  break;
-#endif
 
 	case ASPAT	: ERRMSG(line) "Illegal `@' in expression"
 			  EEND;
@@ -5813,10 +5738,8 @@ Cell e; {
 	case WILDCARD	: ERRMSG(line) "Illegal `_' in expression"
 			  EEND;
 
-#if TREX
 	case EXT	: ERRMSG(line) "Illegal application of record"
 			  EEND;
-#endif
 
 	default 	: internal("depExpr");
    }
@@ -5859,23 +5782,19 @@ List qs; {
 			    break;
 
 	    case QWHERE   :
-#if IPARAM
 		if ( checkIBindings(l,snd(q)) ) {
 		    /* It is unclear what the meaning of this is (by people in-the-know),
 		     * so outlaw it for now. */
 		   ERRMSG(l) "Currently illegal to bind implicit parameters using comprehension/do-level lets"
 	   	   EEND;
 		} else {
-#endif
 		    snd(q)      = eqnsToBindings(snd(q),NIL,NIL,NIL);
 		    withinScope(snd(q));
 		    snd(q)      = dependencyAnal(snd(q));
 		    hd(depends) = snd(q);
 		    depComp(l,e,qs1);
 		    leaveScope();
-#if IPARAM
 		}
-#endif
 			    break;
 
 	    case DOQUAL	  : /* fall-thru */
@@ -5886,7 +5805,6 @@ List qs; {
     }
 }
 
-#if MUDO
 
 /*
  * When typechecking mdo expressions, we need to have
@@ -5976,12 +5894,10 @@ List defs; {
 			    break;
 
 	    case QWHERE   :
-#if IPARAM
 			    if ( checkIBindings(l,snd(q)) ) {
 				ERRMSG(l) "Currently illegal to bind implicit parameters in the recursive do-notation"
 				EEND;
 			    } else
-#endif
 			    {	List currDeps = mdepends;
 				snd3(hd(qs)) = mdoGetPatVarsLet(l,snd(q),NIL);
 				snd(q)     = eqnsToBindings(snd(q),NIL,NIL,NIL);
@@ -6390,9 +6306,7 @@ List eqs; {
 
     mdoSCC(tl(eqs));			/* recurse for the remainder */
 }
-#endif
 
-#if ZIP_COMP
 static List gatheredVars;
 static List gatheredBinds;
 static List gatheredTyvars;
@@ -6499,7 +6413,6 @@ List bs; {
 	dupOnto(fst(hd(bs)),zs);
     return zs;
 }
-#endif
 
 static Void local depCaseAlt(line,a)	/* Find dependents of case altern. */
 Int  line;
@@ -6586,9 +6499,7 @@ Bool check; {
     while (nonNull(bindings1)) {
 	n = varIsMember(t,hd(bounds1));   /* look for t in bound variables */
 	if (nonNull(n)) {
-#if MUDO
 	    mdepends = cons(n,mdepends);
-#endif
 	    return (n);
 	}
 
@@ -6597,9 +6508,7 @@ Bool check; {
 	    if (!cellIsMember(n,hd(depends1))) {
 		hd(depends1) = cons(n,hd(depends1));
 	    }
-#if MUDO
 	    mdepends = cons(isVar(fst(n)) ? fst(n) : e,mdepends);
-#endif
 
 	    if (check) {
 	      checkNameAmbig(line,t, (isVar(fst(n)) ? fst(n) : e));
@@ -6828,7 +6737,6 @@ Bool isP; {
     return cs;
 }
 
-#if IPARAM
 static Void local depWith(line,e)	/* check with using fields	   */
 Int  line;
 Cell e; {
@@ -6847,9 +6755,7 @@ List fs;
     }
     return fs;
 }
-#endif
 
-#if TREX
 /* If Trex records are used in the source code, flag it.
    trexLoad() uses this to determine whether or not to
    bind to a couple of names in the Hugs.Trex module
@@ -6922,10 +6828,8 @@ static Void local trexLoad() {
     }
     trexLibNeeded = FALSE;
 }
-#endif
 
 
-#if TREX
 static Cell local depRecord(line,e)	/* find dependents of record and   */
 Int  line;				/* sort fields into approp. order  */
 Cell e; {				/* to make construction and update */
@@ -6960,7 +6864,6 @@ Cell e; {				/* to make construction and update */
     r = depExpr(line,r);
     return revOnto(exts,r);
 }
-#endif
 
 /* --------------------------------------------------------------------------
  * Several parts of this program require an algorithm for sorting a list
@@ -7458,9 +7361,7 @@ String wh;
 Bool   allowArgs;
 List   ps;
 Inst   in; {
-#if !HASKELL_98_ONLY
     if (haskell98) {
-#endif
 	Cell pi = h98Context(allowArgs,ps);
 	if (nonNull(pi)) {
 	    ERRMSG(line) "Illegal Haskell 98 class constraint in %s",wh ETHEN
@@ -7474,9 +7375,7 @@ Inst   in; {
 	    ERRTEXT	 "\n"
 	    EEND;
 	}
-#if !HASKELL_98_ONLY
     }
-#endif
 }
 
 static Void local h98CheckType(line,wh,e,t)	/* Check for Haskell 98 type */
@@ -7484,9 +7383,7 @@ Int    line;
 String wh;
 Cell   e;
 Type   t; {
-#if !HASKELL_98_ONLY
     if (haskell98) {
-#endif
 	Type ty = t;
 	if (isPolyType(t))
 	    t = monotypeOf(t);
@@ -7501,18 +7398,14 @@ Type   t; {
 		EEND;
 	    }
 	}
-#if !HASKELL_98_ONLY
     }
-#endif
 }
 
 Void h98CheckInferredType(line,e,t)	/* Check for Haskell 98 type	   */
 Int    line;
 Cell   e;
 Type   t; {
-#if !HASKELL_98_ONLY
     if (haskell98) {
-#endif
 	if (isPolyType(t))
 	    t = monotypeOf(t);
 	if (isQualType(t)) {
@@ -7526,22 +7419,16 @@ Type   t; {
 		EEND;
 	    }
 	}
-#if !HASKELL_98_ONLY
     }
-#endif
 }
 
 Void h98DoesntSupport(line,wh)		/* Report feature missing in H98   */
 Int    line;
 String wh; {
-#if !HASKELL_98_ONLY
     if (haskell98) {
-#endif
 	ERRMSG(line) "Haskell 98 does not support %s", wh
 	EEND;
-#if !HASKELL_98_ONLY
     }
-#endif
 }
 
 /* --------------------------------------------------------------------------
@@ -7552,21 +7439,15 @@ Void staticAnalysis(what)
 Int what; {
     switch (what) {
 	case RESET   :
-#if MUDO
 	               mdoLoad();
-#endif
-#if TREX
 	               trexLoad();
-#endif
 	               cfunSfuns    = NIL;
 		       daSccs	    = NIL;
 		       patVars	    = NIL;
 		       bounds	    = NIL;
 		       bindings	    = NIL;
 		       depends      = NIL;
-#if MUDO
 		       mdepends	    = NIL;
-#endif
 		       tcDeps	    = NIL;
 		       derivedInsts = NIL;
 		       diVars	    = NIL;
@@ -7579,23 +7460,17 @@ Int what; {
 		       mark(bounds);
 		       mark(bindings);
 		       mark(depends);
-#if MUDO
 		       mark(mdepends);
-#endif
 		       mark(tcDeps);
 		       mark(derivedInsts);
 		       mark(diVars);
 		       mark(cfunSfuns);
 		       mark(unkindTypes);
-#if TREX
 		       mark(extKind);
-#endif
 		       break;
 
 	case INSTALL : staticAnalysis(RESET);
-#if TREX
 		       extKind = pair(STAR,pair(ROW,ROW));
-#endif
 		       break;
     }
 }

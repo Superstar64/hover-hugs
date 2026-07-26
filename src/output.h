@@ -22,10 +22,8 @@ extern Void printKind	 (FILE *,Kind);
 extern Void printKinds	 (FILE *,Kinds);
 extern Void printFD	 (FILE *,Pair);
 
-#if OBSERVATIONS
 #define ALLTAGS ""
 extern Void printObserve (String);
-#endif
 
 #if DEBUG_SHOWSC
 extern Void  printSc (FILE*, Text, Int, Cell);

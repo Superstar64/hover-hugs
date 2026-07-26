@@ -57,21 +57,15 @@ static Type local liftRank1Body		(Type,Int);
 static Bool local matchTypeAbove	(Type,Int,Type,Int,Int);
 static Bool local varToVarBind		(Tyvar *,Tyvar *);
 static Bool local varToTypeBind		(Tyvar *,Type,Int);
-#if TREX
 static Bool local inserter		(Type,Int,Type,Int);
 static Int  local remover		(Text,Type,Int);
 static Int  local tailVar		(Type,Int);
-#endif
-#if TREX || IO_MONAD
 static Void local expandSynFully	(Type *, Int *);
-#endif
 
 static Bool local improveAgainst	(Int,List,Cell,Int);
 static Bool local instImprove		(Int,Class,Cell,Int);
 static Bool local pairImprove		(Int,Class,Cell,Int,Cell,Int,Int);
-#if IPARAM
 static Bool local ipImprove		(Int,Cell,Int,Cell,Int);
-#endif
 
 static Bool local kvarToVarBind		(Tyvar *,Tyvar *);
 static Bool local kvarToTypeBind	(Tyvar *,Type,Int);
@@ -468,9 +462,7 @@ Int  o; {
     switch (whatIs(t)) {
 	case POLYTYPE  :
 	case QUAL      :
-#if TREX
 	case EXT       :
-#endif
 	case TYCON     :
 	case TUPLE     : return;
 
@@ -895,9 +887,7 @@ Int  o; {
 	case VARIDCELL :
 	case VAROPCELL : return tyvar(findBtyvsInt(textOf(c)))->kind;
 	case TYCON     : return tycon(c).kind;
-#if TREX
 	case EXT    : return extKind;
-#endif
     }
 #if DEBUG_KINDS
     Printf("getKind c = %d, whatIs=%d\n",c,whatIs(c));
@@ -1087,14 +1077,12 @@ un: if (tyv1)
 	    if (isOffset(h1) || isInt(h1)) h1=NIL;  /* represent var by NIL*/
 	    if (isOffset(h2) || isInt(h2)) h2=NIL;
 
-#if TREX
 	    if (isExt(h1) && a1==2)
 		return inserter(t1,o1,t2,o2) &&
 			unify(arg(t1),o1,aVar,remover(extText(h1),t2,o2));
 	    if (isExt(h2) && a2==2)
 		return inserter(t2,o2,t1,o1) &&
 			unify(arg(t2),o2,aVar,remover(extText(h2),t1,o1));
-#endif
 	    if (nonNull(h1) && h1==h2) {/* Assuming well-formed types, both*/
 		if (a1!=a2) {		/* t1, t2 must have same no of args*/
 		    unifyFails = "incompatible constructors";
@@ -1159,7 +1147,6 @@ un: if (tyv1)
     return FALSE;
 }
 
-#if TREX
 static Bool local inserter(r1,o1,r,o)	/* Insert first field in (r1,o1),  */
 Type r1;				/* which is known to begin with    */
 Int  o1;				/* an EXT, into row (r,o)          */
@@ -1241,9 +1228,7 @@ Int  o; {
 	}
     }
 }
-#endif
 
-#if TREX || IO_MONAD
 static Void local expandSynFully(at,ao)	/* repeatedly expand synonyms	   */
 Type  *at;				/* original expression (*at,*ao)   */
 Int   *ao; {				/* expansion returned in (*at,*ao) */
@@ -1257,7 +1242,6 @@ Int   *ao; {				/* expansion returned in (*at,*ao) */
 	expandSyn(h,a,at,ao);
     }
 }
-#endif
 
 #if IO_MONAD
 Type getProgType(ks,type)		/* Extract t, if type is of the    */
@@ -1365,18 +1349,14 @@ Int  o; {
      the pi1 == pi will always return FALSE, giving the desired
      result. */
 
-#if IPARAM
     if (isIP(pi1) && isIP(pi))
 	return textOf(pi1)==textOf(pi);
     else
-#endif
 	return pi1==pi;
 }
 
-#if TREX
 Name nameShowRecRowCls = NIL;  /* Used to test for show on records*/
 Name nameEqRecRowCls   = NIL;  /* Used to test for eq on records*/
-#endif
 
 Inst findInstFor(pi,o)			/* Find matching instance for pred */
 Cell  pi;				/* (pi,o), or otherwise NIL.  If a */
@@ -1413,7 +1393,6 @@ Int   o; {				/* match is found, then tyvars from*/
     }
     unrestrictBind();
 
-#if TREX
     {   Bool wantShow   = (c==nameShowRecRowCls);
 	Bool wantEither = wantShow || (c==nameEqRecRowCls);
 
@@ -1439,7 +1418,6 @@ Int   o; {				/* match is found, then tyvars from*/
 	    }
 	}
     }
-#endif
 
     return NIL;
 }
@@ -1535,10 +1513,8 @@ Int o; {
 	    if (h != h1)
 		improved |= pairImprove(line,h1,pi1,o1,pi,o,numTyvars);
 	}
-#if IPARAM
 	else if (isIP(h1) && textOf(h1) == textOf(h))
 	    improved |= ipImprove(line,pi,o,pi1,o1);
-#endif
     }
     return improved;
 }
@@ -1561,7 +1537,6 @@ Int o; {
     return improved;
 }
 
-#if IPARAM
 Bool ipImprove(line,pi,o,pi1,o1)
 Int line;
 Cell pi;
@@ -1585,7 +1560,6 @@ Int o1; {
     }
     return FALSE;
 }
-#endif
 
 Bool pairImprove(line,c,pi1,o1,pi2,o2,above)	/* Look for improvement of   */
 Int   line;					/* (pi1,o1) against (pi2,o2) */
@@ -1839,10 +1813,8 @@ Int  o1,o2; {
 #endif
 	    if (k1==STAR && k2==STAR)		    /* k1, k2 not vars	   */
 		return TRUE;
-#if TREX
 	    else if (k1==ROW && k2==ROW)
 		return TRUE;
-#endif
 	    else if (isAp(k1) && isAp(k2))
 		return kunify(fst(k1),o1,fst(k2),o2) &&
 		       kunify(snd(k1),o1,snd(k2),o2);

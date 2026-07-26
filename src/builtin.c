@@ -89,12 +89,10 @@ Name namePmInteger;
 #if NPLUSK
 Name namePmNpk,   namePmSub;            /* primitives for (n+k) patterns   */
 #endif
-#if TREX
 Name nameRecExt,  nameRecBrk;           /* Extend and break a record       */
 Name nameRecSel,  nameRecShw;           /* Select and show a record        */
 Name nameRecEq;				/* Compare records		   */
 Name nameAddEv;				/* Add up evidence		   */
-#endif
 
 Name nameRationalToFloat;
 Name nameRationalToDouble;
@@ -298,19 +296,15 @@ PROTO_PRIM(primToLower);
 PROTO_PRIM(primToTitle);
 PROTO_PRIM(primUniGenCat);
 
-#if TREX
 PROTO_PRIM(primRecExt);
 PROTO_PRIM(primRecBrk);
 PROTO_PRIM(primRecSel);
 PROTO_PRIM(primRecShw);
 PROTO_PRIM(primRecEq);
-#endif
 
-#if OBSERVATIONS
 EXT_PROTO_PRIM(primObserve);
 EXT_PROTO_PRIM(primBkpt);
 EXT_PROTO_PRIM(primSetBkpt);
-#endif
 
 PROTO_PRIM(primUnsafePtrEq);
 PROTO_PRIM(primUnsafePtrToInt);
@@ -513,19 +507,15 @@ static struct primitive builtinPrimTable[] = {
   {"toTitle",		1, primToTitle},
   {"primUniGenCat",	1, primUniGenCat},
 
-#if TREX
   {"recExt",            3, primRecExt},
   {"recBrk",            2, primRecBrk},
   {"recSel",            2, primRecSel},
   {"recShw",            5, primRecShw},
   {"recEq",		6, primRecEq},
-#endif		        
 
-#if OBSERVATIONS
   {"observe",           2, primObserve},
   {"bkpt",              2, primBkpt},
   {"setBkpt",           2+IOArity, primSetBkpt},
-#endif
 
   {"unsafePtrEq",       2, primUnsafePtrEq},    /* breaks the semantics  */
   {"unsafePtrToInt",    1, primUnsafePtrToInt}, /* breaks the semantics  */
@@ -2626,11 +2616,9 @@ Int  d; {				/* precedence level		   */
 			pr = nameNPrint;
 			break;
 
-#if TREX
 	case RECORD   : outStr("{record}");
 			pr = nameNPrint;
 			break;
-#endif
  
 #if IO_HANDLES
 	case HANDCELL : outStr("{handle}");
@@ -2638,10 +2626,8 @@ Int  d; {				/* precedence level		   */
 			break;
 #endif
 
-#if OBSERVATIONS
         case OBSERVE  : outStr("printer.c: printer(): OBSERVE");
                         break;
-#endif
 
 	default       : internal("Error in graph");
 			break;
@@ -5720,10 +5706,8 @@ primFun(primClassifyCell) {          /* classifyCell                       */
 
 	    case INSTANCE : result = ap(nameHugsPrim, mkStr(findText("{instance}")));
 			    break;
-#if OBSERVATIONS
             case OBSERVE  : result = ap(nameHugsPrim, mkStr(findText("{observe marker}")));
                             break;
-#endif
 	    default       : internal("Error in graph2");
 			    break;
 	}
@@ -6245,7 +6229,6 @@ Char2Int(primUniGenCat,uni_gencat(x))
  * Extensible records: (Gaster and Jones, 1996)
  * ------------------------------------------------------------------------*/
 
-#if TREX
 primFun(primRecExt) {                   /* :: Int -> a -> Rec ? -> Rec ?   */
     Int  n;
     Cell b = NIL;
@@ -6346,7 +6329,6 @@ primFun(primRecEq) {
     primArg(6) = ap(primArg(6),primArg(5));
     updapRoot(primArg(6),primArg(3));
 }
-#endif
 
 /* --------------------------------------------------------------------------
  * Auxilliary functions
@@ -6358,10 +6340,8 @@ Cell c; {
 	switch (whatIs(c)) {
 	case INDIRECT : c = snd(c);
 		break;
-#if OBSERVATIONS
         case OBSERVE  : c = markedExpr(c);
                 break;
-#endif
 	case NAME     : if (isCfun(c)
 		|| name(c).arity != 0 
 		|| isNull(name(c).defn)) {
@@ -6997,7 +6977,6 @@ Int what; {
 		       pFun(nameBlackHole, "_Gc Black Hole",    "gcBhole");
 		       pFun(nameInd,	   "_indirect", "dictIndirect");
 		       name(nameInd).number = DFUNNAME;
-#if    TREX
 		       pFun(nameRecExt,	   "_recExt",	"recExt");
 		       pFun(nameRecBrk,	   "_recBrk",	"recBrk");
 		       pFun(nameRecSel,	   "_recSel",	"recSel");
@@ -7005,7 +6984,6 @@ Int what; {
 		       pFun(nameRecEq,	   "_recEq",	"recEq");
 		       pFun(nameAddEv,	   "_addEv",	"primPlusInt");
 		       name(nameAddEv).number = DFUNNAME;
-#endif
 #undef pFun
 #define predef(nm,str) nm=newName(findText(str),NIL); name(nm).defn=PREDEFINED
 		       predef(nameNegate,       "negate");

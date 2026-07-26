@@ -49,12 +49,10 @@ static Void local freeHandle            (Int);
 #if GC_STABLEPTRS
 static Void local resetStablePtrs       (Void);
 #endif
-#if OBSERVATIONS
 static Observe  local newObserve        (Text);
 static Void     local appendObs         (Cell,Cell);
 static Breakpt  local addBreakpt        (String);
 static Breakpt  local findBreakpt       (String);
-#endif
 
 #ifdef DOTNET
 extern Void markDotNetPtrs(Int* masks);
@@ -317,7 +315,6 @@ Addr a; {                               /* Currently does NO CHECKING      */
  * this turns out to be a problem.
  * ------------------------------------------------------------------------*/
 
-#if TREX
 Text  DEFTABLE(tabExt,NUM_EXT);         /* Storage for Ext names           */
 Ext   extHw;
 
@@ -334,7 +331,6 @@ Text t; {
     extText(extHw) = t;
     return extHw++;
 }
-#endif
 
 /* --------------------------------------------------------------------------
  * Tycon storage:
@@ -1271,7 +1267,6 @@ Void hugsStackOverflow() {          /* Report stack overflow               */
  * Observation storage
  * ------------------------------------------------------------------------*/
 
-#if OBSERVATIONS
 static Observe observeHw;                            /* next unused Observe  */
 struct strObserve DEFTABLE(tabObserve,NUM_OBS_TAGS); /* Observe storage      */
 static Observe currentObs;			     /* for table iterators  */
@@ -1422,7 +1417,6 @@ Int n; {
     Breakpt b = findBreakpt(s);
     if (b >= BRKMIN) breakpt(b).count = n;
 }
-#endif
 
 /* --------------------------------------------------------------------------
  * Module storage:
@@ -1599,9 +1593,7 @@ typedef struct strScriptStorage {      /* record of storage state prior to */
     Name  nameHw;
     Class classHw;
     Inst  instHw;
-#if TREX
     Ext   extHw;
-#endif
     /*
      * handle to the script's primInfoDef containing primops associated
      * with this script (if any.)
@@ -1651,9 +1643,7 @@ String f; {                             /* of status for later restoration  */
     showUse("Class",  classHw-CLASSMIN, dynTabClass->maxIdx);
     showUse("Inst",   instHw-INSTMIN,   dynTabInst->maxIdx);
 #endif
-#if TREX
     showUse("Ext",    extHw-EXTMIN,     NUM_EXT);
-#endif
 #endif
 
     scripts[scriptHw].file         = findText( f ? f : "<nofile>" );
@@ -1666,9 +1656,7 @@ String f; {                             /* of status for later restoration  */
     scripts[scriptHw].nameHw       = nameHw;
     scripts[scriptHw].classHw      = classHw;
     scripts[scriptHw].instHw       = instHw;
-#if TREX
     scripts[scriptHw].extHw        = extHw;
-#endif
     scripts[scriptHw].prims        = NULL;
 
     return scriptHw++;
@@ -1752,9 +1740,7 @@ Script sno; {
 	scripts[i-1].nameHw = scripts[i].nameHw;
 	scripts[i-1].classHw = scripts[i].classHw;
 	scripts[i-1].instHw = scripts[i].instHw;
-#if TREX
 	scripts[i-1].extHw = scripts[i].extHw;
-#endif
 	if (scripts[i-1].prims) {
 	  freePrimInfo(scripts[i-1].prims);
 	  scripts[i-1].prims = 0;
@@ -1778,9 +1764,7 @@ Script sno; {                           /* to reading script sno           */
 	nameHw       = scripts[sno].nameHw;
 	classHw      = scripts[sno].classHw;
 	instHw       = scripts[sno].instHw;
-#if TREX
 	extHw        = scripts[sno].extHw;
-#endif
 
 	for (i=0; i<TEXTHSZ; ++i) {
 	    int j = 0;
@@ -1922,12 +1906,8 @@ static Void initFastWhat(Void) {
 
 	for (i = 0; i < TUPMIN; i++)
 		whatCode[i] = i;
-#if TREX
 	fillWhatCode(TUPLE,   TUPMIN,  EXTMIN);
 	fillWhatCode(EXT,     EXTMIN,  OFFMIN);
-#else
-	fillWhatCode(TUPLE,   TUPMIN,  OFFMIN);
-#endif
 	fillWhatCode(OFFSET,  OFFMIN,  MODMIN);
 	fillWhatCode(MODULE,  MODMIN,  TYCMIN);
 	fillWhatCode(TYCON,   TYCMIN,  NAMEMIN);
@@ -2416,10 +2396,8 @@ Cell c; {                               /* acyclic graph) for later recall */
 	    }
 	else
 	    return pair(lowLevelLastIn(fst(c)),lowLevelLastIn(snd(c)));
-#if TREX
     else if (isExt(c))
 	return pair(EXTCOPY,saveText(extText(c)));
-#endif
     else
 	return c;
 }
@@ -2440,9 +2418,7 @@ Cell c; {                               /* except that Cells refering to   */
 		case CONOPCELL :
 		case STRCELL   : return pair(fst(c),
 					     findText(text+intValOf(c)));
-#if TREX
 		case EXTCOPY   : return mkExt(findText(text+intValOf(c)));
-#endif
 		default        : return pair(fst(c),snd(c));
 	    }
 	else
@@ -2476,12 +2452,8 @@ register Cell c; {
     else            if (c>=MODMIN)      if (c>=TYCMIN)  return TYCON;
 					else            return MODULE;
 		    else		if (c>=OFFMIN)  return OFFSET;
-#if TREX
 					else		return (c>=EXTMIN) ?
 								EXT : TUPLE;
-#else
-					else		return TUPLE;
-#endif
 
 /*  if (isPair(c)) {
 	register Cell fstc = fst(c);
@@ -2588,14 +2560,12 @@ Int  depth; {
 	  case CONOPCELL :
 	      Printf("{id %s}",textToStr(textOf(c)));
 	      break;
-#if IPARAM
 	  case IPCELL :
 	      Printf("{ip %s}",textToStr(textOf(c)));
 	      break;
 	  case IPVAR :
 	      Printf("?%s",textToStr(textOf(c)));
 	      break;
-#endif
 	  case QUALIDENT :
 	      Printf("{qid %s.%s}",textToStr(qmodOf(c)),textToStr(qtextOf(c)));
 	      break;
@@ -2606,7 +2576,6 @@ Int  depth; {
 	      print(snd(snd(c)),depth-1);
 	      Putchar(')');
 	      break;
-#if OBSERVATIONS
           case INDIRECT:
               Printf("->");
               print(snd(c),depth);
@@ -2625,7 +2594,6 @@ Int  depth; {
               Printf("seq= %d,", intOf(seqObs(thd3(c))));
               Printf("expr= %d)}", exprObs(thd3(c)));
               break;
-#endif
 	  case BIGLAM:
 	      Printf("BigLam(");
 	      printList(fst(snd(c)),depth-1);
@@ -3612,11 +3580,9 @@ Int what; {
 #endif
 		       }
 		       end("Names", nameHw-NAMEMIN);
-#if OBSERVATIONS
                        start();
                        for (i=OBSMIN; i<observeHw; ++i) mark(firstObs(observe(i).head));
                        end("Observations", observeHw=OBSMIN);
-#endif
 		       start();
 		       for (i=MODMIN; i<moduleHw; ++i) {
 			   mark(module(i).tycons);
@@ -3766,13 +3732,9 @@ Int what; {
 		       TABALLOC(tabClass,  struct strClass,  NUM_CLASSES)
 		       TABALLOC(cellStack, Cell,             NUM_STACK)
 		       TABALLOC(tabModule, struct strModule, NUM_MODULE)
-#if TREX
 		       TABALLOC(tabExt,	   Text,	     NUM_EXT)
-#endif
-#if OBSERVATIONS
                        TABALLOC(tabObserve,struct strObserve, NUM_OBS_TAGS)
                        TABALLOC(tabBreakpt,struct strBreakpt, NUM_BRKPTS)
-#endif
 		       clearStack();
 
 #if IO_HANDLES
@@ -3802,10 +3764,8 @@ Int what; {
 
 
 		       addrHw   = 0;
-#if OBSERVATIONS
                        observeHw = OBSMIN;
                        breakptHw = BRKMIN;
-#endif
 
 		       moduleHw = MODMIN;
 
@@ -3830,9 +3790,7 @@ Int what; {
 		       resetStablePtrs();
 #endif
 
-#if TREX
 		       extHw	= EXTMIN;
-#endif
 		       nameHw	= NAMEMIN;
 		       for (i=0; i<NAMEHSZ; ++i)
 			   nameHash[i] = NIL;
@@ -3877,13 +3835,9 @@ Int what; {
 		       TABFREE(tabClass);
 		       TABFREE(cellStack);
 		       TABFREE(tabModule);
-#if TREX
 		       TABFREE(tabExt);
-#endif
-#if OBSERVATIONS
                        TABFREE(tabObserve);
                        TABFREE(tabBreakpt);
-#endif
 		       if (marks) free(marks);
 		       
 		       /* Note: primInfoDef memory is freed in controlFuns() above */

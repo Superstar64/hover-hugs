@@ -46,10 +46,8 @@ static Cell local transDo               (Cell,Cell,List);
 static Cell local transConFlds          (Cell,List);
 static Cell local transUpdFlds          (Cell,List,List);
 
-#if MUDO
 static Cell local transMDo		(Cell,Cell,List);
 static Cell local mdoBuildTuple		(List);
-#endif
 
 static Cell local refutePat             (Cell);
 static Cell local refutePatAp           (Cell);
@@ -74,10 +72,8 @@ static Bool local emptyMatch            (Cell);
 static Cell local maDiscr               (Cell);
 static Bool local isNumDiscr            (Cell);
 static Bool local eqNumDiscr            (Cell,Cell);
-#if TREX
 static Bool local isExtDiscr            (Cell);
 static Bool local eqExtDiscr            (Cell,Cell);
-#endif
 
 static Cell local lift                  (Int,List,Cell);
 static Void local liftPair              (Int,List,Pair);
@@ -147,11 +143,9 @@ Cell e; {
 			  }
 			  return e;
 
-#if TREX
 	case RECSEL     : return nameRecSel;
 
 	case EXT        :
-#endif
 	case TUPLE      :
 	case VAROPCELL  :
 	case VARIDCELL  :
@@ -161,9 +155,7 @@ Cell e; {
 	case STRCELL    :
 	case CHARCELL   : return e;
 
-#if IPARAM
 	case IPVAR	: return nameId;
-#endif
 
 	case FINLIST    : mapOver(translate,snd(e));
 			  return mkConsList(snd(e));
@@ -187,7 +179,6 @@ Cell e; {
 #endif
 			      }
 			  }
-#if MUDO
 	case MDOCOMP	: {   Cell m	= translate(fst(fst(snd(e))));
 			      Cell ms	= translate(snd(fst(snd(e))));
 			      Cell r	= translate(fst(snd(snd(e))));
@@ -195,7 +186,6 @@ Cell e; {
 			      map2Over(transMDo,m,ms,segs);
 			      return transDo(ms,r,segs);
 			  }
-#endif
 
 	case CONFLDS    : return transConFlds(fst(snd(e)),snd(snd(e)));
 
@@ -252,15 +242,11 @@ static List local transBinds(bs)	/* Translate list of bindings:     */
 List bs; {				/* eliminating pattern matching on */
     List newBinds = NIL;		/* lhs of bindings.                */
     for (; nonNull(bs); bs=tl(bs)) {
-#if IPARAM
 	Cell v = fst(hd(bs));
 	while (isAp(v) && fun(v) == nameInd)
 	    v = arg(v);
 	fst(hd(bs)) = v;
 	if (isVar(v)) {
-#else
-	  if (isVar(fst(hd(bs)))) {
-#endif
 	    mapProc(transAlt,snd(hd(bs)));
 	    newBinds = cons(hd(bs),newBinds);
 	}
@@ -449,7 +435,6 @@ List qs; {
     return e;
 }
 
-#if MUDO
 /* Copied verbatim from parser.y: */
 static Cell local mdoBuildTuple(tup)	/* build tuple (x1,...,xn) from	   */
 List tup; {				/* list [xn,...,x1]		   */
@@ -561,7 +546,6 @@ List seg; {
 #undef doQual
 }
 
-#endif
 
 /* --------------------------------------------------------------------------
  * Translation of named field construction and update:
@@ -708,10 +692,8 @@ Cell pat; {                       /* (can we omit the default case?)       */
 	case DICTVAR   :
 	case WILDCARD  : return TRUE;
 
-#if TREX
 	case EXT       : return failFree(extField(pat)) &&
 				failFree(extRow(pat));
-#endif
 
 	case CONFLDS   : if (cfunOf(fst(snd(c)))==0) {
 			     List fs = snd(snd(c));
@@ -779,13 +761,11 @@ Cell p; {
     else if (whatIs(h)==ADDPAT)
 	return ap(fun(p),refutePat(arg(p)));
 #endif
-#if TREX
     else if (isExt(h)) {
 	Cell pf = refutePat(extField(p));
 	Cell pr = refutePat(extRow(p));
 	return ap(ap(fun(fun(p)),pf),pr);
     }
-#endif
     else {
 	List as = getArgs(p);
 	mapOver(refutePat,as);
@@ -850,7 +830,6 @@ Cell pat; {                     /* replaces parts of pattern that do not   */
 			     else if (whatIs(h)==ADDPAT)
 				 return pat;
 #endif
-#if TREX
 			     else if (isExt(h)) {
 				 Cell pf = matchPat(extField(pat));
 				 Cell pr = matchPat(extRow(pat));
@@ -858,7 +837,6 @@ Cell pat; {                     /* replaces parts of pattern that do not   */
 					  ? WILDCARD
 					  : ap(ap(fun(fun(pat)),pf),pr);
 			     }
-#endif
 			     else {
 				 List args = NIL;
 				 Bool avar = FALSE;
@@ -1035,7 +1013,6 @@ List lds; {
 			 }
 			 break;
 
-#if TREX
 	case EXT       : {   Cell nv = inventVar();
 			     arg(fun(fun(pat)))
 				 = translate(arg(fun(fun(pat))));
@@ -1048,7 +1025,6 @@ List lds; {
 			     lds = remPat1(extRow(pat),ap(nameSnd,nv),lds);
 			 }
 			 break;
-#endif
 
 	default        : internal("remPat1");
 			 break;
@@ -1104,9 +1080,7 @@ Cell e;  {                             /* e  = expr to transform           */
 #if NPLUSK
 	case ADDPAT   :
 #endif
-#if TREX
 	case EXT      :
-#endif
 	case TUPLE    :
 	case NAME     :
 	case CHARCELL :
@@ -1321,7 +1295,6 @@ List mas; {                     /* N.B. Assumes nonNull(mas).              */
 	    map2Proc(advance,co,da,smas);
 	    srhs = ap(NUMCASE,triple(mkOffset(o),d1,match(co+da,smas)));
 	}
-#if TREX
 	else if (isExtDiscr(d)) {       /* Record match                    */
 	    Int  da = discrArity(d);
 	    Cell d1 = pmcTerm(co,maSc(hd(smas)),d);
@@ -1338,7 +1311,6 @@ List mas; {                     /* N.B. Assumes nonNull(mas).              */
 	    map2Proc(advance,co,da,smas);
 	    srhs = ap(EXTCASE,triple(mkOffset(o),d1,match(co+da,smas)));
 	}
-#endif
 	else {                          /* Constructor match               */
 	    List tab = addConTable(d,hd(smas),NIL);
 	    Int  da;
@@ -1509,11 +1481,9 @@ Cell ma; {                      /* match, ma.                              */
 	case ADDPAT  : arg(fun(p)) = translate(arg(fun(p)));
 		       return fun(p);
 #endif
-#if TREX
 	case EXT     : h      = fun(fun(p));
 		       arg(h) = translate(arg(h));
 		       return h;
-#endif
 	case NAME    : if (h==nameFromInt || h==nameFromInteger
 					  || h==nameFromDouble) {
 			   if (argCount==2)
@@ -1531,11 +1501,7 @@ Cell d; {
 	case TUPLE     :
 	case CHARCELL  : return FALSE;
 
-#if TREX
 	case AP        : return !isExt(fun(d));
-#else
-	case AP        : return TRUE;   /* must be a literal or (n+k)      */
-#endif
     }
     internal("isNumDiscr");
     return 0;/*NOTREACHED*/
@@ -1547,7 +1513,6 @@ Cell d; {
 	case NAME      : return name(d).arity;
 	case TUPLE     : return tupleOf(d);
 	case CHARCELL  : return 0;
-#if TREX
 	case AP        : switch (whatIs(fun(d))) {
 #if NPLUSK
 			     case ADDPAT : return 1;
@@ -1555,13 +1520,6 @@ Cell d; {
 			     case EXT    : return 2;
 			     default     : return 0;
 			 }
-#else
-#if NPLUSK
-	case AP        : return (whatIs(fun(d))==ADDPAT) ? 1 : 0;
-#else
-	case AP        : return 0;      /* must be an Int or Double lit    */
-#endif
-#endif
     }
     internal("discrArity");
     return 0;/*NOTREACHED*/
@@ -1585,7 +1543,6 @@ Cell d1, d2; {                          /* descriptors have same value     */
     return FALSE;/*NOTREACHED*/
 }
 
-#if TREX
 static Bool local isExtDiscr(d)         /* Test of extension discriminator */
 Cell d; {
     return isAp(d) && isExt(fun(d));
@@ -1595,7 +1552,6 @@ static Bool local eqExtDiscr(d1,d2)     /* Determine whether two extension */
 Cell d1, d2; {                          /* discriminators have same label  */
     return fun(d1)==fun(d2);
 }
-#endif
 
 /* --------------------------------------------------------------------------
  * Lambda Lifter:    replace local function definitions with new global
@@ -1616,9 +1572,7 @@ Cell e; {
 	case CASE      : map2Proc(liftAlt,co,tr,snd(snd(e)));
 			 break;
 
-#if TREX
 	case EXTCASE   :
-#endif
 	case NUMCASE   : liftNumcase(co,tr,snd(e));
 			 break;
 
@@ -1642,9 +1596,7 @@ Cell e; {
 #if NPLUSK
 	case ADDPAT    :
 #endif
-#if TREX
 	case EXT       :
-#endif
 	case TUPLE     :
 	case NAME      :
 	case INTCELL   :
@@ -1898,9 +1850,7 @@ Cell e; {				/* include extra parameters	   */
 			 mapProc(preCompCase,snd(snd(e)));
 			 break;
 
-#if TREX
 	case EXTCASE   : return ap(EXTCASE,preCompTriple(snd(e)));
-#endif
 
 	case NUMCASE   : return ap(NUMCASE,preCompTriple(snd(e)));
 
@@ -1914,9 +1864,7 @@ Cell e; {				/* include extra parameters	   */
 #if NPLUSK
 	case ADDPAT    :
 #endif
-#if TREX
 	case EXT       :
-#endif
 	case TUPLE     :
 	case NAME      :
 	case INTCELL   :

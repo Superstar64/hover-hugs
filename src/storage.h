@@ -50,13 +50,9 @@ typedef Cell	     Bignum;			 /* bignum integer	   */
 #endif
 typedef FloatImpType Float;			 /* implementation of Float*/
 typedef DoubleImpType Double;			 /* implementation of Double*/
-#if TREX
 typedef Cell	     Ext;			 /* extension label	   */
-#endif
-#if OBSERVATIONS
 typedef Int          Observe;                    /* observation            */
 typedef Int          Breakpt;                    /* Breakpoint             */
-#endif
 
 #ifdef DOTNET
 extern  Void         primInvoker (StackPtr,Name);
@@ -276,19 +272,15 @@ extern	Cell	     whatIs    (Cell);
 #if !BREAK_FLOATS
 #define FLOATCELL    15		  /* Floating pt number:      snd :: Float */
 #endif
-#if TREX
 #define EXTCOPY	     16		  /* Copy of an Ext:	      snd :: Text  */
-#endif
 #if GC_MALLOCPTRS
 #define MPCELL       17		  /* Malloc Ptr Cell:         snd :: Int   */
 #endif
 #if SIZEOF_INTP == SIZEOF_INT
 #define PTRCELL      18           /* C Heap Pointer:          snd ::Pointer*/
 #endif
-#if IPARAM
 #define IPCELL       19		  /* Imp Param Cell:	      snd :: Text  */
 #define IPVAR	     20		  /* ?x:		      snd :: Text  */
-#endif
 #if DOTNET
 #define NPCELL       21		  /* .NET Ptr Cell:           snd :: Int   */
 #endif
@@ -316,14 +308,10 @@ extern	Cell	     whatIs    (Cell);
 #define mkDictVar(t)	ap(DICTVAR,t)
 #define inventDictVar() mkDictVar(inventDictText())
 #define mkStr(t)	ap(STRCELL,t)
-#if IPARAM
 #define mkIParam(c)	ap(IPCELL,snd(c))
 #define isIP(p)		(whatIs(p) == IPCELL)
 #define ipMatch(pi, t)	(isIP(fun(pi)) && textOf(fun(pi)) == t)
 #define ipVar(pi)	textOf(fun(pi))
-#else
-#define isIP(p)		FALSE
-#endif
 
 extern	Bool		isVar       (Cell);
 extern	Bool		isCon       (Cell);
@@ -385,9 +373,7 @@ extern void growDynTable       (DynTable*);
 #define FINLIST      33 	  /* FINLIST	snd :: [Exp]		   */
 #define DOCOMP       34 	  /* DOCOMP	snd :: (Exp,[Qual])	   */
 
-#if MUDO
 #define MDOCOMP	     44		  /* MDOCOMP	snd :: (Exp,[Qual])	   */
-#endif
 
 #define BANG	     35		  /* BANG	snd :: Type		   */
 #define COMP         36 	  /* COMP	snd :: (Exp,[Qual])	   */
@@ -424,9 +410,7 @@ extern void growDynTable       (DynTable*);
 #define STABLENAME   58		  /* Stable Nm  snd :: Cell		   */
 #endif
 
-#if IPARAM
 #define WITHEXP      59 	  /* WITH	snd :: [(Var,Exp)]	   */
-#endif
 
 #define POLYTYPE     60		  /* POLYTYPE	snd :: (Kind,Type)	   */
 #define QUAL	     61		  /* QUAL	snd :: ([Classes],Type)	   */
@@ -439,30 +423,24 @@ extern void growDynTable       (DynTable*);
 #define LABC	     70		  /* LABC	snd :: (con,[(Vars,Type)]) */
 #define CONFLDS	     71		  /* CONFLDS	snd :: (con,[Field])	   */
 #define UPDFLDS	     72		  /* UPDFLDS	snd :: (Exp,[con],[Field]) */
-#if TREX
 #define RECORD	     73		  /* RECORD	snd :: [Val]		   */
 #define EXTCASE	     74		  /* EXTCASE	snd :: (Exp,Disc,Rhs)	   */
 #define RECSEL	     75		  /* RECSEL	snd :: Ext		   */
-#endif
 #define IMPDEPS	     78		  /* IMPDEPS	snd :: [Binding]	   */
 
 #define QUALIDENT    80           /* Qualified identifier  snd :: (Id,Id)  */
 #define HIDDEN       81           /* hiding import list    snd :: [Entity] */
 #define MODULEENT    82           /* module in export list snd :: con      */
 
-#if OBSERVATIONS
 #define OBSERVEHEAD  83           /* obs. list; snd ::(first,last)         */
 #define OBSERVE      84           /* observe marker; snd :: (Cell,observe) */
 #define OBSERVESTK   85           /* observe marker on stack               */
-#endif
 
 #define INFIX	     90		  /* INFIX	snd :: (see tidyInfix)	   */
 #define ONLY	     91		  /* ONLY	snd :: Exp		   */
 #define NEG	     92		  /* NEG	snd :: Exp		   */
 
-#if ZIP_COMP
 #define ZCOMP        93 	  /* ZCOMP	snd :: (Exp,[[Qual]])	   */
-#endif
 
 #define DOUBLECELL   97		  /* DOUBLECELL snd :: (Int,Int)	   */
 #define I64CELL      98           /* Int/Word64 snd :: (Int,Int)           */
@@ -483,9 +461,7 @@ extern void growDynTable       (DynTable*);
 
 #define NONE	     129	  /* Dummy stub				   */
 #define STAR	     130	  /* Representing the kind of types	   */
-#if TREX
 #define ROW	     131	  /* Representing the kind of rows	   */
-#endif
 #define WILDCARD     132	  /* Wildcard pattern			   */
 
 #define SKOLEM	     133	  /* Skolem constant			   */
@@ -504,9 +480,7 @@ extern void growDynTable       (DynTable*);
 #define TUPLE	     143	  /* whatIs code for tuple constructor	   */
 #define OFFSET	     144	  /* whatis code for offset		   */
 #define AP	     145	  /* whatIs code for application node	   */
-#if TREX
 #define EXT	     147	  /* whatIs code for isExt		   */
-#endif
 
 #define SIGDECL      148	  /* Signature declaration		   */
 #define FIXDECL      149	  /* Fixity declaration			   */
@@ -528,9 +502,7 @@ extern void growDynTable       (DynTable*);
 
 #define NONE	     101	  /* Dummy stub				   */
 #define STAR	     102	  /* Representing the kind of types	   */
-#if TREX
 #define ROW	     103	  /* Representing the kind of rows	   */
-#endif
 #define WILDCARD     104	  /* Wildcard pattern			   */
 
 #define SKOLEM	     105	  /* Skolem constant			   */
@@ -549,9 +521,7 @@ extern void growDynTable       (DynTable*);
 #define TUPLE	     115	  /* whatIs code for tuple constructor	   */
 #define OFFSET	     116	  /* whatis code for offset		   */
 #define AP	     117	  /* whatIs code for application node	   */
-#if TREX
 #define EXT	     119	  /* whatIs code for isExt		   */
-#endif
 
 #define SIGDECL      120	  /* Signature declaration		   */
 #define FIXDECL      121	  /* Fixity declaration			   */
@@ -573,15 +543,10 @@ extern void growDynTable       (DynTable*);
  * ------------------------------------------------------------------------*/
 
 #define TUPMIN	     201
-#if TREX
 #define isTuple(c)   (TUPMIN<=(c) && (c)<EXTMIN)
-#else
-#define isTuple(c)   (TUPMIN<=(c) && (c)<OFFMIN)
-#endif
 #define mkTuple(n)   (TUPMIN+(n))
 #define tupleOf(n)   ((Int)((n)-TUPMIN))
 
-#if TREX
 #define EXTMIN	     (TUPMIN+NUM_TUPLES)
 #define isExt(c)     (EXTMIN<=(c) && (c)<OFFMIN)
 #define extText(e)   tabExt[(e)-EXTMIN]
@@ -590,19 +555,12 @@ extern void growDynTable       (DynTable*);
 
 extern Text	     DECTABLE(tabExt);
 extern Ext           mkExt (Text);
-#else
-#define mkExt(t) NIL
-#endif
 
 /* --------------------------------------------------------------------------
  * Offsets: (generic types/stack offsets)
  * ------------------------------------------------------------------------*/
 
-#if TREX
 #define OFFMIN	     (EXTMIN+NUM_EXT)
-#else
-#define OFFMIN	     (TUPMIN+NUM_TUPLES)
-#endif
 #define isOffset(c)  (OFFMIN<=(c) && (c)<MODMIN)
 #define offsetOf(c)  ((c)-OFFMIN)
 #define mkOffset(o)  (OFFMIN+(o))
@@ -611,7 +569,6 @@ extern Ext           mkExt (Text);
  * Observations
  * ------------------------------------------------------------------------*/
 
-#if OBSERVATIONS
 #define OBSMIN	      (OFFMIN+NUM_OFFSETS)
 #define observe(n)    tabObserve[(n)-OBSMIN]
 
@@ -654,17 +611,12 @@ extern Void     clearAllBreak   (Void);
 extern Bool     breakNow	(String);
 extern Void     setBreakpt	(String,Bool);
 extern Void     setBreakCount   (String,Int);
-#endif
 
 /* --------------------------------------------------------------------------
  * Modules:
  * ------------------------------------------------------------------------*/
 
-#if OBSERVATIONS
 #define MODMIN        (BRKMIN+NUM_BRKPTS)
-#else
-#define MODMIN        (OFFMIN+NUM_OFFSETS)
-#endif
 
 #define isModule(c)   (MODMIN<=(c) && (c)<TYCMIN)
 #define mkModule(n)   (MODMIN+(n))

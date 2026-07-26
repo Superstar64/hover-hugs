@@ -18,7 +18,6 @@
 /* --------------------------------------------------------------------------
  * Break dialogue code
  * ------------------------------------------------------------------------*/
-#if OBSERVATIONS
 static Void   breakDialogue    (String);
 
 static struct cmd brkCmds[] =
@@ -66,13 +65,11 @@ String s;{
 	}
     } while (cmd!=BRK_CONTINUE);
 }
-#endif
 
 /* --------------------------------------------------------------------------
  * Observations & breakpoints primops:
  * ------------------------------------------------------------------------*/
 
-#if OBSERVATIONS
 #define MAXTAGLENGTH 80
 static char obsTag[MAXTAGLENGTH+1];
 
@@ -125,4 +122,3 @@ extPrimFun(primSetBkpt) {
 }
 #endif
 
-#endif

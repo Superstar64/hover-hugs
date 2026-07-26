@@ -77,12 +77,8 @@ extern Bool  debugCode;		        /* TRUE => print G-code to screen  */
 #if DEBUG_SHOWSC
 extern Bool  debugSC;			/* TRUE => print SC to screen  */
 #endif
-#if OBSERVATIONS
 extern Bool   rootOpt;                  /* TRUE => enable root optimisation*/
-#endif
-#if HERE_DOC
 extern Bool  hereDocs;                  /* TRUE => enable `here documents' */
-#endif
 
 #if HUGS_FOR_WINDOWS
 extern Bool  autoLoadFiles;             /* TRUE => automatically reloaded modified files */
@@ -123,9 +119,7 @@ extern Bool   printing;                 /* TRUE => currently printing value*/
  */
 struct options {                        /* command line option toggles     */
     char   c;                           /* table defined in main app.      */
-#if !HASKELL_98_ONLY
     int    h98;                         /* set in Haskell'98 mode?         */
-#endif
     String description;
     Bool   *flag;
 };

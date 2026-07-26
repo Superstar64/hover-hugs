@@ -28,9 +28,7 @@ Bool   printing     = FALSE;     /* TRUE => currently printing value*/
 String  hugsEdit   = 0;	         /* String for editor command       */
 String  prompt     = 0;          /* Prompt string                   */
 
-#if !HASKELL_98_ONLY
 Bool haskell98 = TRUE;		 /* TRUE => Haskell 98 compatibility*/
-#endif
 
 #if EXPLAIN_INSTANCE_RESOLUTION
 Bool showInstRes = FALSE;
@@ -79,11 +77,7 @@ String getLastEdit(Int* pLastLine) {
  * Setting of command line options:
  * ------------------------------------------------------------------------*/
 
-#if HASKELL_98_ONLY
-#define Option(c,h98,description,flag) { c, description, flag }
-#else
 #define Option(c,h98,description,flag) { c, h98, description, flag }
-#endif
 
 static Void   local toggleSet         (Char,Bool);
 static Void   local togglesIn         (Bool);
@@ -119,12 +113,8 @@ struct options toggle[] = {     /* List of command line toggles    */
 #if DEBUG_SHOWSC
     Option('C', 1, "Debug: show generated SC code",         &debugSC),
 #endif
-#if OBSERVATIONS
     Option('R', 1, "Enable root optimisation",              &rootOpt),
-#endif
-#if HERE_DOC
     Option('H', 0, "Enable `here documents'",               &hereDocs),
-#endif
     Option(0, 0, 0, 0)
 };
 
@@ -163,11 +153,7 @@ Bool state; {                           /* given state                     */
     Int count = 0;
     Int i;
     for (i=0; toggle[i].c; ++i)
-#if HASKELL_98_ONLY
-	if (*toggle[i].flag == state) {
-#else
 	if (*toggle[i].flag == state && (!haskell98 || toggle[i].h98)) {
-#endif        
 	    if (count==0)
 		Putchar((char)(state ? '+' : '-'));
 	    Putchar(toggle[i].c);
@@ -184,13 +170,9 @@ Void optionInfo(Void) {                 /* Print information about command */
 
     Printf("TOGGLES: groups begin with +/- to turn options on/off resp.\n");
     for (i=0; toggle[i].c; ++i) {
-#if !HASKELL_98_ONLY
 	if (!haskell98 || toggle[i].h98) {
-#endif
 	    Printf(fmtc,toggle[i].c,toggle[i].description);
-#if !HASKELL_98_ONLY
 	}
-#endif
     }
 
     Printf("\nOTHER OPTIONS: (leading + or - makes no difference)\n");
@@ -234,12 +216,8 @@ Void optionInfo(Void) {                 /* Print information about command */
 #if PROFILING
     Printf("\nProfile interval: -d%d", profiling ? profInterval : 0);
 #endif
-#if HASKELL_98_ONLY
-    Printf("\nCompatibility   : Haskell 98");
-#else
     Printf("\nCompatibility   : %s", haskell98 ? "Haskell 98 (+98)"
 					       : "Hugs Extensions (-98)");
-#endif
     Putchar('\n');
 }
 
@@ -335,9 +313,7 @@ String optionsToStr() {          /* convert options to string */
 	PUTC(toggle[i].c);
 	PUTC(' ');
     }
-#if !HASKELL_98_ONLY
     PUTS(haskell98 ? "+98 " : "-98 ");
-#endif
     PUTInt('h',hpSize);  PUTC(' ');
     PUTStr('p',prompt);
     PUTStr('r',repeatStr);
@@ -518,7 +494,6 @@ String s; {              /* return FALSE if none found.     */
 		       return TRUE;
 
         default  :
-#if !HASKELL_98_ONLY
 	           if (strcmp("98",s)==0) {
 		       if (heapBuilt() && (state != haskell98)) {
 			   FPrintf(stderr,"Haskell 98 compatibility cannot be changed while the interpreter is running\n");
@@ -528,11 +503,8 @@ String s; {              /* return FALSE if none found.     */
 		       }
 		       return TRUE;
 		   } else {
-#endif
 		       toggleSet(*s,state);
-#if !HASKELL_98_ONLY
 		   }
-#endif
 		   break;
 	}
     return TRUE;

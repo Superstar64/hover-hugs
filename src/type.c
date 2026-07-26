@@ -92,10 +92,8 @@ Name nameReturn,  nameBind, nameThen;   /* for translating do/monad comps  */
 Name nameMFail;
 Name nameGt;				/* for readsPrec		   */
 
-#if MUDO
 Class classMonadRec;			/* Recursive monads		   */
 Name nameMFix;
-#endif
 
 #if    IO_MONAD
 Type   typeIO;			        /* For the IO monad, IO 	   */
@@ -126,11 +124,9 @@ Name   nameDivideByZero;
 Name   nameIndexOutOfBounds;
 Name   nameUndefinedElement;
 
-#if TREX
 Type  typeNoRow;			/* Empty row			   */
 Type  typeRec;				/* Record formation		   */
 Name  nameNoRec;			/* Empty record			   */
-#endif
 
 #if DOTNET
 Name   nameNetException;
@@ -176,24 +172,18 @@ static Int    local funcType          (Int);
 static Void   local typeCase          (Int,Int,Cell);
 static Void   local typeComp	      (Int,Type,Cell,List);
 static Cell   local typeMonadComp     (Int,Cell);
-#if ZIP_COMP
 static Cell   local typeZComp	      (Int,Type,Cell,List);
 static Void   local typeCompy	      (Int,Type,List);
 static Cell   local typeMonadZComp    (Int,Cell);
 static List   local getPats           (List);
 static Cell   local tupleUp           (List);
-#endif
 static Void   local typeDo	      (Int,Cell);
-#if MUDO
 static Void   local typeRecComp	      (Int,Type,Cell,List);
 static Void   local typeMDo	      (Int,Cell);
 static Void   local typeRecursiveDo   (Int,Cell);
-#endif
 static Void   local typeConFlds	      (Int,Cell);
 static Void   local typeUpdFlds	      (Int,Cell);
-#if IPARAM
 static Cell   local typeWith	      (Int,Cell);
-#endif
 static Cell   local typeFreshPat      (Int,Cell);
 
 static Void   local typeBindings      (List);
@@ -244,9 +234,7 @@ static Cell  predFractional;		/* Fractional (mkOffset(0))	   */
 static Cell  predIntegral;		/* Integral (mkOffset(0))	   */
 static Kind  starToStar;		/* Type -> Type			   */
 static Cell  predMonad;			/* Monad (mkOffset(0))		   */
-#if MUDO
 static Cell  predMonadRec;		/* MonadRec/MonadFix (mkOffset(0)) */
-#endif
 
 /* --------------------------------------------------------------------------
  * Assumptions:
@@ -459,10 +447,8 @@ Type type; {
  * ------------------------------------------------------------------------*/
 
 static Cell   local assumeEvid        (Cell,Int);
-#if IPARAM
 static Cell   local findIPEvid	      (Text);
 static Void   local removeIPEvid      (Text);
-#endif
 static List   local makePredAss	      (List,Int);
 static List   local copyPreds	      (List);
 static Void   local qualify	      (List,Cell);
@@ -479,9 +465,7 @@ static Cell   local inEntail	      (List,Cell,Int,Int);
 static Cell   local inEntails	      (List,Cell,Int,Int);
 static Bool   local instCompare	      (Inst, Inst);
 #endif
-#if TREX
 static Cell   local lacksNorm	      (Type,Int,Cell);
-#endif
 
 static List   local scSimplify	      (List);
 static Void   local elimTauts	      (Void);
@@ -519,7 +503,6 @@ Int  o; {
     return nd;
 }
 
-#if IPARAM
 static Cell local findIPEvid(t)
 Text t; {
     List ps = preds;
@@ -543,7 +526,6 @@ Text t; {
 	    prev = &tl(ps);
 	}
 }
-#endif
 
 static List local makePredAss(qs,o)	/* Make list of predicate assumps. */
 List qs;				/* from qs (offset o), w/ new dict */
@@ -857,7 +839,6 @@ Int  d; {
     if (d++ >= cutoff)
 	cutoffExceeded(pi,o,ps);
 
-#if TREX
     if (isAp(pi) && isExt(fun(pi))) {	/* Lacks predicates		   */
 	Cell e  = fun(pi);
 	Cell l;
@@ -882,7 +863,6 @@ Int  d; {
 	}
     }
     else {
-#endif
 
     in = findInstFor(pi,o);	/* Class predicates		   */
     if (nonNull(in)) {
@@ -928,9 +908,7 @@ Int  d; {
     }
 #endif
     return NIL;
-#if TREX
     }
-#endif
 }
 
 #if MULTI_INST
@@ -950,7 +928,6 @@ Int  d; {
     if (d++ >= cutoff)
 	cutoffExceeded(pi,o,ps);
 
-#if TREX
     if (isAp(pi) && isExt(fun(pi))) {	/* Lacks predicates		   */
 	Cell e  = fun(pi);
 	Cell l;
@@ -975,7 +952,6 @@ Int  d; {
 	}
     }
     else {
-#endif
 
 #if EXPLAIN_INSTANCE_RESOLUTION
     if (showInstRes) {
@@ -1070,9 +1046,7 @@ Int  d; {
     }
 #endif
     return NIL;
-#if TREX
     }
-#endif
 }
 
 static Bool local instComp_(ia,ib)	/* See if ia is an instance of ib  */
@@ -1120,7 +1094,6 @@ Cell  pi; {				/* desparate measures like context */
     return (nonNull(preds) ? NIL : thd3(hd(qs)));
 }
 
-#if TREX
 static Cell local lacksNorm(t,o,e)	/* Normalize lacks pred (t,o)\l	   */
 Type t;					/* returning NIL (unsatisfiable),  */
 Int  o;					/* Int (tautological) or pair (v,a)*/
@@ -1149,7 +1122,6 @@ Cell e; {				/* such that, if e is evid for v\l,*/
 	}
     }
 }
-#endif
 
 /* --------------------------------------------------------------------------
  * Predicate set Simplification:
@@ -1202,11 +1174,8 @@ Int  o; {				/* superclass hierarchy		   */
  * ------------------------------------------------------------------------*/
 
 static Void local elimTauts() {		/* Remove tautological constraints */
-#if !HASKELL_98_ONLY
     if (haskell98) {			/* from preds			   */
-#endif
 	reducePreds();			/* (or context reduce for Hask98)  */
-#if !HASKELL_98_ONLY
     } else {
 	List ps = preds;
 	preds   = NIL;
@@ -1225,7 +1194,6 @@ static Void local elimTauts() {		/* Remove tautological constraints */
 	    }
 	}
     }
-#endif
 }
 
 static Int numFixedVars = 0;		/* Number of fixed vars found	   */
@@ -1350,7 +1318,6 @@ static Void local reducePreds() {	/* Context reduce predicates: uggh!*/
 
 static Void local normPreds(line)	/* Normalize each element of preds */
 Int line; {				/* in some appropriate manner	   */
-#if TREX
     List ps = preds;
     List pr = NIL;
     while (nonNull(ps)) {
@@ -1392,7 +1359,6 @@ Int line; {				/* in some appropriate manner	   */
 	    ps = tl(ps);
 	}
     }
-#endif
 }
 
 /* --------------------------------------------------------------------------
@@ -1735,13 +1701,8 @@ Type   inft, expt; {
 				       typeError(l,e,in,where,t,o);
 #define check(l,e,in,where,t,o)    e=typeExpr(l,e); shouldBe(l,e,in,where,t,o)
 #define inferType(t,o)		   typeIs=t; typeOff=o
-#if IPARAM
 #define spTypeExpr(l,e)			svPreds = preds; preds = NIL; e = typeExpr(l,e); preds = revOnto(preds,svPreds);
 #define spCheck(l,e,in,where,t,o)	svPreds = preds; preds = NIL; check(l,e,in,where,t,o); preds = revOnto(preds,svPreds);
-#else
-#define spTypeExpr(l,e)			e = typeExpr(l,e);
-#define spCheck(l,e,in,where,t,o)	check(l,e,in,where,t,o);
-#endif
 
 static Void local cantEstablish(line,wh,e,t,ps)
 Int    line;				/* Complain when declared preds	   */
@@ -1811,9 +1772,7 @@ Cell e; {
     static String aspat   = "as (@) pattern";
     static String typeSig = "type annotation";
     static String lambda  = "lambda expression";
-#if IPARAM
     List svPreds;
-#endif
 
     switch (whatIs(e)) {
 
@@ -1823,9 +1782,7 @@ Cell e; {
 	case NAME	:
 	case VAROPCELL	:
 	case VARIDCELL	:
-#if IPARAM
 	case IPVAR	:
-#endif
 	  		  return typeAp(l,e);
 
 	case TUPLE	: typeTuple(e);
@@ -1869,7 +1826,6 @@ Cell e; {
 					      fst(snd(e)),snd(snd(e)),
 					      0,0,FALSE);
 
-#if TREX
 	case EXT	: {   Int beta = newTyvars(2);
 			      Cell pi  = ap(e,aVar);
 			      Type t   = fn(aVar,
@@ -1879,16 +1835,13 @@ Cell e; {
 			      inferType(t,beta);
 			      return ap(e,assumeEvid(pi,beta+1));
 			  }
-#endif
 
 	/* The following cases can only occur in expr mode		   */
 
 	case UPDFLDS	: typeUpdFlds(l,e);
 			  break;
 
-#if IPARAM
 	case WITHEXP	: return typeWith(l,e);
-#endif
 
 	case COND	: {   Int beta = newTyvars(1);
 			      check(l,fst3(snd(e)),e,cond,typeBool,0);
@@ -1918,15 +1871,11 @@ Cell e; {
 	case DOCOMP	: typeDo(l,e);
 			  break;
 
-#if MUDO
 	case MDOCOMP	: typeMDo(l,e);
 			  break;
-#endif  
 	case COMP	: return typeMonadComp(l,e);
 
-#if ZIP_COMP
 	case ZCOMP	: return typeMonadZComp(l,e);
-#endif
 
 	case CASE	: {    Int beta = newTyvars(2);    /* discr result */
 			       check(l,fst(snd(e)),NIL,discr,aVar,beta);
@@ -1943,7 +1892,6 @@ Cell e; {
 			  }
 			  break;
 
-#if TREX
 	case RECSEL	: {   Int beta = newTyvars(2);
 			      Cell pi  = ap(snd(e),aVar);
 			      Type t   = fn(ap(typeRec,
@@ -1953,7 +1901,6 @@ Cell e; {
 			      inferType(t,beta);
 			      return ap(e,assumeEvid(pi,beta+1));
 			  }
-#endif
 
 	/* The remaining cases can only occur in pattern mode: */
 
@@ -1997,9 +1944,7 @@ Cell e; {				/* requires polymorphism, qualified*/
     Cell p = NIL;
     Cell a = e;
     Int  i;
-#if IPARAM
     List svPreds;
-#endif
 
     switch (whatIs(h)) {
 	case NAME      : typeIs = name(h).type;
@@ -2025,7 +1970,6 @@ Cell e; {				/* requires polymorphism, qualified*/
 			     }
 			 }
 			 break;
-#if IPARAM
 	case IPVAR    :	{   Text t    = textOf(h);
 			    Int alpha = newTyvars(1);
 			    Cell ip   = pair(ap(IPCELL,t),aVar);
@@ -2034,7 +1978,6 @@ Cell e; {				/* requires polymorphism, qualified*/
 			    h	      = ap(h,ev);
 			}
 			break;
-#endif
 
 	default        : h = typeExpr(l,h);
 			 break;
@@ -2359,9 +2302,7 @@ Cell e;
 List qs; {
     static String boolQual = "boolean qualifier";
     static String genQual  = "generator";
-#if IPARAM
     List svPreds;
-#endif
 
     STACK_CHECK
     if (isNull(qs)) {			/* no qualifiers left		   */
@@ -2404,7 +2345,6 @@ List qs; {
     }
 }
 
-#if ZIP_COMP
 
 /* --------------------------------------------------------------------------
  * Parallel comprehensions
@@ -2481,9 +2421,7 @@ List qss; {
     List zpat, zexp;
     Int  len;
     Text zName;
-#if IPARAM
     List svPreds;
-#endif
     enterGathering();
     enterBindings();
     for (pss = qss;nonNull(pss);pss=tl(pss)) {
@@ -2538,9 +2476,7 @@ Type m;					/* monad (mkOffset(0))		   */
 List qs; {
     static String boolQual = "boolean qualifier";
     static String genQual  = "generator";
-#if IPARAM
     List svPreds;
-#endif
 
     STACK_CHECK
     if (!isNull(qs)) {			/* no qualifiers left		   */
@@ -2586,7 +2522,6 @@ List qs; {
 	}
     }
 }
-#endif
 
 static Cell local typeMonadComp(l,e)	/* type check monad comprehension  */
 Int  l;
@@ -2607,7 +2542,6 @@ Cell e; {
     return ap(MONADCOMP,pair(m,snd(e)));
 }
 
-#if ZIP_COMP
 static Cell local typeMonadZComp(l,e)	/* type check monad comprehension  */
 Int  l;
 Cell e; {
@@ -2627,7 +2561,6 @@ Cell e; {
     inferType(mon,alpha);
     return ap(MONADCOMP,pair(m,new));
 }
-#endif
 
 static Void local typeDo(l,e)		/* type check do-notation	   */
 Int  l;
@@ -2644,7 +2577,6 @@ Cell e; {
     snd(e) = pair(m,snd(e));
 }
 
-#if MUDO
 
 #define segRecs(seg)	fst3(fst(seg))
 #define segExps(seg)	snd3(fst(seg))
@@ -2661,9 +2593,7 @@ List qs; {
     static String letQual  = "mdo-transformed let generator";
     String mesg		   = genQual;
 
-#if IPARAM
     List svPreds;
-#endif
 
 
     STACK_CHECK
@@ -2777,7 +2707,6 @@ Cell e; {
 #undef segExps
 #undef segDefs
 #undef segQuals
-#endif
 
 static Void local typeConFlds(l,e)	/* Type check a construction	   */
 Int  l;
@@ -2789,9 +2718,7 @@ Cell e; {
     Int  to;
     Int  tf;
     Int  i;
-#if IPARAM
     List svPreds;
-#endif
 
     instantiate(name(c).type);
     for (; nonNull(predsAre); predsAre=tl(predsAre))
@@ -2829,9 +2756,7 @@ Cell e; {				/* bizarre manner for the benefit  */
     Int  alpha = newTyvars(2+n);
     Int  i;
     List fs1;
-#if IPARAM
     List svPreds;
-#endif
 
     /* Calculate type and translation for each expr in the field list	   */
     for (fs1=fs, i=alpha+2; nonNull(fs1); fs1=tl(fs1), i++) {
@@ -2922,7 +2847,6 @@ Cell e; {				/* bizarre manner for the benefit  */
     /* (typeIs,typeOff) still carry the result type when we exit the loop  */
 }
 
-#if IPARAM
 static Cell local typeWith(line,e)	/* Type check a with		   */
 Int  line;
 Cell e; {
@@ -2972,7 +2896,6 @@ Cell e; {
     typeOff = tOff;
     return (ap(LETREC,pair(bs,fst(snd(e)))));
 }
-#endif
 
 static Cell local typeFreshPat(l,p)    /* find type of pattern, assigning  */
 Int  l; 			       /* fresh type variables to each var */
@@ -3836,9 +3759,7 @@ Cell gded; {			       /*	      ex :: (var,beta)	   */
     static String guarded = "guarded expression";
     static String guard   = "guard";
     Int line = intOf(fst(gded));
-#if IPARAM
     List svPreds;
-#endif
 
     gded     = snd(gded);
     spCheck(line,fst(gded),NIL,guard,typeBool,0);
@@ -3971,9 +3892,7 @@ et: if (whatIs(t1)!=whatIs(t2))
 	return FALSE;
 
     switch (whatIs(t1)) {
-#if TREX
 	case EXT     :
-#endif
 	case TYCON   :
 	case OFFSET  :
 	case TUPLE   : return t1==t2;
@@ -4281,9 +4200,7 @@ Int what; {
 		       mark(predIntegral);
 		       mark(starToStar);
 		       mark(predMonad);
-#if MUDO
 		       mark(predMonadRec);
-#endif
 
 #if IO_MONAD
 		       mark(typeProgIO);
@@ -4332,7 +4249,6 @@ Int what; {
 				    = cons(nameNil,cons(nameCons,NIL));
 
 		       typeVarToVar = fn(aVar,aVar);
-#if TREX
 		       typeNoRow    = addPrimTycon(findText("EmptyRow"),
 						   ROW,0,DATATYPE,NIL);
 		       typeRec	    = addPrimTycon(findText("Rec"),
@@ -4340,12 +4256,6 @@ Int what; {
 						   DATATYPE,NIL);
 		       nameNoRec    = addPrimCfun(findText("EmptyRec"),0,0,
 							ap(typeRec,typeNoRow));
-#else
-		       /* bogus definitions to avoid changing the prelude */
-		       addPrimCfun(findText("Rec"),      0,0,typeUnit);
-		       addPrimCfun(findText("EmptyRow"), 0,0,typeUnit);
-		       addPrimCfun(findText("EmptyRec"), 0,0,typeUnit);
-#endif
 
 		       break;
     }

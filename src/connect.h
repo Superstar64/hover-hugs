@@ -79,10 +79,8 @@ extern Name  nameThen;                  /* for translating do / monad comps*/
 extern Name  nameMFail;
 extern Name  nameListMonad;		/* builder function for List Monad */
 
-#if MUDO
 extern Class classMonadRec;		/* Recursive monads		   */
 extern Name  nameMFix;			/* for translating mdo-notation	   */
-#endif
 
 extern Name  namePrint;			/* printing primitive		   */
 extern Name  nameNPrint;		/* internal printer                */
@@ -147,7 +145,6 @@ extern Text  textNum;			/* used to process default decls   */
 #if    NPLUSK
 extern Text  textPlus;			/* Used to recognise n+k patterns  */
 #endif
-#if TREX
 extern Name  nameNoRec;			/* The empty record		   */
 extern Type  typeNoRow;			/* The empty row		   */
 extern Type  typeRec;			/* Record formation		   */
@@ -163,7 +160,6 @@ extern Name  nameEqRecRow;		/* Used to compare rows		   */
 extern Name  nameInsFld;		/* Field insertion routine	   */
 extern Name  nameShowRecRowCls;         /* Trex.ShowRecRow class           */
 extern Name  nameEqRecRowCls;           /* Trex.EqRecRow class             */
-#endif
 
 extern String versionString;		/* String containing version name  */
 #if USE_REGISTRY
@@ -304,13 +300,9 @@ extern  Void   classDefn	(Int,Cell,List,List);
 extern  Void   instDefn		(Int,Cell,Cell);
 extern  Void   addTupInst	(Class,Int);
 extern  Bool   hasIOResultType  (Type);
-#if TREX
 extern  Inst   addRecShowInst	(Class,Ext);
 extern  Inst   addRecEqInst	(Class,Ext);
-#endif
-#if ZIP_COMP
 extern Text    zipName		(Int);
-#endif
 extern  List   oclose		(List,List);
 extern  List   zonkTyvarsIn	(Type,List);
 extern  Type   zonkTyvar	(Int);
@@ -369,10 +361,8 @@ extern  Int    discrArity       (Cell);
 extern  Void   machine          (Int);
 extern  Addr   codeGen          (Name,Int,Cell);
 extern  Void   implementCfun	(Name,List);
-#if TREX
 extern  Name   implementRecShw  (Text,Cell);
 extern  Name   implementRecEq   (Text,Cell);
-#endif
 extern  Void   addCfunTable	(Tycon);
 extern  Name   succCfun		(Name);
 extern  Name   nextCfun		(Name,Name);
@@ -446,7 +436,6 @@ extern  Void saveInputState	(Void);
 extern  Void restoreInputState	(Void);
 #endif
 
-#if OBSERVATIONS
 #define NUMARGS         16               /* max num of args; must be 2^n    */
 #define appId(seq,arg)  (seq)*NUMARGS+(arg)
 #define argNum(n)       (n)%NUMARGS
@@ -457,7 +446,6 @@ extern Int    obsCount;			/* sanity counter for observations */
 extern Bool   isWhnf           (Cell);
 extern Cell   getCaf           (Cell);
 extern Int    countObserve     (Void);
-#endif
 
 extern  Void   charOps          (Int);
 

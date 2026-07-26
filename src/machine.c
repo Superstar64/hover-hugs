@@ -19,9 +19,7 @@
 #include "opts.h"	/* needed for DEBUG_CODE */
 #include <setjmp.h>
 
-#if OBSERVATIONS
 Bool   rootOpt       = TRUE;		/* TRUE => enable root optimisation*/
-#endif
 #if DEBUG_CODE
 Bool   debugCode     = FALSE;		/* TRUE => print G-code to screen  */
 #endif
@@ -182,23 +180,17 @@ static Int   local buildLoc     (List,Int);
 #if BIGNUMS
 static Void  local buildBignum  (Bignum);
 #endif
-#if TREX
 static Void  local buildName	(Cell);
-#endif
 
 static Void  local make         (Cell,Int,Label,Label);
 static Void  local makeCond     (Cell,Cell,Cell,Int,Label,Label);
 static Void  local makeNumcase  (Triple,Int,Label,Label);
-#if TREX
 static Void  local makeExtcase  (Triple,Int,Label,Label);
-#endif
 static Void  local testGuard    (Pair,Int,Label,Label,Label);
 static Void  local testCase     (Pair,Int,Label,Label,Label);
 
 static Void  local analyseAp    (Cell);
-#if TREX
 static Int   local fastBuildRec	(Cell,Int);
-#endif
 static Void  local buildAp      (Cell,Int,Label,Bool);
 
 static Void  local evalString   (Cell);
@@ -695,17 +687,11 @@ Int  co; {                              /* perform no evaluation           */
 	case AP        : buildAp(e,co,SHOULDNTFAIL,FALSE);
 			 break;
 
-#if TREX
 	case NAME      : buildName(e);
 			 break;
 
 	case TUPLE     : asCELL(e);
 			 break;
-#else
-	case TUPLE     :
-	case NAME      : asCELL(e);
-			 break;
-#endif
 
 #if BIGNUMS
 	case ZERONUM   :
@@ -785,7 +771,6 @@ Bignum b; {
 }
 #endif
 
-#if TREX
 static Void local buildName(e)		/* Build name, taking account of   */
 Cell e; {				/* special cases, as necessary.	   */
     if (e==nameNoRec) {
@@ -796,7 +781,6 @@ Cell e; {				/* special cases, as necessary.	   */
     else
 	asCELL(e);
 }
-#endif
 
 /* --------------------------------------------------------------------------
  * Compile expression to code which will build expression evaluating guards
@@ -856,10 +840,8 @@ Label d; {
 				  thd3(snd(e)),co,f,d);
 			 break;
 
-#if TREX
 	case EXTCASE   : makeExtcase(snd(e),co,f,d);
 			 break;
-#endif
 
 	case NUMCASE   : makeNumcase(snd(e),co,f,d);
 			 break;
@@ -888,7 +870,6 @@ Label d; {
 			 asGOTO(d);
 			 break;
 
-#if TREX
 	case NAME      : buildName(e);
 			 asGOTO(d);
 			 break;
@@ -896,12 +877,6 @@ Label d; {
 	case TUPLE     : asCELL(e);
 			 asGOTO(d);
 			 break;
-#else
-	case TUPLE     :
-	case NAME      : asCELL(e);
-			 asGOTO(d);
-			 break;
-#endif
 
 #if BIGNUMS
 	case ZERONUM   :
@@ -1005,7 +980,6 @@ Label  f, d; {
     }
 }
 
-#if TREX
 static Void local makeExtcase(ec,co,f,d)/* Build code for extcase	   */
 Triple ec;
 Int    co;
@@ -1016,7 +990,6 @@ Label  f, d; {
     offsPosn[co+2] = ++srsp;
     make(thd3(ec),co+2,f,d);
 }
-#endif
 
 static Void local testGuard(g,co,f,cf,d)/* Produce code for guard          */
 Pair  g;
@@ -1081,7 +1054,6 @@ Cell e; {                              /* application can be built using a */
 	rootPortion = 0;
 }
 
-#if TREX
 static Int local fastBuildRec(e,co)	/* Try to build record, returning  */
 Cell e;					/* no of elements, or (-1) if not a*/
 Int  co; {				/* simple record		   */
@@ -1099,7 +1071,6 @@ Int  co; {				/* simple record		   */
     }
     return (-1);
 }
-#endif
 
 static Void local buildAp(e,co,f,str)  /* Build application, making use of */
 Cell  e;                               /* root optimisation if poss.       */
@@ -1108,14 +1079,11 @@ Label f;
 Bool  str; {
     Int nr, rp, i;
 
-#if TREX
     if ((i=fastBuildRec(e,co))>=0) {	/* Fast build for records whose	   */
 	asCELL(RECORD);			/* structure is known at compile   */
 	asMKAP(1);			/* time ... but the savings are	   */
 	return;				/* pretty small.		   */
     }
-#endif
-#if OBSERVATIONS
     if (!rootOpt){
         rp = 0;
         nr = 0;
@@ -1126,7 +1094,6 @@ Bool  str; {
         }
     }
     else {
-#endif
     nonRoots = 0;
     analyseAp(e);
     nr = nonRoots;
@@ -1136,14 +1103,10 @@ Bool  str; {
         build(arg(e),co);
         e = fun(e);
     }
-#if OBSERVATIONS
     }
-#endif
 
-#if TREX
     if (isExt(e))
 	e = nameRecExt;
-#endif
     if (0<rp && rp<=definingArity) {
 	asROOT(rp-1);
     }
@@ -1236,7 +1199,6 @@ List scs; {                             /* in incr order of strict comps.  */
     }
 }
 
-#if TREX
 Name nameInsFld;			/* Hooks to Trex library	   */
 Name nameShowRecRow;                    /* static.c:trexLoad() binds them  */
 Name nameEqRecRow;
@@ -1272,7 +1234,6 @@ Cell parent; {
     name(n).code   = startInstr;
     return n;
 }
-#endif
 
 /* --------------------------------------------------------------------------
  * Evaluator:
@@ -1303,12 +1264,10 @@ Int  rootsp = (-1);
 Cell evalRoots[NUM_STACK];
 #endif
 
-#if OBSERVATIONS
 #define obsMarker(p) (whatIs(stack(p))==OBSERVESTK)
 #define isFree(n) (whatIs(n)==OBSERVE && whatIs(markedExpr(n))==FREECELL)
 Int appNum;
 Int obsCount=0;
-#endif
 
 Void eval(n)                            /* Graph reduction evaluator       */
 Cell n; {
@@ -1334,12 +1293,10 @@ unw:switch (whatIs(n)) {                /* unwind spine of application     */
 			 allowBreak();
 			 goto unw;
 
-#if OBSERVATIONS
         case OBSERVE   : push(pair(OBSERVESTK,markedObs(n)));
                          obsCount++;
                          n = markedExpr(n);
                          goto unw;
-#endif
 
 	case NAME      : allowBreak();
 			 {
@@ -1350,9 +1307,7 @@ unw:switch (whatIs(n)) {                /* unwind spine of application     */
 				    n - NAMEMIN, textToStr(name(n).text));
 			 }
 #endif
-#if OBSERVATIONS
     if (!obsCount) {
-#endif
 			 if (!isCfun(n) && (ar=name(n).arity)<=(sp-base)) {
 			    if (ar>0) {                     /* fn with args*/
 				 StackPtr root;
@@ -1411,7 +1366,6 @@ unw:switch (whatIs(n)) {                /* unwind spine of application     */
 #endif
 			     goto unw;
 			 }
-#if OBSERVATIONS
     }
     else { 		/* handle reduction in presence of observations	   */
         StackPtr p, dest;
@@ -1541,7 +1495,6 @@ unw:switch (whatIs(n)) {                /* unwind spine of application     */
             goto unw;
         }
     }
-#endif
 			 }
 			 break;
 
@@ -1558,7 +1511,6 @@ unw:switch (whatIs(n)) {                /* unwind spine of application     */
 			 goto unw;
     }
 
-#if OBSERVATIONS
     /* remove observation markers due to non-fun observations              */
     if (obsCount){
         StackPtr p, dest;
@@ -1570,7 +1522,6 @@ unw:switch (whatIs(n)) {                /* unwind spine of application     */
             }
         sp = dest - 1;
     }
-#endif
 
     whnfHead = n;                      /* rearrange components of term on  */
     whnfArgs = sp - base;              /* stack, now in whnf ...           */
@@ -1585,7 +1536,6 @@ unw:switch (whatIs(n)) {                /* unwind spine of application     */
     evalDepth--;
 }
 
-#if OBSERVATIONS
 Bool isWhnf(n)                            /* is graph expr in WHNF      */
 Cell n; {
     Int      ar;
@@ -1620,7 +1570,6 @@ Cell n; {
     else
         return 0;
 }
-#endif
 
 Void unwind(n)                         /* unwind spine of application;     */
 Cell n; {                              /* like eval except that we always  */
@@ -1805,7 +1754,6 @@ static  void *labs[] = { INSTRLIST };
 			pc++;
 			Continue;
 
-#if OBSERVATIONS
 	Case(iROOT)   : {   Cell t = stack(root);        /* partial root   */
 			    Int  i = pc->mint;
 			    Cell c;
@@ -1824,25 +1772,6 @@ static  void *labs[] = { INSTRLIST };
 			}
 			pc++;
 			Continue;
-#else
-	Case(iROOT)   : {   Cell t = stack(root);        /* partial root   */
-			    Int  i = pc->mint;
-			    while (fst(t)==INDIRECT) {
-				allowBreak();
-				t = arg(t);
-			    }
-			    while (0<i--) {
-				t = fun(t);
-				while (fst(t)==INDIRECT) {
-				    allowBreak();
-				    t = arg(t);
-				}
-			    }
-			    push(t);
-			}
-			pc++;
-			Continue;
-#endif
 	Case(iSLIDE)  : pushed(pc->mint) = top();        /* remove loc vars*/
 			sp -= pc->mint;
 			pc++;
@@ -1900,9 +1829,7 @@ StackPtr root; {
 Void throwException(ex)
 Cell ex; {
     exception = ex;
-#if OBSERVATIONS
     obsCount=0;
-#endif
     if (evalError)
 	longjmp(*evalError,1);
     else
@@ -1939,10 +1866,8 @@ Int what; {
 #endif
 		       break;
 
-#if OBSERVATIONS
 	case BREAK   : obsCount = 0;
 	               break;
-#endif
 
         case EXIT    : 
 #if WANT_FIXED_SIZE_TABLES

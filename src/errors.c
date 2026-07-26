@@ -43,7 +43,6 @@ Void stopAnyPrinting() {  /* terminate printing of expression,*/
 #endif
 #undef plural
 	}
-#if OBSERVATIONS
         printObserve(ALLTAGS);
         if (obsCount) {
             ERRMSG(0) "Internal: observation sanity counter > 0\n"
@@ -54,7 +53,6 @@ Void stopAnyPrinting() {  /* terminate printing of expression,*/
             if (n > 0)
                 Printf("%d observations recorded\n", n);
         }
-#endif
 	FlushStdout();
 	garbageCollect();
     }

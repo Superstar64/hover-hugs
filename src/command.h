@@ -47,7 +47,6 @@ extern Command readCommand (struct cmd *, Char, Char);
 #define NOCMD   20
 #define MAIN    22
 
-#if OBSERVATIONS
 /*-------------------------------------------------------------------------*
  * Commands available after breakpoint                                     *
  *-------------------------------------------------------------------------*/
@@ -55,7 +54,6 @@ extern Command readCommand (struct cmd *, Char, Char);
 #define BRK_CONTINUE    1
 #define BRK_SET         2
 #define BRK_RESET       3
-#endif
 
 /*-------------------------------------------------------------------------*/
 

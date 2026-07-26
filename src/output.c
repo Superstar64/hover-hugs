@@ -20,11 +20,7 @@
 #include "char.h"
 #include <ctype.h>
 
-#if OBSERVATIONS
 #define DEPTH_LIMIT     150
-#else
-#define DEPTH_LIMIT     15
-#endif
 
 /* --------------------------------------------------------------------------
  * Local function prototypes:
@@ -64,10 +60,8 @@ static Void local putApType      (Type,Int,Int);
 static Void local putKind        (Kind);
 static Void local putKinds	 (Kinds);
 
-#if OBSERVATIONS
 static Bool local printObsList   (Cell,Int,Bool);
 static Void local printArg       (FILE *,Cell);
-#endif
 
 static Bool local isStrConst	 (Cell);
 static Void local putStrConst	 (Cell);
@@ -79,9 +73,7 @@ static Char local getCellChar    (Cell);
  * ------------------------------------------------------------------------*/
 
 static FILE *outputStream;             /* current output stream        	   */
-#if DEBUG_SHOWSC || OBSERVATIONS
 static Int  outColumn = 0;             /* current output column number 	   */
-#endif				       				       
 								       
 #define OPEN(b)    if (b) putChr('('); 				       
 #define CLOSE(b)   if (b) putChr(')'); 				       
@@ -89,18 +81,14 @@ static Int  outColumn = 0;             /* current output column number 	   */
 static Void local putChr(c)            /* print single character       	   */
 Int c; {			       				       
     Putc(c,outputStream);	       				       
-#if DEBUG_SHOWSC || OBSERVATIONS		       				       
     outColumn++;		       				       
-#endif				       				       
 }				       				       
 								       
 static Void local putStr(s)            /* print string                 	   */
 String s; {			       				       
     for (; *s; s++) {		       				       
 	Putc(*s,outputStream);	       				       
-#if DEBUG_SHOWSC || OBSERVATIONS
 	outColumn++;		       				       
-#endif				       				       
     }				       				       
 }				       				       
 								       
@@ -145,7 +133,6 @@ Cell e; {
     else
 	putDepth++;
 
-#if OBSERVATIONS
     if (printingObservations) {
         Cell caf;
 
@@ -160,7 +147,6 @@ Cell e; {
             return;
         }
     }
-#endif
 
     switch (whatIs(e)) {
 	case FINLIST    : putChr('[');
@@ -179,9 +165,7 @@ Cell e; {
 			  break;
 
 	case NAME       : 
-#if OBSERVATIONS
 			  if (inString) break;
-#endif
 	                  putModule(name(e).mod);
 	                  unlexVar(name(e).text);
 			  break;
@@ -193,7 +177,6 @@ Cell e; {
 	case CONOPCELL  : 
 	                  unlexVar(textOf(e));
 			  break;
-#if IPARAM
 	case IPVAR	: putChr('?');
 			  unlexVar(textOf(e));
 			  break;
@@ -203,13 +186,10 @@ Cell e; {
 			  put(WHERE_PREC+1,fst(snd(e)));
 			  CLOSE(d>WHERE_PREC);
 			  break;
-#endif
 
-#if TREX
 	case RECSEL	: putChr('#');
 			  unlexVar(extText(snd(e)));
 			  break;
-#endif
 
 	case FREECELL   : putStr("{free!}");
 			  break;
@@ -229,10 +209,8 @@ Cell e; {
 			  put(ALWAYS,snd(e));
 			  break;
 
-#if MUDO
 	case MDOCOMP    : putStr("mdo {...}");
 			  break;
-#endif
 
 	case DOCOMP     : putStr("do {...}");
 			  break;
@@ -344,7 +322,6 @@ Cell e; {
 	case UPDFLDS    : putFlds(fst3(snd(e)),thd3(snd(e)));
 			  break;
 
-#if OBSERVATIONS
         case INDIRECT   : if(printingObservations)
                               put(d, snd(e));
                           else {
@@ -359,11 +336,6 @@ Cell e; {
                               put(ALWAYS,markedExpr(e));
                           }
                           break;
-#else
-	case INDIRECT   : putChr('^');
-			  put(ALWAYS,snd(e));
-			  break;
-#endif
 	default         : /*internal("put");*/
 			  putChr('$');
 			  putInt(e);
@@ -392,11 +364,7 @@ List fs; {
 		     isVar(e)  ? textOf(e)    : inventText();
 
 	    put(NEVER,f);
-#if HASKELL_98_ONLY
-        if (s!=t) {
-#else
 	    if (haskell98 || s!=t) {
-#endif
 		putStr(" = ");
 		put(NEVER,e);
 	    }
@@ -441,13 +409,11 @@ Cell q; {
 
 static Bool local isDictVal(e)          /* Look for dictionary value       */
 Cell e; {
-#if !DEBUG_CODE || OBSERVATIONS         /* code definitely needed for obs. */
     Cell h = getHead(e);
     switch (whatIs(h)) {
 	case DICTVAR : return TRUE;
 	case NAME    : return isDfun(h);
     }
-#endif
     return FALSE;
 }
 
@@ -508,7 +474,6 @@ Cell e; {
 	case CONOPCELL  : sy = defaultSyntax(t = textOf(h));
 			  break;
 
-#if TREX
 	case EXT	: if (args==2) {
 			      String punc = "(";
 			      do {
@@ -535,7 +500,6 @@ Cell e; {
 			  else
 			      args-=2;
 			  break;
-#endif
 
 	default         : sy = APPLIC;
 			  break;
@@ -596,10 +560,8 @@ Cell e; {
 	    case CHARCELL	: return 1;
 	    case INDIRECT	: e = snd(e);
 	    			  break;
-#if OBSERVATIONS
 	    case OBSERVE	: e = markedExpr(e);
 	    			  break;
-#endif
 	    default		: return 0;
 	}
 }
@@ -611,10 +573,8 @@ Cell e; {
 	    case CHARCELL	: return charOf(e);
 	    case INDIRECT	: e = snd(e);
 	    			  break;
-#if OBSERVATIONS
 	    case OBSERVE	: e = markedExpr(e);
 	    			  break;
-#endif
 	    default		: internal("error in getCellChar");
 	}
 }
@@ -815,13 +775,11 @@ Int  co; {
                           unlexFullVar(e);
 			  break;
 
-#if TREX
 	case RECSEL	: putStr("_recSel");
 			  break;
 
 	case EXT	: putStr("_recExt");
 			  break;
-#endif
 
 	case TUPLE      : pPutTuple(tupleOf(e),e,co);
 			  break;
@@ -1047,9 +1005,7 @@ String eq; {
 		       }
 		       break;
 
-#if TREX
 	case EXTCASE :
-#endif
 	case NUMCASE : {   Int  left = outColumn;
 			   Cell t    = snd(e);
 			   Cell h     = getHead(snd3(t));
@@ -1141,7 +1097,6 @@ Int  co; {
 			}
 			break;
 
-#if TREX
 	case AP       : if (isExt(fun(d))) {
 			    putChr('(');
 			    putStr(textToStr(extText(fun(d))));
@@ -1149,7 +1104,6 @@ Int  co; {
 			    return 2;
 			}
 			/* intentional fall-thru */
-#endif
 	default       : pPut(NEVER,d,co);
 			break;
     }
@@ -1199,11 +1153,7 @@ List qs;
 Int  fr; {
     Int len = length(ps) + length(qs);
     Int c   = len;
-#if IPARAM
     Bool useParens = len!=1 || isIP(fun(hd(ps)));
-#else
-    Bool useParens = len!=1;
-#endif
     if (useParens)
 	putChr('(');
     for (; nonNull(ps); ps=tl(ps)) {
@@ -1226,15 +1176,12 @@ static Void local putPred(pi,fr)	/* Output predicate		   */
 Cell pi;
 Int  fr; {
     if (isAp(pi)) {
-#if TREX
 	if (isExt(fun(pi))) {
 	    putType(arg(pi),ALWAYS,fr);
 	    putChr('\\');
 	    putStr(textToStr(extText(fun(pi))));
 	    return;
 	}
-#endif
-#if IPARAM
 	if (isIP(fun(pi))) {
 	    putChr('?');
 	    putPred(fun(pi),fr);
@@ -1242,7 +1189,6 @@ Int  fr; {
 	    putType(arg(pi),NEVER,fr);
 	    return;
 	}
-#endif
 	putPred(fun(pi),fr);
 	putChr(' ');
 	putType(arg(pi),ALWAYS,fr);
@@ -1253,10 +1199,8 @@ Int  fr; {
     } else if (isCon(pi)) {
 	putStr(textToStr(textOf(pi)));
     }
-#if IPARAM
     else if (isIP(pi))
         unlexVar(textOf(pi));
-#endif
     else
 	putStr("<unknownPredicate>");
 }
@@ -1361,7 +1305,6 @@ Int  fr; {
 				    return;
 				}
 			    }
-#if TREX
 			    else if (isExt(typeHead)) {
 				if (args==2) {
 				    String punc = "(";
@@ -1386,7 +1329,6 @@ Int  fr; {
 				else
 				    args-=2;
 			    }
-#endif
 			    OPEN(brackets);
 			    putApType(t,args,fr);
 			    CLOSE(brackets);
@@ -1451,10 +1393,8 @@ Kind k; {
 		       }
 		       break;
 
-#if TREX
 	case ROW     : putStr("row");
 		       break;
-#endif
 
 	case STAR    : putChr('*');
 		       break;
@@ -1490,7 +1430,6 @@ Kinds ks; {
 /* --------------------------------------------------------------------------
  * Print observations
  * ------------------------------------------------------------------------*/
-#if OBSERVATIONS
 #define DELTA 2
 
 Bool printingObservations = FALSE;
@@ -1619,7 +1558,6 @@ Bool funPrint;
     }
     return(funPrint);
 }
-#endif
 
 /* --------------------------------------------------------------------------
  * Print qualified module name (if wanted):
@@ -1645,7 +1583,6 @@ Cell e; {
     put(NEVER,e);
 }
 
-#if OBSERVATIONS
 static Void printArg(fp,e)              /* print expr on specified stream  */
 FILE *fp;
 Cell e; {
@@ -1653,7 +1590,6 @@ Cell e; {
     putDepth     = 0;
     put(ALWAYS,e);
 }
-#endif
 
 Void printType(fp,t)			/* print type on specified stream  */
 FILE *fp;

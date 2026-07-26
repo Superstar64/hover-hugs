@@ -148,12 +148,10 @@ Module m; {        /* evaluate expr and print value    */
     numReductions = 0;
     numGcs        = 0;
     printing      = TRUE;
-#if OBSERVATIONS
     appNum        = 0;
     obsCount      = 0;
     clearAllBreak();
     clearObserve();
-#endif
     consGC = FALSE;
     if (nonNull(type) && addType) {
 	onto(NIL);

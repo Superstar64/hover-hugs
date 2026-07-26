@@ -49,12 +49,6 @@
  * and demos and therefore cannot be modified using the configure script.
  * Most users should leave them alone!
  *
- *   OBSERVATIONS   to include support for `observe' and friends
- *   TREX	    to include support for Typed Rows and EXtensions.
- *   IPARAM	    to include support for Implicit Parameters.
- *   MUDO	    to include support for Recursive-do notation
- *   ZIP_COMP       to include support for Zip Comprehensions
- *   MULTI_INST	    to include support for Multi-Instance Resolution.
  *   HASKELL_ARRAYS to include support for Haskell array primitives.
  *   IO_MONAD	    to include the IO monad primitives and support.
  *   IO_HANDLES     to include the IO file operations.
@@ -91,21 +85,6 @@
  *   FAST_WHATIS1   to use whatIs1(), a faster version of whatIs(), for speed
  *-------------------------------------------------------------------------*/
 
-#if !HASKELL_98_ONLY
-#define TREX		1
-#define IPARAM		1
-#define MUDO		1
-#define OBSERVATIONS    1
-#define ZIP_COMP	1
-#define HERE_DOC	1
-#else
-#define TREX            0
-#define IPARAM          0
-#define MUDO		0
-#define OBSERVATIONS    0
-#define ZIP_COMP	0
-#define HERE_DOC	0
-#endif
 #define HASKELL_ARRAYS	 1
 #define IO_MONAD	 1
 #define IO_HANDLES       1
@@ -484,9 +463,7 @@ typedef void*    Pointer;
 #define NUM_TUPLES         100
 #define NUM_OFFSETS        1024
 #define NUM_LAT1_CHARS     256
-#if TREX
 #define NUM_EXT		   100
-#endif
 
 #if PROFILING
 #define DEF_PROFINTDIV	   10		/* hpsize/this cells between samples*/
@@ -502,10 +479,8 @@ typedef void*    Pointer;
 #define Pick(s,r,l)	   l
 #endif
 
-#if OBSERVATIONS
 #define NUM_OBS_TAGS       Pick(100,    200,        1000)
 #define NUM_BRKPTS         Pick(100,    200,        200)
-#endif
 
 #define NUM_SCRIPTS        Pick(64,     200,        800)
 #define NUM_FIXUPS         Pick(400,    400,        1000)
