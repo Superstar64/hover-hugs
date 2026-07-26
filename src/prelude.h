@@ -122,11 +122,7 @@ int macsystem(char *filenames);
 # define DLLIMPORT(rty) rty
 # define DLLEXPORT(rty) rty
 
-#ifdef __EXTERNAL
-#define HUGSAPI(rty) DLLIMPORT(rty)
-#else
 #define HUGSAPI(rty) DLLEXPORT(rty)
-#endif
 
 /*---------------------------------------------------------------------------
  * String operations:
