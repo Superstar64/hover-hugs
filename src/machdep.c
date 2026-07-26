@@ -36,35 +36,9 @@
 
 #define MAXPATHLEN PATH_MAX
 
-/* Windows/DOS include files */
-#if HAVE_DOS_H
-# include <dos.h>
-#endif
-#if HAVE_CONIO_H && ! HUGS_FOR_WINDOWS
-# include <conio.h>
-#endif
-#if HAVE_IO_H
-# include <io.h>
-#endif
-#if HAVE_STD_H
-# include <std.h>
-#endif
-
-
-
-/* Macintosh include files */
-#if HAVE_CONSOLE_H
-# include <console.h>
-#endif
-#if HAVE_FILES_H
-# include <Files.h>
-#endif
 # include <fcntl.h>
 # include <errno.h>
 # include <stdlib.h>
-#if HAVE_UNIX_H
-#include <unix.h>
-#endif
 
 
 /* --------------------------------------------------------------------------

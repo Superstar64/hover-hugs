@@ -24,9 +24,6 @@
 #include "char.h"
 #include <ctype.h>
 
-#if HAVE_IO_H
-# include <io.h>
-#endif
 
 /* Header files needed to compile the IO primitives */
 
