@@ -260,190 +260,190 @@ extern Bool  preludeLoaded;		/* TRUE => prelude has been loaded */
 #define BREAK   5		/* Take action after program break	   */
 
 /* hugs.c exports: */
-extern  Void   shutdownHugs     Args((Void));
-extern  Void   promptForInput   Args((String));
+extern  Void   shutdownHugs     (Void);
+extern  Void   promptForInput   (String);
 /* The next three are required only by winhugs */
-extern  Bool   doCommand        Args((Void));
-extern  Void   runEditor        Args((Void));
-extern  Module findEvalModule   Args((Void));
+extern  Bool   doCommand        (Void);
+extern  Void   runEditor        (Void);
+extern  Module findEvalModule   (Void);
 
-extern  Void   storage          Args((Int));
+extern  Void   storage          (Int);
 
-extern  Bool   startsQual        Args((Char));
-extern  Void   input             Args((Int));
-extern  Void   consoleInput      Args((String));
-extern  Void   stringInput       Args((String));
-extern  Bool   parseScript       Args((String,Long));
-extern  Void   parseScriptString Args((String));
-extern  Void   parseExp          Args((Void));
+extern  Bool   startsQual        (Char);
+extern  Void   input             (Int);
+extern  Void   consoleInput      (String);
+extern  Void   stringInput       (String);
+extern  Bool   parseScript       (String,Long);
+extern  Void   parseScriptString (String);
+extern  Void   parseExp          (Void);
 #if EXPLAIN_INSTANCE_RESOLUTION
-extern  Void   parseContext     Args((Void));
+extern  Void   parseContext     (Void);
 #endif
-extern  String readFilename     Args((Void));
-extern  String readLine		Args((Void));
-extern  Bool   isModuleId	Args((String));
-extern  Syntax defaultSyntax    Args((Text));
-extern  Syntax syntaxOf		Args((Name));
-extern  String unlexChar        Args((Char,Char));
-extern  Void   printString	Args((String));
-extern  Char   getStrChr	Args((String *));
+extern  String readFilename     (Void);
+extern  String readLine		(Void);
+extern  Bool   isModuleId	(String);
+extern  Syntax defaultSyntax    (Text);
+extern  Syntax syntaxOf		(Name);
+extern  String unlexChar        (Char,Char);
+extern  Void   printString	(String);
+extern  Char   getStrChr	(String *);
 
-extern  Void   substitution	Args((Int));
+extern  Void   substitution	(Int);
 
-extern  Void   staticAnalysis   Args((Int));
-extern  Void   startModule      Args((Cell));
-extern  Void   setExportList    Args((List));
-extern  Void   setExports       Args((List));
-extern  Void   tyconDefn	Args((Int,Cell,Cell,Cell));
-extern  Void   setTypeIns	Args((List));
-extern  Void   clearTypeIns	Args((Void));
-extern  Type   fullExpand	Args((Type));
-extern  Bool   isAmbiguous	Args((Type));
-extern  Void   ambigError	Args((Int,String,Cell,Type));
-extern  Void   classDefn	Args((Int,Cell,List,List));
-extern  Void   instDefn		Args((Int,Cell,Cell));
-extern  Void   addTupInst	Args((Class,Int));
-extern  Bool   hasIOResultType  Args((Type));
+extern  Void   staticAnalysis   (Int);
+extern  Void   startModule      (Cell);
+extern  Void   setExportList    (List);
+extern  Void   setExports       (List);
+extern  Void   tyconDefn	(Int,Cell,Cell,Cell);
+extern  Void   setTypeIns	(List);
+extern  Void   clearTypeIns	(Void);
+extern  Type   fullExpand	(Type);
+extern  Bool   isAmbiguous	(Type);
+extern  Void   ambigError	(Int,String,Cell,Type);
+extern  Void   classDefn	(Int,Cell,List,List);
+extern  Void   instDefn		(Int,Cell,Cell);
+extern  Void   addTupInst	(Class,Int);
+extern  Bool   hasIOResultType  (Type);
 #if TREX
-extern  Inst   addRecShowInst	Args((Class,Ext));
-extern  Inst   addRecEqInst	Args((Class,Ext));
+extern  Inst   addRecShowInst	(Class,Ext);
+extern  Inst   addRecEqInst	(Class,Ext);
 #endif
 #if ZIP_COMP
-extern Text    zipName		Args((Int));
+extern Text    zipName		(Int);
 #endif
-extern  List   oclose		Args((List,List));
-extern  List   zonkTyvarsIn	Args((Type,List));
-extern  Type   zonkTyvar	Args((Int));
-extern  Type   zonkType		Args((Type,Int));
-extern  Void   primDefn		Args((Cell,List,Cell));
-extern  Void   defaultDefn	Args((Int,List));
-extern  Void   checkExp		Args((Void));
+extern  List   oclose		(List,List);
+extern  List   zonkTyvarsIn	(Type,List);
+extern  Type   zonkTyvar	(Int);
+extern  Type   zonkType		(Type,Int);
+extern  Void   primDefn		(Cell,List,Cell);
+extern  Void   defaultDefn	(Int,List);
+extern  Void   checkExp		(Void);
 #if EXPLAIN_INSTANCE_RESOLUTION
-extern  Void   checkContext	Args((Void));
+extern  Void   checkContext	(Void);
 #endif
-extern  Void   checkDefns	Args((Void));
-extern  Void   h98CheckInferredType	Args((Int,Cell,Type));
-extern  Void   h98DoesntSupport	Args((Int,String));
-extern  Cell   depExpr          Args((Int,Cell));
+extern  Void   checkDefns	(Void);
+extern  Void   h98CheckInferredType	(Int,Cell,Type);
+extern  Void   h98DoesntSupport	(Int,String);
+extern  Cell   depExpr          (Int,Cell);
 
-extern  Void   foreignImport    Args((Cell,Cell,Cell,Cell,Cell,Type));
-extern  Void   foreignExport    Args((Cell,Cell,Cell,Cell,Cell,Type));
+extern  Void   foreignImport    (Cell,Cell,Cell,Cell,Cell,Type);
+extern  Void   foreignExport    (Cell,Cell,Cell,Cell,Cell,Type);
 extern  Int    foreignCount;
 extern  List   foreignImports;           /* foreign import declarations     */
 extern  List   foreignExports;           /* foreign export declarations     */
 
-extern  Void   ffi              Args((Int));
-extern  Void   foreignHeader    Args((String));
-extern  Void   foreignFooter    Args((String,Text,List,List));
-extern  Void   ffiSetFlags      Args((String));
-extern  Void   ffiAddCppInclude Args((String));
-extern  Void   implementForeignImport Args((Int,Name,Int,Text,Text,Bool,Text,List,Bool,Type));
-extern  Void   implementForeignImportDynamic Args((Int,Int,Text,List,Bool,Type));
-extern  Void   implementForeignImportWrapper Args((Int,Int,Text,List,Bool,Type));
-extern  Void   implementForeignImportLabel   Args((Int,Int,Text,Text,Text,Type));
-extern  Void   implementForeignExport        Args((Int,Int,Text,List,Bool,Type));
-extern  Bool   foreignNeedStubs              Args((List,List));
+extern  Void   ffi              (Int);
+extern  Void   foreignHeader    (String);
+extern  Void   foreignFooter    (String,Text,List,List);
+extern  Void   ffiSetFlags      (String);
+extern  Void   ffiAddCppInclude (String);
+extern  Void   implementForeignImport (Int,Name,Int,Text,Text,Bool,Text,List,Bool,Type);
+extern  Void   implementForeignImportDynamic (Int,Int,Text,List,Bool,Type);
+extern  Void   implementForeignImportWrapper (Int,Int,Text,List,Bool,Type);
+extern  Void   implementForeignImportLabel   (Int,Int,Text,Text,Text,Type);
+extern  Void   implementForeignExport        (Int,Int,Text,List,Bool,Type);
+extern  Bool   foreignNeedStubs              (List,List);
 extern  Bool   generateFFI;	/* running ffihugs? */
 extern  Bool   generate_ffi;	/* generate FFI for the current module? */
 
-extern  Void   typeChecker      Args((Int));
-extern  Type   typeCheckExp	Args((Bool));
-extern  Void   typeCheckDefns	Args((Void));
-extern  Cell   provePred	Args((Kinds,List,Cell));
-extern  Cell   resolvePred	Args((Kinds,Cell));
-extern  List   simpleContext	Args((List,Int));
-extern  Cell   rhsExpr		Args((Cell));
-extern  Int    rhsLine		Args((Cell));
-extern  Cell   getProgType	Args((List,Type));
-extern  Cell   superEvid	Args((Cell,Class,Class));
-extern  Void   linkPreludeTC    Args((Void));
-extern  Void   linkPreludeCM    Args((Void));
-extern  Void   linkPreludeFuns  Args((Void));
+extern  Void   typeChecker      (Int);
+extern  Type   typeCheckExp	(Bool);
+extern  Void   typeCheckDefns	(Void);
+extern  Cell   provePred	(Kinds,List,Cell);
+extern  Cell   resolvePred	(Kinds,Cell);
+extern  List   simpleContext	(List,Int);
+extern  Cell   rhsExpr		(Cell);
+extern  Int    rhsLine		(Cell);
+extern  Cell   getProgType	(List,Type);
+extern  Cell   superEvid	(Cell,Class,Class);
+extern  Void   linkPreludeTC    (Void);
+extern  Void   linkPreludeCM    (Void);
+extern  Void   linkPreludeFuns  (Void);
 
-extern  Void   compiler         Args((Int));
-extern  Void   compileDefns     Args((Void));
-extern  Void   compileExp       Args((Void));
-extern  Bool   failFree		Args((Cell));
-extern  Int    discrArity       Args((Cell));
+extern  Void   compiler         (Int);
+extern  Void   compileDefns     (Void);
+extern  Void   compileExp       (Void);
+extern  Bool   failFree		(Cell);
+extern  Int    discrArity       (Cell);
 
-extern  Void   machine          Args((Int));
-extern  Addr   codeGen          Args((Name,Int,Cell));
-extern  Void   implementCfun	Args((Name,List));
+extern  Void   machine          (Int);
+extern  Addr   codeGen          (Name,Int,Cell);
+extern  Void   implementCfun	(Name,List);
 #if TREX
-extern  Name   implementRecShw  Args((Text,Cell));
-extern  Name   implementRecEq   Args((Text,Cell));
+extern  Name   implementRecShw  (Text,Cell);
+extern  Name   implementRecEq   (Text,Cell);
 #endif
-extern  Void   addCfunTable	Args((Tycon));
-extern  Name   succCfun		Args((Name));
-extern  Name   nextCfun		Args((Name,Name));
-extern  Name   cfunByNum	Args((Name,Int));
-extern  Void   unwind           Args((Cell));
-extern  Void   run              Args((Addr,StackPtr));
+extern  Void   addCfunTable	(Tycon);
+extern  Name   succCfun		(Name);
+extern  Name   nextCfun		(Name,Name);
+extern  Name   cfunByNum	(Name,Int);
+extern  Void   unwind           (Cell);
+extern  Void   run              (Addr,StackPtr);
 #if !WANT_FIXED_SIZE_TABLES
 extern DynTable* dynMemory;
-extern void    growMemory       Args((Void));
+extern void    growMemory       (Void);
 #endif
 
-extern  Void   eval             Args((Cell));
-extern  Cell   evalWithNoError  Args((Cell));
-extern  Void   evalFails        Args((StackPtr));
-extern  Void   throwException   Args((Cell)) HUGS_noreturn;
+extern  Void   eval             (Cell);
+extern  Cell   evalWithNoError  (Cell);
+extern  Void   evalFails        (StackPtr);
+extern  Void   throwException   (Cell) HUGS_noreturn;
 
 #if BYTECODE_PRIMS
-extern Int     IntAt            Args((Addr));
-extern Float   FloatAt          Args((Addr));
-extern Double  DoubleAt         Args((Addr));
-extern Cell    CellAt           Args((Addr));
-extern Text    TextAt           Args((Addr));
-extern Addr    AddrAt           Args((Addr));
-extern Int     InstrAt          Args((Addr));
+extern Int     IntAt            (Addr);
+extern Float   FloatAt          (Addr);
+extern Double  DoubleAt         (Addr);
+extern Cell    CellAt           (Addr);
+extern Text    TextAt           (Addr);
+extern Addr    AddrAt           (Addr);
+extern Int     InstrAt          (Addr);
 #endif /* BYTECODE_PRIMS */
 
-extern  Void   builtIn          Args((Int));
-extern  Void   abandon		Args((String,Cell));
-extern  Void   outputString	Args((FILE *));
-extern  Void   dialogue		Args((Cell));
-extern  Cell   consChar		Args((Char));
+extern  Void   builtIn          (Int);
+extern  Void   abandon		(String,Cell);
+extern  Void   outputString	(FILE *);
+extern  Void   dialogue		(Cell);
+extern  Cell   consChar		(Char);
 #if BIGNUMS
-extern  Bignum bigInt		Args((Int));
-extern  Bignum bigDouble	Args((double));
-extern  Bignum bigNeg		Args((Bignum));
-extern  Cell   bigToInt		Args((Bignum));
-extern  double bigToDouble	Args((Bignum));
-extern  Bignum bigStr		Args((String));
-extern  Cell   bigOut		Args((Bignum,Cell,Bool));
-extern  Bignum bigShift		Args((Bignum,Int,Int));
-extern  Int    bigCmp		Args((Bignum,Bignum));
+extern  Bignum bigInt		(Int);
+extern  Bignum bigDouble	(double);
+extern  Bignum bigNeg		(Bignum);
+extern  Cell   bigToInt		(Bignum);
+extern  double bigToDouble	(Bignum);
+extern  Bignum bigStr		(String);
+extern  Cell   bigOut		(Bignum,Cell,Bool);
+extern  Bignum bigShift		(Bignum,Int,Int);
+extern  Int    bigCmp		(Bignum,Bignum);
 #endif
 #if IO_MONAD
-extern Void   setHugsArgs       Args((Int,String[]));
+extern Void   setHugsArgs       (Int,String[]);
 #endif
 
-extern  Void   machdep          Args((Int));
-extern  String findPathname     Args((String));
-extern  String findMPathname    Args((String));
-extern  String findMInDir       Args((String,String));
-extern  Bool   readable         Args((String,Bool));
+extern  Void   machdep          (Int);
+extern  String findPathname     (String);
+extern  String findMPathname    (String);
+extern  String findMInDir       (String,String);
+extern  Bool   readable         (String,Bool);
 #if PROFILING
-extern  String timeString	Args((Void));
+extern  String timeString	(Void);
 #endif
-extern  String hugsdir          Args((Void));
-extern  String mkFFIFilename    Args((String));
-extern  String mkFFIFilename2   Args((String));
-extern  Void   freeDLL          Args((void*));
-extern  Void   compileAndLink   Args((String,String));
+extern  String hugsdir          (Void);
+extern  String mkFFIFilename    (String);
+extern  String mkFFIFilename2   (String);
+extern  Void   freeDLL          (void*);
+extern  Void   compileAndLink   (String,String);
 
-extern  Void   plugins          Args((Int));
-extern  Bool   havePlugin       Args((String));
-extern  List   calcFunDepsPreds Args((List));
-extern  Inst   findInstFor      Args((Cell,Int));
+extern  Void   plugins          (Int);
+extern  Bool   havePlugin       (String);
+extern  List   calcFunDepsPreds (List);
+extern  Inst   findInstFor      (Cell,Int);
 #if MULTI_INST
-extern  List   findInstsFor     Args((Cell,Int));
+extern  List   findInstsFor     (Cell,Int);
 #endif
 
 #if HUGS_FOR_WINDOWS
-extern  Void saveInputState	Args((Void));
-extern  Void restoreInputState	Args((Void));
+extern  Void saveInputState	(Void);
+extern  Void restoreInputState	(Void);
 #endif
 
 #if OBSERVATIONS
@@ -454,14 +454,14 @@ extern  Void restoreInputState	Args((Void));
 extern Bool   printingObservations;     /* TRUE => print observed exprs    */
 extern Int    appNum;                   /* for counting applications       */
 extern Int    obsCount;			/* sanity counter for observations */
-extern Bool   isWhnf           Args((Cell));
-extern Cell   getCaf           Args((Cell));
-extern Int    countObserve     Args((Void));
+extern Bool   isWhnf           (Cell);
+extern Cell   getCaf           (Cell);
+extern Int    countObserve     (Void);
 #endif
 
-extern  Void   charOps          Args((Int));
+extern  Void   charOps          (Int);
 
-extern	Void   pushString	Args((String));
+extern	Void   pushString	(String);
 
 /*-------------------------------------------------------------------------*/
 

@@ -11,20 +11,20 @@
 /* --------------------------------------------------------------------------
  * Functions for processing and displaying Hugs options:
  * ------------------------------------------------------------------------*/
-extern Bool   processOption       Args((String));
-extern Void   readOptions         Args((String,Bool));
-extern Bool   readOptions2        Args((String));
-extern Void   optionInfo          Args((Void));
-extern Bool   isOption            Args((String));
-extern Void   setOptions          Args((Void));
-extern String optionsToStr        Args((Void));
-extern Void   processOptionVector Args((Int, String []));
-extern Void   readOptionSettings  Args((Void));
+extern Bool   processOption       (String);
+extern Void   readOptions         (String,Bool);
+extern Bool   readOptions2        (String);
+extern Void   optionInfo          (Void);
+extern Bool   isOption            (String);
+extern Void   setOptions          (Void);
+extern String optionsToStr        (Void);
+extern Void   processOptionVector (Int, String []);
+extern Void   readOptionSettings  (Void);
 
-extern Void   setLastEdit         Args((String,Int));
-extern String getLastEdit         Args((Int*));
-extern Int    argToInt            Args((String));
-extern Void   setHeapSize         Args((String));
+extern Void   setLastEdit         (String,Int);
+extern String getLastEdit         (Int*);
+extern Int    argToInt            (String);
+extern Void   setHeapSize         (String);
 
 /* --------------------------------------------------------------------------
  * Interpreter flags and options:

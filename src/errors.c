@@ -189,9 +189,9 @@ typedef struct _HugsStream {
     Int  next;                        /* next space in buffer              */
 } HugsStream;
 
-static Void   local vBufferedPrintf  Args((HugsStream*, const char*, va_list));
-static Void   local bufferedPutchar  Args((HugsStream*, int));
-static String local bufferClear      Args((HugsStream *stream));
+static Void   local vBufferedPrintf  (HugsStream*, const char*, va_list);
+static Void   local bufferedPutchar  (HugsStream*, int);
+static String local bufferClear      (HugsStream *stream);
 
 static Void local vBufferedPrintf(stream, fmt, ap)
 HugsStream* stream;

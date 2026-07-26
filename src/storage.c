@@ -28,32 +28,32 @@
  * local function prototypes:
  * ------------------------------------------------------------------------*/
 
-static Int  local hash                  Args((String));
-static Int  local saveText              Args((Text));
-static Void local hashTycon             Args((Tycon));
-static List local insertTycon           Args((Tycon,List));
-static Void local hashName              Args((Name));
-static List local insertName            Args((Name,List));
-static Void local patternError          Args((String));
-static Bool local stringMatch           Args((String,String));
-static Bool local typeInvolves		Args((Type,Type));
-static Cell local markCell              Args((Cell));
-static Cell local markSnd               Args((Cell));
-static Cell local indirectChain         Args((Cell));
-static Bool local isMarked		Args((Cell));
-static Cell local lowLevelLastIn        Args((Cell));
-static Cell local lowLevelLastOut       Args((Cell));
+static Int  local hash                  (String);
+static Int  local saveText              (Text);
+static Void local hashTycon             (Tycon);
+static List local insertTycon           (Tycon,List);
+static Void local hashName              (Name);
+static List local insertName            (Name,List);
+static Void local patternError          (String);
+static Bool local stringMatch           (String,String);
+static Bool local typeInvolves		(Type,Type);
+static Cell local markCell              (Cell);
+static Cell local markSnd               (Cell);
+static Cell local indirectChain         (Cell);
+static Bool local isMarked		(Cell);
+static Cell local lowLevelLastIn        (Cell);
+static Cell local lowLevelLastOut       (Cell);
 #if IO_HANDLES
-static Void local freeHandle            Args((Int));
+static Void local freeHandle            (Int);
 #endif
 #if GC_STABLEPTRS
-static Void local resetStablePtrs       Args((Void));
+static Void local resetStablePtrs       (Void);
 #endif
 #if OBSERVATIONS
-static Observe  local newObserve        Args((Text));
-static Void     local appendObs         Args((Cell,Cell));
-static Breakpt  local addBreakpt        Args((String));
-static Breakpt  local findBreakpt       Args((String));
+static Observe  local newObserve        (Text);
+static Void     local appendObs         (Cell,Cell);
+static Breakpt  local addBreakpt        (String);
+static Breakpt  local findBreakpt       (String);
 #endif
 
 #ifdef DOTNET
@@ -765,7 +765,7 @@ struct primInfoDef {
     struct primInfoDef* nextPrimInfoDef; /* subsumes nextPrimInfo (ToDo: nuke it) */
 };
 
-static Void local freePrimInfo Args((struct primInfoDef*));
+static Void local freePrimInfo (struct primInfoDef*);
 
 static struct primInfoDef *firstPrimInfo = 0; /* queue of primInfo structures */
 static struct primInfoDef *lastPrimInfo  = 0;
@@ -1177,7 +1177,7 @@ Inst newInst() {                       /* Add new instance to table        */
 }
 
 #if DEBUG_DICTS
-extern Void printInst Args((Inst));
+extern Void printInst (Inst);
 
 Void printInst(in)
 Inst in; {
@@ -2509,8 +2509,8 @@ register Cell c; {
  * robust and can be used on any data structure irrespective of
  * its type.
  */
-Void printList Args((List, Int));
-Void print Args((Cell, Int));
+Void printList (List, Int);
+Void print (Cell, Int);
 Void print(c, depth)
 Cell c;
 Int  depth; {
@@ -2518,7 +2518,7 @@ Int  depth; {
 	Printf("...");
 #if 0 /* Not in this version of Hugs */
     } else if (isPair(c) && !isGenPair(c)) {
-	extern Void printEvalCell Args((Cell, Int));
+	extern Void printEvalCell (Cell, Int);
 	printEvalCell(c,depth);
 #endif
     } else {
@@ -3422,7 +3422,7 @@ Int i; {
  * ------------------------------------------------------------------------*/
 
 #if DYN_TABLES
-static void far* safeFarCalloc Args((Int,Int));
+static void far* safeFarCalloc (Int,Int);
 static void far* safeFarCalloc(n,s)     /* allocate table storage and check*/
 Int n, s; {                             /* for non-null return             */
     void far* tab = farCalloc(n,s);

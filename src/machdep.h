@@ -33,7 +33,7 @@ typedef time_t Time;
 #define timeSet(var,tm)         var = tm
 #endif
 
-extern Void getFileInfo Args((String, Time *, Long *));
+extern Void getFileInfo (String, Time *, Long *);
 
 /* --------------------------------------------------------------------------
  * Prototypes for registry reading
@@ -42,42 +42,42 @@ extern Void getFileInfo Args((String, Time *, Long *));
 #if USE_REGISTRY
 
 #if HUGS_FOR_WINDOWS
-extern Int    readRegInt     Args((String,Int));
-extern Bool   writeRegInt    Args((String,Int));
+extern Int    readRegInt     (String,Int);
+extern Bool   writeRegInt    (String,Int);
 #endif
 
-extern String readRegString       Args((HKEY, String, String, String));
-extern Bool   writeRegString      Args((String,String));
-extern String readRegChildStrings Args((HKEY, String, String, String));
+extern String readRegString       (HKEY, String, String, String);
+extern Bool   writeRegString      (String,String);
+extern String readRegChildStrings (HKEY, String, String, String);
 #endif /* USE_REGISTRY */
 
 /* --------------------------------------------------------------------------
  * Search for script files on the HUGS path:
  * ------------------------------------------------------------------------*/
 
-extern String RealPath  Args((String));
-extern String substPath Args((String,String));
-extern String uniqPath  Args((String));
+extern String RealPath  (String);
+extern String substPath (String,String);
+extern String uniqPath  (String);
 #if !HUGS_SERVER
-extern Bool startEdit   Args((Int,String));
+extern Bool startEdit   (Int,String);
 #endif
 
-extern  Int    shellEsc		Args((String,Bool,Bool));
-extern  Int    getTerminalWidth Args((Void));
-extern  Void   normalTerminal	Args((Void));
-extern  Bool   getEchoTerminal	Args((Int));
-extern  Void   setEchoTerminal	Args((Int,Bool));
-extern  Bool   getBuffTerminal	Args((Int));
-extern  Void   setBuffTerminal	Args((Int,Bool));
-extern  Void   gcStarted	Args((Void));
-extern  Void   gcScanning	Args((Void));
-extern  Void   gcRecovered	Args((Int));
-extern  Void   gcCStack		Args((Void));
-extern  Void   needPrims        Args((Int,void*)); 
+extern  Int    shellEsc		(String,Bool,Bool);
+extern  Int    getTerminalWidth (Void);
+extern  Void   normalTerminal	(Void);
+extern  Bool   getEchoTerminal	(Int);
+extern  Void   setEchoTerminal	(Int,Bool);
+extern  Bool   getBuffTerminal	(Int);
+extern  Void   setBuffTerminal	(Int,Bool);
+extern  Void   gcStarted	(Void);
+extern  Void   gcScanning	(Void);
+extern  Void   gcRecovered	(Int);
+extern  Void   gcCStack		(Void);
+extern  Void   needPrims        (Int,void*); 
 
-extern  String fromEnv		Args((String,String));
-extern  Bool   initSystem       Args((Void));
+extern  String fromEnv		(String,String);
+extern  Bool   initSystem       (Void);
 
-extern	String dirname		Args((String));
+extern	String dirname		(String);
 
 #endif /* __MACHDEP_H__ */

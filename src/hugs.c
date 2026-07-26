@@ -32,30 +32,30 @@
  * Local function prototypes:
  * ------------------------------------------------------------------------*/
 
-static Void   local interpreter       Args((Int,String []));
-static Void   local initInterpreter   Args((Void));
-static Void   local menu              Args((Void));
-static Void   local guidance          Args((Void));
-static Void   local forHelp           Args((Void));
-static Void   local changeDir         Args((Void));
-static Void   local load              Args((Void));
-static Void   local editor            Args((Void));
-static Void   local find              Args((Void));
-static Void   local setModule         Args((Void));
-static Void   local showtype          Args((Void));
-static String local objToStr          Args((Module, Cell));
-static Void   local info              Args((Void));
-static Void   local printSyntax       Args((Name));
-static Void   local showInst          Args((Inst));
-static Void   local describe          Args((Text));
-static Void   local listNames         Args((Void));
-static Void   local expandPath        Args((String,String,unsigned int));
-static Void   local browse	      Args((Void));
-static Void   local initialize        Args((Int, String []));
-static Void   local clearEvalModule   Args((Void));
+static Void   local interpreter       (Int,String []);
+static Void   local initInterpreter   (Void);
+static Void   local menu              (Void);
+static Void   local guidance          (Void);
+static Void   local forHelp           (Void);
+static Void   local changeDir         (Void);
+static Void   local load              (Void);
+static Void   local editor            (Void);
+static Void   local find              (Void);
+static Void   local setModule         (Void);
+static Void   local showtype          (Void);
+static String local objToStr          (Module, Cell);
+static Void   local info              (Void);
+static Void   local printSyntax       (Name);
+static Void   local showInst          (Inst);
+static Void   local describe          (Text);
+static Void   local listNames         (Void);
+static Void   local expandPath        (String,String,unsigned int);
+static Void   local browse	      (Void);
+static Void   local initialize        (Int, String []);
+static Void   local clearEvalModule   (Void);
 
 #if HUGS_FOR_WINDOWS
-static Void   local autoReloadFiles   Args((Void));
+static Void   local autoReloadFiles   (Void);
 #endif
 
 /* --------------------------------------------------------------------------
@@ -98,8 +98,8 @@ static Void   local autoReloadFiles   Args((Void));
 #include <sys/time.h>
 #include <sys/resource.h>
 
-void updateTimers Args((void));
-long millisecs  Args((long));
+void updateTimers (void);
+long millisecs  (long);
 long userElapsed, systElapsed;
 
 void updateTimers() {
@@ -216,7 +216,7 @@ String argv[]; {
 /* --------------------------------------------------------------------------
  * Printing the banner
  * ------------------------------------------------------------------------*/
-static Void printBanner Args((Void));
+static Void printBanner (Void);
 
 static Void printBanner()
 {
@@ -259,7 +259,7 @@ static Void printBanner()
  * Hugs entry point:
  * ------------------------------------------------------------------------*/
 
-int main Args((Int, String []));       /* now every func has a prototype  */
+int main (Int, String []);       /* now every func has a prototype  */
 
 int main(argc,argv)
 int  argc;

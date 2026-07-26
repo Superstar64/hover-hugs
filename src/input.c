@@ -64,47 +64,47 @@ String preprocessor  = 0;
  * Local function prototypes:
  * ------------------------------------------------------------------------*/
 
-static Bool local fileInput       Args((String,Long));
-static Bool local literateMode    Args((String));
-static Bool local linecmp         Args((String,ShortChar *));
-static Int  local nextLine        Args((Void));
-static Void local skip            Args((Void));
-static Void local thisLineIs      Args((Int));
-static Void local newlineSkip     Args((Void));
-static Void local closeAnyInput   Args((Void));
+static Bool local fileInput       (String,Long);
+static Bool local literateMode    (String);
+static Bool local linecmp         (String,ShortChar *);
+static Int  local nextLine        (Void);
+static Void local skip            (Void);
+static Void local thisLineIs      (Int);
+static Void local newlineSkip     (Void);
+static Void local closeAnyInput   (Void);
 
-       Int  yyparse         Args((Void)); /* can't stop yacc making this   */
+       Int  yyparse         (Void); /* can't stop yacc making this   */
 					  /* public, but don't advertise   */
 					  /* it in a header file.          */
 
-static Void local endToken        Args((Void));
-static Text local readOperator    Args((Void));
-static Text local readIdent       Args((Void));
-static Cell local readRadixNumber Args((Int));
-static Cell local readNumber      Args((Void));
-static Cell local readChar        Args((Void));
-static Cell local readString      Args((Void));
-static Void local saveStrChr      Args((Char));
-static Cell local readAChar       Args((Bool));
+static Void local endToken        (Void);
+static Text local readOperator    (Void);
+static Text local readIdent       (Void);
+static Cell local readRadixNumber (Int);
+static Cell local readNumber      (Void);
+static Cell local readChar        (Void);
+static Cell local readString      (Void);
+static Void local saveStrChr      (Char);
+static Cell local readAChar       (Bool);
 
-static Bool local lazyReadMatches Args((String));
-static Cell local readEscapeChar  Args((Bool,Bool));
-static Void local skipGap         Args((Void));
-static Cell local readCtrlChar    Args((Void));
-static Cell local readOctChar     Args((Void));
-static Cell local readHexChar     Args((Void));
-static Int  local readHexDigit    Args((Char));
-static Cell local readDecChar     Args((Void));
+static Bool local lazyReadMatches (String);
+static Cell local readEscapeChar  (Bool,Bool);
+static Void local skipGap         (Void);
+static Cell local readCtrlChar    (Void);
+static Cell local readOctChar     (Void);
+static Cell local readHexChar     (Void);
+static Int  local readHexDigit    (Char);
+static Cell local readDecChar     (Void);
 
-static Void local goOffside       Args((Int));
-static Void local unOffside       Args((Void));
-static Bool local canUnOffside    Args((Void));
+static Void local goOffside       (Int);
+static Void local unOffside       (Void);
+static Bool local canUnOffside    (Void);
 
-static Void local skipWhitespace  Args((Void));
-static Int  local yylex           Args((Void));
-static Int  local repeatLast      Args((Void));
+static Void local skipWhitespace  (Void);
+static Int  local yylex           (Void);
+static Int  local repeatLast      (Void);
 
-static Void local parseInput      Args((Int));
+static Void local parseInput      (Int);
 
 /* --------------------------------------------------------------------------
  * Text values for reserved words and special symbols:
@@ -213,8 +213,8 @@ static String nextStringChar;          /* next char in string buffer       */
 static  String currentLine;            /* editline or GNU readline         */
 static  String nextChar;
 #define nextConsoleChar() (*nextChar=='\0' ? '\n' : ExtractChar(nextChar))
-extern  Void add_history  Args((String));
-extern  String readline   Args((String));
+extern  Void add_history  (String);
+extern  String readline   (String);
 
 static  Int litLines;                  /* count defn lines in lit script   */
 #define DEFNCHAR  '>'                  /* definition lines begin with this */

@@ -16,15 +16,15 @@
 #include "prelude.h"
 #include "storage.h"
 
-extern String evalName  Args((Cell));
-extern Cell   mkIOError Args((Cell *,Name,String,String,Cell *));
+extern String evalName  (Cell);
+extern Cell   mkIOError (Cell *,Name,String,String,Cell *);
 
 /* --------------------------------------------------------------------------
  * Macros used to define primitives:
  * ------------------------------------------------------------------------*/
 
-#define PROTO_PRIM(name)      static Void name Args((StackPtr))
-#define EXT_PROTO_PRIM(name)  extern Void name Args((StackPtr))
+#define PROTO_PRIM(name)      static Void name (StackPtr)
+#define EXT_PROTO_PRIM(name)  extern Void name (StackPtr)
 #define primFun(name)         static Void name(root) StackPtr root;
 #define extPrimFun(name)      Void name(StackPtr root)
 #define primCAF(name)         static Void name(root) StackPtr root HUGS_unused;

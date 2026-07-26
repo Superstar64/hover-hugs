@@ -27,32 +27,32 @@
 /* --------------------------------------------------------------------------
  * local function prototypes:
  * ------------------------------------------------------------------------*/
-static Name   local lookupName		Args((Text,List));
-static Module local modOfEntity         Args((Cell));
-static Void   local reportAmbigEntity   Args((Text,Text,List));
-static List   local checkSubentities	Args((List,List,List,String,Text));
-static Void   local checkExportDistinct Args((List,Bool,Cell));
-static List   local checkExportTycon	Args((List,Text,Bool,Cell,Tycon));
-static List   local checkExportClass	Args((List,Text,Bool,Cell,Class));
-static List   local checkExportModule	Args((List,Text,Cell));
-static List   local checkExport		Args((List,Text,Cell));
-static List   local checkImportEntity	Args((List,Module,Bool,Cell));
-static List   local resolveImportList	Args((Module,Cell,Bool));
-static Cell   local entityIsMember      Args((Cell,List));
-static List   local augmentEntity       Args((Bool,Cell,Cell,List));
-static List   local addEntity           Args((Cell,Cell,List));
-static List   local addEntityPair       Args((Cell,List));
-static List   local mergeImportLists    Args((List,List));
-static List   local getIEOrphans        Args((List));
-static List   local fixupIEList         Args((List));
-static List   local allMethodsOrDCons   Args((List,Cell,Module,Bool));
+static Name   local lookupName		(Text,List);
+static Module local modOfEntity         (Cell);
+static Void   local reportAmbigEntity   (Text,Text,List);
+static List   local checkSubentities	(List,List,List,String,Text);
+static Void   local checkExportDistinct (List,Bool,Cell);
+static List   local checkExportTycon	(List,Text,Bool,Cell,Tycon);
+static List   local checkExportClass	(List,Text,Bool,Cell,Class);
+static List   local checkExportModule	(List,Text,Cell);
+static List   local checkExport		(List,Text,Cell);
+static List   local checkImportEntity	(List,Module,Bool,Cell);
+static List   local resolveImportList	(Module,Cell,Bool);
+static Cell   local entityIsMember      (Cell,List);
+static List   local augmentEntity       (Bool,Cell,Cell,List);
+static List   local addEntity           (Cell,Cell,List);
+static List   local addEntityPair       (Cell,List);
+static List   local mergeImportLists    (List,List);
+static List   local getIEOrphans        (List);
+static List   local fixupIEList         (List);
+static List   local allMethodsOrDCons   (List,Cell,Module,Bool);
 
-static Cell   local importEntity	Args((Module,Cell));
-static Void   local importTycon		Args((Module,Tycon));
-static Void   local importClass		Args((Module,Class));
+static Cell   local importEntity	(Module,Cell);
+static Void   local importTycon		(Module,Tycon);
+static Void   local importClass		(Module,Class);
 
-static Void   local browseName		Args((Name));
-static Void   local browseEntity	Args((Cell));
+static Void   local browseName		(Name);
+static Void   local browseEntity	(Cell);
 
 Void addQualImport(orig,new,entities) /* Add to qualified import list       */
 Cell orig;       /* Original name of module                                */
@@ -114,8 +114,8 @@ Text   textParent; {
 
 #if 0
 /* debugging code - dumping IE lists */
-static Void showIEEntity Args((Cell));
-static Void showIEList   Args((List,char));
+static Void showIEEntity (Cell);
+static Void showIEList   (List,char);
 
 static Void
 showIEEntity(e)

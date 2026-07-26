@@ -32,77 +32,77 @@ static FILE *scfp;		       /* super combinator file pointer    */
  * Local function prototypes:
  * ------------------------------------------------------------------------*/
 
-static Cell local translate             Args((Cell));
-static Void local transPair             Args((Pair));
-static Void local transTriple           Args((Triple));
-static Void local transAlt              Args((Cell));
-static Void local transCase             Args((Cell));
-static List local transBinds            Args((List));
-static Cell local transRhs              Args((Cell));
-static Cell local mkConsList            Args((List));
-static Cell local expandLetrec          Args((Cell));
-static Cell local transComp             Args((Cell,List,Cell));
-static Cell local transDo               Args((Cell,Cell,List));
-static Cell local transConFlds          Args((Cell,List));
-static Cell local transUpdFlds          Args((Cell,List,List));
+static Cell local translate             (Cell);
+static Void local transPair             (Pair);
+static Void local transTriple           (Triple);
+static Void local transAlt              (Cell);
+static Void local transCase             (Cell);
+static List local transBinds            (List);
+static Cell local transRhs              (Cell);
+static Cell local mkConsList            (List);
+static Cell local expandLetrec          (Cell);
+static Cell local transComp             (Cell,List,Cell);
+static Cell local transDo               (Cell,Cell,List);
+static Cell local transConFlds          (Cell,List);
+static Cell local transUpdFlds          (Cell,List,List);
 
 #if MUDO
-static Cell local transMDo		Args((Cell,Cell,List));
-static Cell local mdoBuildTuple		Args((List));
+static Cell local transMDo		(Cell,Cell,List);
+static Cell local mdoBuildTuple		(List);
 #endif
 
-static Cell local refutePat             Args((Cell));
-static Cell local refutePatAp           Args((Cell));
-static Cell local matchPat              Args((Cell));
-static List local remPat                Args((Cell,Cell,List));
-static List local remPat1               Args((Cell,Cell,List));
+static Cell local refutePat             (Cell);
+static Cell local refutePatAp           (Cell);
+static Cell local matchPat              (Cell);
+static List local remPat                (Cell,Cell,List);
+static List local remPat1               (Cell,Cell,List);
 
-static Cell local pmcTerm               Args((Int,List,Cell));
-static Cell local pmcPair               Args((Int,List,Pair));
-static Cell local pmcTriple             Args((Int,List,Triple));
-static Cell local pmcVar                Args((List,Text));
-static Void local pmcLetrec             Args((Int,List,Pair));
-static Cell local pmcVarDef             Args((Int,List,List));
-static Void local pmcFunDef             Args((Int,List,Triple));
-static List local altsMatch             Args((Int,Int,List,List));
-static Cell local match                 Args((Int,List));
-static Cell local joinMas               Args((Int,List));
-static Bool local canFail               Args((Cell));
-static List local addConTable           Args((Cell,Cell,List));
-static Void local advance               Args((Int,Int,Cell));
-static Bool local emptyMatch            Args((Cell));
-static Cell local maDiscr               Args((Cell));
-static Bool local isNumDiscr            Args((Cell));
-static Bool local eqNumDiscr            Args((Cell,Cell));
+static Cell local pmcTerm               (Int,List,Cell);
+static Cell local pmcPair               (Int,List,Pair);
+static Cell local pmcTriple             (Int,List,Triple);
+static Cell local pmcVar                (List,Text);
+static Void local pmcLetrec             (Int,List,Pair);
+static Cell local pmcVarDef             (Int,List,List);
+static Void local pmcFunDef             (Int,List,Triple);
+static List local altsMatch             (Int,Int,List,List);
+static Cell local match                 (Int,List);
+static Cell local joinMas               (Int,List);
+static Bool local canFail               (Cell);
+static List local addConTable           (Cell,Cell,List);
+static Void local advance               (Int,Int,Cell);
+static Bool local emptyMatch            (Cell);
+static Cell local maDiscr               (Cell);
+static Bool local isNumDiscr            (Cell);
+static Bool local eqNumDiscr            (Cell,Cell);
 #if TREX
-static Bool local isExtDiscr            Args((Cell));
-static Bool local eqExtDiscr            Args((Cell,Cell));
+static Bool local isExtDiscr            (Cell);
+static Bool local eqExtDiscr            (Cell,Cell);
 #endif
 
-static Cell local lift                  Args((Int,List,Cell));
-static Void local liftPair              Args((Int,List,Pair));
-static Void local liftTriple            Args((Int,List,Triple));
-static Void local liftAlt               Args((Int,List,Cell));
-static Void local liftNumcase           Args((Int,List,Triple));
-static Cell local liftVar               Args((List,Cell));
-static Cell local liftLetrec            Args((Int,List,Cell));
-static Void local liftFundef            Args((Int,List,Triple));
-static Void local solve                 Args((List));
+static Cell local lift                  (Int,List,Cell);
+static Void local liftPair              (Int,List,Pair);
+static Void local liftTriple            (Int,List,Triple);
+static Void local liftAlt               (Int,List,Cell);
+static Void local liftNumcase           (Int,List,Triple);
+static Cell local liftVar               (List,Cell);
+static Cell local liftLetrec            (Int,List,Cell);
+static Void local liftFundef            (Int,List,Triple);
+static Void local solve                 (List);
 
-static Cell local preComp               Args((Cell));
-static Cell local preCompPair           Args((Pair));
-static Cell local preCompTriple         Args((Triple));
-static Void local preCompCase           Args((Pair));
-static Cell local preCompOffset         Args((Int));
+static Cell local preComp               (Cell);
+static Cell local preCompPair           (Pair);
+static Cell local preCompTriple         (Triple);
+static Void local preCompCase           (Pair);
+static Cell local preCompOffset         (Int);
 
-static Void local compileGlobalFunction Args((Pair));
-static Void local compileGenFunction	Args((Name));
-static Name local compileSelFunction	Args((Pair));
-static Void local newGlobalFunction     Args((Name,Int,List,Int,Cell));
+static Void local compileGlobalFunction (Pair);
+static Void local compileGenFunction	(Name);
+static Name local compileSelFunction	(Pair);
+static Void local newGlobalFunction     (Name,Int,List,Int,Cell);
 
 #if DEBUG_SHOWSC
-static Void local debugConstructors     Args((FILE *fp,Cell c));
-static Void local debugConstructor      Args((FILE *fp,Name c));
+static Void local debugConstructors     (FILE *fp,Cell c);
+static Void local debugConstructor      (FILE *fp,Name c);
 #endif
 
 /* --------------------------------------------------------------------------
@@ -1768,7 +1768,7 @@ Triple fd; {
  */
 
 #if DEBUG_CODE
-extern Void dumpFundefs Args((List));
+extern Void dumpFundefs (List);
 
 Void dumpFundefs(fs)
 List fs; {

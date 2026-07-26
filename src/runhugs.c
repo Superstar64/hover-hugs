@@ -26,9 +26,9 @@
 #include <windows.h>
 #endif
 
-extern int  main      Args((int, char**));
-static void check     Args((void));
-static void loadHugs  Args((int, char**));
+extern int  main      (int, char**);
+static void check     (void);
+static void loadHugs  (int, char**);
 
 static HugsServerAPI* hugs = 0;
 
@@ -143,6 +143,6 @@ char* argv[]; {
 
 #if WANT_TIMER
 /* dummy definition: timers are only available in the interpreter */
-void updateTimers Args((void));
+void updateTimers (void);
 void updateTimers() {}
 #endif

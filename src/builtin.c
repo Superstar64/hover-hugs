@@ -321,7 +321,7 @@ EXT_PROTO_PRIM(primSetBkpt);
 PROTO_PRIM(primUnsafePtrEq);
 PROTO_PRIM(primUnsafePtrToInt);
 
-static Cell local followInd Args(( Cell ));
+static Cell local followInd (Cell );
 
 /* --------------------------------------------------------------------------
  * Table of primitive/built-in values:
@@ -1053,7 +1053,7 @@ static struct primitive bignumPrimTable[] = {
 static Name nameIntToInteger;
 #endif
 
-static Void bignumControl Args((Int));
+static Void bignumControl (Int);
 static Void bignumControl(what)
 Int what; {
     switch (what) {
@@ -1075,20 +1075,20 @@ Int what; {
 static struct primInfo bignumPrims = { bignumControl, bignumPrimTable, 0 };
 
 /* Used by the IO implementation, so not 'static' like the rest. */
-extern Bignum bigWord   Args((Unsigned));
+extern Bignum bigWord   (Unsigned);
 
 /* --------------------------------------------------------------------------
  * Local function prototypes:
  * ------------------------------------------------------------------------*/
 
-static Int    local digitsCmp Args((List,List));
-static Bignum local bigAdd    Args((Bignum,Bignum));
-static Bignum local bigSub    Args((Bignum,Bignum));
-static Bignum local digitsAdd Args((Cell,List,List));
-static Bignum local digitsSub Args((List,List));
-static Bignum local bigMul    Args((Bignum,Bignum));
-static Bignum local bigQrm    Args((Bignum,Bignum));
-static List   local digitsQrm Args((List,List));
+static Int    local digitsCmp (List,List);
+static Bignum local bigAdd    (Bignum,Bignum);
+static Bignum local bigSub    (Bignum,Bignum);
+static Bignum local digitsAdd (Cell,List,List);
+static Bignum local digitsSub (List,List);
+static Bignum local bigMul    (Bignum,Bignum);
+static Bignum local bigQrm    (Bignum,Bignum);
+static List   local digitsQrm (List,List);
 
 /*---------------------------------------------------------------------------
  * Simple bignum primitives:
@@ -2304,17 +2304,17 @@ primFun(primCmpDouble) {               /* Double compare primitive         */
  * $Date: 2006/09/05 22:43:44 $
  * ------------------------------------------------------------------------*/
 
-static Void   local printer		Args((Name,Int));
-static Void   local outName   		Args((Name));
-static Void   local outVar		Args((Name));
-static Void   local outOp		Args((Name));
-static Void   local outStr		Args((String));
-static Void   local outPr		Args((Name,Int,Cell));
-static Void   local outLPr		Args((Name,Cell));
-static Void   local outException	Args((Cell));
-static Void   local outBadRedex		Args((Cell));
-static Cell   local printDException	Args((Cell));
-static Cell   local printException	Args((Cell,Cell));
+static Void   local printer		(Name,Int);
+static Void   local outName   		(Name);
+static Void   local outVar		(Name);
+static Void   local outOp		(Name);
+static Void   local outStr		(String);
+static Void   local outPr		(Name,Int,Cell);
+static Void   local outLPr		(Name,Cell);
+static Void   local outException	(Cell);
+static Void   local outBadRedex		(Cell);
+static Cell   local printDException	(Cell);
+static Cell   local printException	(Cell,Cell);
 
 static Name nameLPrint, nameNLPrint;	/* list printing primitives	   */
 static Name nameSPrint, nameNSPrint;	/* string printing primitives	   */
@@ -2331,7 +2331,7 @@ static Cell out;			/* GC'd var used by printer code   */
  * Printer control:
  * ------------------------------------------------------------------------*/
 
-static Void printerControl Args((Int));
+static Void printerControl (Int);
 static Void printerControl(what)
 Int what; {
     switch (what) {
@@ -3000,19 +3000,19 @@ static Cell hugsProgName;		/* value of getProgName            */
 static Cell hugsArgs;			/* value of getArgs                */
 
 #if IO_HANDLES
-static Void   local throwErrno     Args((String,Bool,Int,Cell *));
-static String local toIOErrorDescr Args((int,Bool));
-static Name   local toIOError      Args((int));
-static Int    local newHandle      Args((Cell *,String));
-static String local modeString     Args((Int,Bool));
-static Cell   local openHandle     Args((StackPtr,Cell *,Int,Bool,String));
-static Cell   local openFdHandle   Args((StackPtr,Int,Int,Bool,String));
-static Char   local hGetChar       Args((Int,String));
-static Void   local hPutChar       Args((Char,Int,String));
-static Void   local setRWState     Args((Int,Int));
-static Void   local checkOpen      Args((Int,String));
-static Void   local checkReadable  Args((Int,String));
-static Void   local checkWritable  Args((Int,String));
+static Void   local throwErrno     (String,Bool,Int,Cell *);
+static String local toIOErrorDescr (int,Bool);
+static Name   local toIOError      (int);
+static Int    local newHandle      (Cell *,String);
+static String local modeString     (Int,Bool);
+static Cell   local openHandle     (StackPtr,Cell *,Int,Bool,String);
+static Cell   local openFdHandle   (StackPtr,Int,Int,Bool,String);
+static Char   local hGetChar       (Int,String);
+static Void   local hPutChar       (Char,Int,String);
+static Void   local setRWState     (Int,Int);
+static Void   local checkOpen      (Int,String);
+static Void   local checkReadable  (Int,String);
+static Void   local checkWritable  (Int,String);
 #endif
 
 #if IO_HANDLES
@@ -3023,13 +3023,13 @@ static Void   local checkWritable  Args((Int,String));
 # endif
 #endif
 
-extern Void local pushString       Args((String));
+extern Void local pushString       (String);
 
 /* --------------------------------------------------------------------------
  * IO monad control:
  * ------------------------------------------------------------------------*/
 
-static Void iomonadControl Args((Int));
+static Void iomonadControl (Int);
 static Void iomonadControl(what)
 Int what; {
     switch (what) {
@@ -3069,8 +3069,8 @@ PROTO_PRIM(primSetProgName);
 PROTO_PRIM(primSetArgs);
 
 #if IO_HANDLES
-static Void local fopenPrim   Args((StackPtr,Bool,String));
-static int local getIOMode    Args((Cell));
+static Void local fopenPrim   (StackPtr,Bool,String);
+static int local getIOMode    (Cell);
 
 PROTO_PRIM(primHGetChar);
 PROTO_PRIM(primHPutChar);
@@ -4785,7 +4785,7 @@ primFun(primIOHash) {                      /* :: Eval a => a -> ST Mem Int */
  * Time/CPUTime control:
  * ------------------------------------------------------------------------*/
 
-static Void timeControl Args((Int));
+static Void timeControl (Int);
 
 static Void timeControl(what)
 Int what; {
@@ -4967,7 +4967,7 @@ primFun(primGetCPUUsage) { /* IO (Int,Int,Int,Int) */
  * Directory control:
  * ------------------------------------------------------------------------*/
 
-static Void dirControl Args((Int));
+static Void dirControl (Int);
 
 static Void dirControl(what)
 Int what; {
@@ -5011,7 +5011,7 @@ static struct primitive dirPrimTable[] = {
 
 static struct primInfo dirPrims = { dirControl, dirPrimTable, 0 };
 
-static	Bool	local	isDirectory	Args((String));
+static	Bool	local	isDirectory	(String);
 
 #define ToBool(v) ( (v) ? nameTrue : nameFalse)
 
@@ -5486,12 +5486,12 @@ primFun(primGetModTime) { /* FilePath -> IO Int{-time_t-} - get the mod. time of
  * internalPrims control
  * ------------------------------------------------------------------------*/
 
-static Void linkInternals Args((Void));
+static Void linkInternals (Void);
 
 static Name nameLeft;			/* standard data constructors      */
 static Name nameRight;			
 
-static Void local internalControl Args((Int));
+static Void local internalControl (Int);
 static Void local internalControl(what)
 Int what; {
     switch (what) {
@@ -5958,7 +5958,7 @@ static struct primitive arrayPrimTable[] = {
   {0,			0, 0}
 };
 
-static Void outOfBounds Args((void));
+static Void outOfBounds (void);
 static void outOfBounds() {
     throwException(ap(nameArrayException, ap(nameIndexOutOfBounds, nameNil)));
 }
@@ -5967,7 +5967,7 @@ static void outOfBounds() {
  * Array control:
  * ------------------------------------------------------------------------*/
 
-static Void arrayControl Args((Int));
+static Void arrayControl (Int);
 static Void arrayControl(what)
 Int what; {
     switch (what) {
@@ -6473,60 +6473,60 @@ primFun(primUnsafePtrToInt) {
  * table hugsAPI4).
  *-------------------------------------------------------------------------*/
 
-static void           getUnit        Args((void));
-static HsInt          getInt         Args((void));
-static HsWord         getWord        Args((void));
-static HsAddr         getAddr        Args((void));
-static char           getChar4       Args((void));
-static HsChar         getChar        Args((void));
-static HugsForeign    getForeign     Args((void));
-static HsBool         getBool        Args((void));
-static HsInt8         getInt8        Args((void));
-static HsInt16        getInt16       Args((void));
-static HsInt32        getInt32       Args((void));
-static HsInt64        getInt64       Args((void));
-static HsWord8        getWord8       Args((void));
-static HsWord16       getWord16      Args((void));
-static HsWord32       getWord32      Args((void));
-static HsWord64       getWord64      Args((void));
-static HsPtr          getPtr         Args((void));
-static HsFunPtr       getFunPtr      Args((void));
-static HsForeignPtr   getForeignPtr  Args((void));	      
-static HsStablePtr    getStablePtr4  Args((void));
-static HsFloat        getFloat       Args((void));
-static HsDouble       getDouble      Args((void));
+static void           getUnit        (void);
+static HsInt          getInt         (void);
+static HsWord         getWord        (void);
+static HsAddr         getAddr        (void);
+static char           getChar4       (void);
+static HsChar         getChar        (void);
+static HugsForeign    getForeign     (void);
+static HsBool         getBool        (void);
+static HsInt8         getInt8        (void);
+static HsInt16        getInt16       (void);
+static HsInt32        getInt32       (void);
+static HsInt64        getInt64       (void);
+static HsWord8        getWord8       (void);
+static HsWord16       getWord16      (void);
+static HsWord32       getWord32      (void);
+static HsWord64       getWord64      (void);
+static HsPtr          getPtr         (void);
+static HsFunPtr       getFunPtr      (void);
+static HsForeignPtr   getForeignPtr  (void);	      
+static HsStablePtr    getStablePtr4  (void);
+static HsFloat        getFloat       (void);
+static HsDouble       getDouble      (void);
 
-static HugsStablePtr  getStablePtr   Args((void));
+static HugsStablePtr  getStablePtr   (void);
 
-static void           putInt         Args((HsInt));
-static void           putWord        Args((HsWord));
-static void           putAddr        Args((HsAddr));
-static void           putChar4       Args((char));
-static void           putChar        Args((HsChar));
-static void           putForeign     Args((HugsForeign, void (*)(void *)));
-static void           putStablePtr4  Args((HsStablePtr));
-static void           putBool        Args((HsBool));
-static void           putInt8        Args((HsInt8));
-static void           putInt16       Args((HsInt16));
-static void           putInt32       Args((HsInt32));
-static void           putInt64       Args((HsInt64));
-static void           putWord8       Args((HsWord8));
-static void           putWord16      Args((HsWord16));
-static void           putWord32      Args((HsWord32));
-static void           putWord64      Args((HsWord64));
-static void           putPtr         Args((HsPtr));
-static void           putFunPtr      Args((HsFunPtr));
-static void           putForeignPtr  Args((HsForeignPtr));
-static void           putFloat       Args((HsFloat));
-static void           putDouble      Args((HsDouble));
+static void           putInt         (HsInt);
+static void           putWord        (HsWord);
+static void           putAddr        (HsAddr);
+static void           putChar4       (char);
+static void           putChar        (HsChar);
+static void           putForeign     (HugsForeign, void (*)(void *));
+static void           putStablePtr4  (HsStablePtr);
+static void           putBool        (HsBool);
+static void           putInt8        (HsInt8);
+static void           putInt16       (HsInt16);
+static void           putInt32       (HsInt32);
+static void           putInt64       (HsInt64);
+static void           putWord8       (HsWord8);
+static void           putWord16      (HsWord16);
+static void           putWord32      (HsWord32);
+static void           putWord64      (HsWord64);
+static void           putPtr         (HsPtr);
+static void           putFunPtr      (HsFunPtr);
+static void           putForeignPtr  (HsForeignPtr);
+static void           putFloat       (HsFloat);
+static void           putDouble      (HsDouble);
 
-static void           freeStablePtr4 Args((HsStablePtr));
+static void           freeStablePtr4 (HsStablePtr);
 
 	      
-static void           returnIO       Args((HugsStackPtr, int));
-static void           returnId       Args((HugsStackPtr, int));
-static int            runIO          Args((int));
-static void           apMany         Args((int));
+static void           returnIO       (HugsStackPtr, int);
+static void           returnId       (HugsStackPtr, int);
+static int            runIO          (int);
+static void           apMany         (int);
 
 static void           getUnit()      { eval(pop()); }
 static HsInt          getInt()       { eval(pop()); checkInt();   return whnfInt; }
@@ -6562,7 +6562,7 @@ static HugsStablePtr  getStablePtr() {
     return c;
 }
 
-static HugsStablePtr  lookupName Args((String, String));
+static HugsStablePtr  lookupName (String, String);
 static HugsStablePtr  lookupName(q,n)
 String q;
 String n; { 
@@ -6731,7 +6731,7 @@ int n; {
     /* stack = ap(...(ap(fun,arg1),...),argn) : rest */
 }
 
-static int runId Args((int));
+static int runId (int);
 
 static int runId(n)
 int n; {
@@ -6777,9 +6777,9 @@ struct thunk_data {
     char               code[1];
 };
 
-static void* mkThunk      Args((void (*)(void), HugsStablePtr));
-static void freeThunkAux  Args((struct thunk_data*));
-static void freeAllThunks Args((void));
+static void* mkThunk      (void (*)(void), HugsStablePtr);
+static void freeThunkAux  (struct thunk_data*);
+static void freeAllThunks (void);
 
 static struct thunk_data* foreignThunks = 0;
 
@@ -6997,7 +6997,7 @@ void hs_free_fun_ptr(HsFunPtr fp)
  * ------------------------------------------------------------------------*/
 
 /* Dummy entry */
-static Void builtinControl Args((Int));
+static Void builtinControl (Int);
 static Void builtinControl(what)
 Int what; {
 }

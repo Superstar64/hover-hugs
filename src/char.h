@@ -58,11 +58,11 @@ extern  unsigned char   charTable[];
 
 #if UNICODE_CHARS
 
-extern	Bool	isLower		Args((Char));
-extern	Bool	isUpper		Args((Char));
-extern	Bool	isAlpha		Args((Char));
-extern	Bool	isAlphaNum	Args((Char));
-extern	Bool	isPrint 	Args((Char));
+extern	Bool	isLower		(Char);
+extern	Bool	isUpper		(Char);
+extern	Bool	isAlpha		(Char);
+extern	Bool	isAlphaNum	(Char);
+extern	Bool	isPrint 	(Char);
 
 #else
 
@@ -74,11 +74,11 @@ extern	Bool	isPrint 	Args((Char));
 
 #endif
 
-extern	Void	initCharTab	Args((void));
-extern	Char	toUpper		Args((Char));
-extern	Char	toLower		Args((Char));
-extern	Char	toTitle		Args((Char));
-extern	Int	uni_gencat	Args((Char));
+extern	Void	initCharTab	(void);
+extern	Char	toUpper		(Char);
+extern	Char	toLower		(Char);
+extern	Char	toTitle		(Char);
+extern	Int	uni_gencat	(Char);
 
 /* --------------------------------------------------------------------------
  * Encoding of Chars as sequences of bytes.
@@ -117,10 +117,10 @@ extern	Int	uni_gencat	Args((Char));
 #  define MAX_CHAR_ENCODING 6
 
 #if CHAR_ENCODING
-extern	int	fputc_mb	Args((Char, FILE *));
-extern	int	fgetc_mb	Args((FILE *));
-extern	Void	addc_mb		Args((Char, String *));
-extern	Char	extc_mb		Args((String *));
+extern	int	fputc_mb	(Char, FILE *);
+extern	int	fgetc_mb	(FILE *);
+extern	Void	addc_mb		(Char, String *);
+extern	Char	extc_mb		(String *);
 
 #define	FPutChar(c,f)	fputc_mb(c,f)
 #define	FGetChar(f)	fgetc_mb(f)

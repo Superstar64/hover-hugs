@@ -83,7 +83,7 @@ struct StringBuilder {
 
 #define INITIAL_BUILDER_SIZE 200
 
-static Bool expandStringBuilder Args((StringBuilder* b, unsigned int newSz));
+static Bool expandStringBuilder (StringBuilder* b, unsigned int newSz);
 
 /*
  * Function: newStringBuilder(sz)

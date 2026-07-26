@@ -15,9 +15,9 @@
 
 #include "prelude.h"
 
-extern Void internal	    Args((String)) HUGS_noreturn;
-extern Void fatal	    Args((String)) HUGS_noreturn;
-extern Void stopAnyPrinting Args((Void));
+extern Void internal	    (String) HUGS_noreturn;
+extern Void fatal	    (String) HUGS_noreturn;
+extern Void stopAnyPrinting (Void);
 
 /*---------------------------------------------------------------------------
  * Compiler output
@@ -26,15 +26,15 @@ extern Void stopAnyPrinting Args((Void));
  *-------------------------------------------------------------------------*/
 
 #if REDIRECT_OUTPUT
-extern Void   hugsPrintf            Args((const char *, ...));
-extern Void   hugsPutchar           Args((int));
-extern Void   hugsFlushStdout       Args((Void));
-extern Void   hugsEnableOutput      Args((Bool));
-extern String hugsClearOutputBuffer Args((Void));
+extern Void   hugsPrintf            (const char *, ...);
+extern Void   hugsPutchar           (int);
+extern Void   hugsFlushStdout       (Void);
+extern Void   hugsEnableOutput      (Bool);
+extern String hugsClearOutputBuffer (Void);
 
-extern Void   hugsFFlush    	    Args((FILE*));
-extern Void   hugsFPrintf   	    Args((FILE*, const char*, ...));
-extern Void   hugsPutc      	    Args((int, FILE*));
+extern Void   hugsFFlush    	    (FILE*);
+extern Void   hugsFPrintf   	    (FILE*, const char*, ...);
+extern Void   hugsPutc      	    (int, FILE*);
 
 #define Printf         	     hugsPrintf
 #define Putchar        	     hugsPutchar
@@ -88,13 +88,13 @@ extern Void   hugsPutc      	    Args((int, FILE*));
 #define ERRKINDS(ks)	 Hilite(); printKinds(errorStream,ks); Lolite()
 #define ERRFD(fd)	 Hilite(); printFD(errorStream,fd); Lolite()
 
-extern Void errHead      Args((Int));		   /* in main.c		   */
-extern Void errFail	 Args((Void)) HUGS_noreturn;
-extern Void errAbort	 Args((Void));
+extern Void errHead      (Int);		   /* in main.c		   */
+extern Void errFail	 (Void) HUGS_noreturn;
+extern Void errAbort	 (Void);
 
 extern sigProto(breakHandler);
 
-extern Bool breakOn      Args((Bool));		   /* in machdep.c	   */
+extern Bool breakOn      (Bool);		   /* in machdep.c	   */
 
 #include <setjmp.h>
 extern jmp_buf catch_error;          /* jump buffer for error trapping  */

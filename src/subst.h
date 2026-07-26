@@ -61,71 +61,71 @@ extern  List		btyvars;	/* explicitly scoped type vars	   */
 
 extern  char		*unifyFails;	/* Unification error message	   */
 
-extern Void  emptySubstitution	Args((Void));
-extern Int   newTyvars		Args((Int));
+extern Void  emptySubstitution	(Void);
+extern Int   newTyvars		(Int);
 #define      newKindvars(n)	newTyvars(n)
-extern Int   newKindedVars	Args((Kind));
-extern Void  instantiate	Args((Type));
+extern Int   newKindedVars	(Kind);
+extern Void  instantiate	(Type);
 
-extern Pair  findBtyvs		Args((Text));
-extern Void  markBtyvs		Args((Void));
-extern Type  localizeBtyvs	Args((Type));
+extern Pair  findBtyvs		(Text);
+extern Void  markBtyvs		(Void);
+extern Type  localizeBtyvs	(Type);
 
-extern Tyvar *getTypeVar	Args((Type,Int));
-extern Void  tyvarType		Args((Int));
-extern Void  bindTv		Args((Int,Type,Int));
-extern Cell  getDerefHead	Args((Type,Int));
-extern Void  expandSyn		Args((Tycon, Int, Type *, Int *));
+extern Tyvar *getTypeVar	(Type,Int);
+extern Void  tyvarType		(Int);
+extern Void  bindTv		(Int,Type,Int);
+extern Cell  getDerefHead	(Type,Int);
+extern Void  expandSyn		(Tycon, Int, Type *, Int *);
 
-extern Void  clearMarks		Args((Void));
-extern Void  markAllVars	Args((Void));
-extern Void  resetGenerics	Args((Void));
-extern Void  markTyvar		Args((Int));
-extern Void  markType		Args((Type,Int));
-extern Void  markPred		Args((Cell));
+extern Void  clearMarks		(Void);
+extern Void  markAllVars	(Void);
+extern Void  resetGenerics	(Void);
+extern Void  markTyvar		(Int);
+extern Void  markType		(Type,Int);
+extern Void  markPred		(Cell);
 
-extern Type  copyTyvar		Args((Int));
-extern Type  copyType		Args((Type,Int));
-extern Cell  copyPred		Args((Cell,Int));
-extern Type  dropRank2		Args((Type,Int,Int));
-extern Type  dropRank1		Args((Type,Int,Int));
-extern Void  liftRank2Args	Args((List,Int,Int));
-extern Type  liftRank2		Args((Type,Int,Int));
-extern Type  liftRank1		Args((Type,Int,Int));
+extern Type  copyTyvar		(Int);
+extern Type  copyType		(Type,Int);
+extern Cell  copyPred		(Cell,Int);
+extern Type  dropRank2		(Type,Int,Int);
+extern Type  dropRank1		(Type,Int,Int);
+extern Void  liftRank2Args	(List,Int,Int);
+extern Type  liftRank2		(Type,Int,Int);
+extern Type  liftRank1		(Type,Int,Int);
 #if DEBUG_TYPES
-extern Type  debugTyvar		Args((Int));
-extern Type  debugType		Args((Type,Int));
-extern List  debugContext	Args((List));
-extern Cell  debugPred		Args((Cell,Int));
+extern Type  debugTyvar		(Int);
+extern Type  debugType		(Type,Int);
+extern List  debugContext	(List);
+extern Cell  debugPred		(Cell,Int);
 #endif
-extern Kind  copyKindvar	Args((Int));
-extern Kind  copyKind		Args((Kind,Int));
+extern Kind  copyKindvar	(Int);
+extern Kind  copyKind		(Kind,Int);
 
-extern Bool  eqKind		Args((Kind,Kind));
-extern Kind  getKind		Args((Cell,Int));
+extern Bool  eqKind		(Kind,Kind);
+extern Kind  getKind		(Cell,Int);
 
-extern List  genvarTyvar	Args((Int,List));
-extern List  genvarType		Args((Type,Int,List));
+extern List  genvarTyvar	(Int,List);
+extern List  genvarType		(Type,Int,List);
 
-extern Bool  doesntOccurIn	Args((Tyvar*,Type,Int));
-extern Bool  unify		Args((Type,Int,Type,Int));
-extern Bool  kunify		Args((Kind,Int,Kind,Int));
+extern Bool  doesntOccurIn	(Tyvar*,Type,Int);
+extern Bool  unify		(Type,Int,Type,Int);
+extern Bool  kunify		(Kind,Int,Kind,Int);
 
-extern Void  typeTuple		Args((Cell));
-extern Kind  simpleKind		Args((Int));
-extern Void  varKind		Args((Int));
+extern Void  typeTuple		(Cell);
+extern Kind  simpleKind		(Int);
+extern Void  varKind		(Int);
 
-extern Bool  samePred		Args((Cell,Int,Cell,Int));
-extern Bool  matchPred		Args((Cell,Int,Cell,Int));
-extern Bool  unifyPred		Args((Cell,Int,Cell,Int));
-extern Inst  findInstFor	Args((Cell,Int));
+extern Bool  samePred		(Cell,Int,Cell,Int);
+extern Bool  matchPred		(Cell,Int,Cell,Int);
+extern Bool  unifyPred		(Cell,Int,Cell,Int);
+extern Inst  findInstFor	(Cell,Int);
 
-extern Void  improve		Args((Int,List,List));
-extern Void  improve1		Args((Int,List,Cell,Int));
+extern Void  improve		(Int,List,List);
+extern Void  improve1		(Int,List,Cell,Int);
 
-extern Bool  sameSchemes	Args((Type,Type));
-extern Bool  sameType		Args((Type,Int,Type,Int));
-extern Bool  matchType		Args((Type,Int,Type,Int));
+extern Bool  sameSchemes	(Type,Type);
+extern Bool  sameType		(Type,Int,Type,Int);
+extern Bool  matchType		(Type,Int,Type,Int);
 
 /*-------------------------------------------------------------------------*/
 

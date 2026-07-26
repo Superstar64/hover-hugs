@@ -46,7 +46,7 @@ Bool printTypeUseDefaults = FALSE;
 /* --------------------------------------------------------------------------
  * Decls for MacOS preference file support:
  * ------------------------------------------------------------------------*/
-static Void    readPrefsFile          Args((FILE *));
+static Void    readPrefsFile          (FILE *);
 typedef char GVarname[2000];
 static GVarname hugsFlags = "";
 int  iniArgc;
@@ -85,8 +85,8 @@ String getLastEdit(Int* pLastLine) {
 #define Option(c,h98,description,flag) { c, h98, description, flag }
 #endif
 
-static Void   local toggleSet         Args((Char,Bool));
-static Void   local togglesIn         Args((Bool));
+static Void   local toggleSet         (Char,Bool);
+static Void   local togglesIn         (Bool);
 
 struct options toggle[] = {     /* List of command line toggles    */
     Option('s', 1, "Print no. reductions/cells after eval", &showStats),
@@ -276,7 +276,7 @@ Void optionInfo(Void) {                 /* Print information about command */
 #define PUTStr(c,s)                     \
     next=PUTStr_aux(next,&charsLeft,c,s)
 
-static String local PUTStr_aux Args((String,Int*,Char, String));
+static String local PUTStr_aux (String,Int*,Char, String);
 
 static String local PUTStr_aux(next,chLeft,c,s)
 String next;

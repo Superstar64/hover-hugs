@@ -33,7 +33,7 @@
 
 #ifdef YYBISON
 # if !defined(__GNUC__) || __GNUC__ <= 1
-static void __yy_memcpy Args((char*,char*, unsigned int));
+static void __yy_memcpy (char*,char*, unsigned int);
 # endif
 #endif
 
@@ -41,29 +41,29 @@ static void __yy_memcpy Args((char*,char*, unsigned int));
 static void yymemcpy (char *yyto, const char *yyfrom, size_t yycount);
 #endif
 
-static Cell   local gcShadow	 Args((Int,Cell));
-static Void   local syntaxError	 Args((String));
-static String local unexpected	 Args((Void));
-static Cell   local checkPrec	 Args((Cell));
-static Cell   local buildTuple	 Args((List));
-static List   local checkCtxt	 Args((List));
-static Cell   local checkPred	 Args((Cell));
-static Pair   local checkDo	 Args((List));
-static Cell   local checkTyLhs	 Args((Cell));
-static Cell   local checkConstr	 Args((Cell));
+static Cell   local gcShadow	 (Int,Cell);
+static Void   local syntaxError	 (String);
+static String local unexpected	 (Void);
+static Cell   local checkPrec	 (Cell);
+static Cell   local buildTuple	 (List);
+static List   local checkCtxt	 (List);
+static Cell   local checkPred	 (Cell);
+static Pair   local checkDo	 (List);
+static Cell   local checkTyLhs	 (Cell);
+static Cell   local checkConstr	 (Cell);
 
 #if MUDO
-static Pair   local checkMDo	 Args((List));
+static Pair   local checkMDo	 (List);
 #endif
 
 #if !TREX
-static Void   local noTREX	 Args((String));
+static Void   local noTREX	 (String);
 #endif
 #if !IPARAM
-static Void   local noIP	 Args((String));
+static Void   local noIP	 (String);
 #endif
 #if !MUDO
-static Void   local noMDo	 Args((String));
+static Void   local noMDo	 (String);
 #endif
 
 /* For the purposes of reasonably portable garbage collection, it is

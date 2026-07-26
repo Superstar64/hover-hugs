@@ -204,8 +204,6 @@ int macsystem(char *filenames);
  *  dynamic linking declarations
  *-------------------------------------------------------------------------*/
 
-#define Args(x) x
-
 /* local = prefix for locally defined functions */
 /* far   = prefix for far pointers              */
 #if DOS
@@ -306,7 +304,7 @@ int macsystem(char *filenames);
  * Interrupting execution (signals, allowBreak):
  *-------------------------------------------------------------------------*/
 
-# define sigProto(nm)	void nm Args((int))
+# define sigProto(nm)	void nm (int)
 # define sigRaise(nm)	nm(1)
 # define sigHandler(nm)	void nm(sig_arg) int sig_arg;
 # define sigResume	return

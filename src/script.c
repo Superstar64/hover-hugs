@@ -49,8 +49,8 @@ static Bool   needsImports;             /* set to TRUE if imports required */
 /* --------------------------------------------------------------------------
  * Local function prototypes:
  * ------------------------------------------------------------------------*/
-static Bool local addScript     Args((String,Long));
-static Void local freeScript    Args((Int));
+static Bool local addScript     (String,Long);
+static Void local freeScript    (Int);
 
 /* --------------------------------------------------------------------------
  * Initialising / freeing script stacks:

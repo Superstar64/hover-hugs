@@ -27,10 +27,10 @@
 
 #include <setjmp.h>
 
-static Void   setHugsAPI   Args((Void));
-static Bool   SetModule    Args((String));
+static Void   setHugsAPI   (Void);
+static Bool   SetModule    (String);
 #ifndef NO_DYNAMIC_TYPES
-static Bool   linkDynamic     Args((Void));
+static Bool   linkDynamic     (Void);
 #endif
 
 /* --------------------------------------------------------------------------
@@ -45,31 +45,31 @@ static Bool   linkDynamic     Args((Void));
  *    functions and variables that we need to access.
  * ------------------------------------------------------------------------*/
 
-static Int    GetNumScripts   Args((Void));
-static Void   Reset           Args((Int));
-static Void   SetOutputEnable Args((Bool));
-static Void   ChangeDir       Args((String));
-static Void   LoadProject     Args((String));
-static Void   LoadFile        Args((String));
-static Void   LoadStringF     Args((String));
-static Void   SetOptions      Args((String));
-static String GetOptions      Args((Void));
-static HVal   CompileExpr     Args((String, String));
-static Void   GarbageCollect  Args((void));
-static Void   LookupName      Args((String, String));
-static Void   MkInt           Args((Int));
-static Void   MkAddr          Args((void*));
-static Void   MkString        Args((String));
-static Void   Apply           Args((Void));
-static Int    EvalInt         Args((Void));
-static void*  EvalAddr        Args((void));
-static String EvalString      Args((Void));
-static Int    DoIO            Args((Void));
-static Int    DoIO_Int        Args((int*));
-static Int    DoIO_Addr       Args((void**));
-static HVal   PopHVal         Args((Void));
-static Void   PushHVal        Args((HVal));
-static Void   FreeHVal        Args((HVal));
+static Int    GetNumScripts   (Void);
+static Void   Reset           (Int);
+static Void   SetOutputEnable (Bool);
+static Void   ChangeDir       (String);
+static Void   LoadProject     (String);
+static Void   LoadFile        (String);
+static Void   LoadStringF     (String);
+static Void   SetOptions      (String);
+static String GetOptions      (Void);
+static HVal   CompileExpr     (String, String);
+static Void   GarbageCollect  (void);
+static Void   LookupName      (String, String);
+static Void   MkInt           (Int);
+static Void   MkAddr          (void*);
+static Void   MkString        (String);
+static Void   Apply           (Void);
+static Int    EvalInt         (Void);
+static void*  EvalAddr        (void);
+static String EvalString      (Void);
+static Int    DoIO            (Void);
+static Int    DoIO_Int        (int*);
+static Int    DoIO_Addr       (void**);
+static HVal   PopHVal         (Void);
+static Void   PushHVal        (HVal);
+static Void   FreeHVal        (HVal);
 
 static HugsServerAPI hugs;             /* virtual function table            */
 

@@ -144,64 +144,64 @@ Addr m; {
  * Local function prototypes:
  * ------------------------------------------------------------------------*/
 
-static Void  local instrNone    Args((Instr));
-static Void  local instrInt     Args((Instr,Int));
-static Void  local instrDouble  Args((Instr,DoublePro));
-static Void  local instrCell    Args((Instr,Cell));
-static Void  local instrText    Args((Instr,Text));
-static Void  local instrLab     Args((Instr,Label));
-static Void  local instrCellLab Args((Instr,Cell,Label));
+static Void  local instrNone    (Instr);
+static Void  local instrInt     (Instr,Int);
+static Void  local instrDouble  (Instr,DoublePro);
+static Void  local instrCell    (Instr,Cell);
+static Void  local instrText    (Instr,Text);
+static Void  local instrLab     (Instr,Label);
+static Void  local instrCellLab (Instr,Cell,Label);
 
-static Void  local asSTART      Args((Void));
-static Label local newLabel     Args((Label));
-static Void  local asEND        Args((Void));
-static Void  local asEVAL       Args((Void));
-static Void  local asTEST       Args((Cell,Label));
-static Void  local asSLIDE      Args((Int));
-static Void  local asMKAP       Args((Int));
-static Void  local asUPDATE     Args((Int));
-static Void  local asRUPDATE    Args((Void));
-static Void  local asGOTO       Args((Label));
+static Void  local asSTART      (Void);
+static Label local newLabel     (Label);
+static Void  local asEND        (Void);
+static Void  local asEVAL       (Void);
+static Void  local asTEST       (Cell,Label);
+static Void  local asSLIDE      (Int);
+static Void  local asMKAP       (Int);
+static Void  local asUPDATE     (Int);
+static Void  local asRUPDATE    (Void);
+static Void  local asGOTO       (Label);
 
 #if DEBUG_CODE
-static Void  local dissassemble Args((Addr,Addr));
-static Addr  local dissInstr    Args((Addr));
-static Void  local printCell    Args((Cell));
-static Addr  local dissNone     Args((Addr,String));
-static Addr  local dissInt      Args((Addr,String));
-static Addr  local dissDouble   Args((Addr,String));
-static Addr  local dissCell     Args((Addr,String));
-static Addr  local dissText     Args((Addr,String));
-static Addr  local dissAddr     Args((Addr,String));
-static Addr  local dissCellAddr Args((Addr,String));
+static Void  local dissassemble (Addr,Addr);
+static Addr  local dissInstr    (Addr);
+static Void  local printCell    (Cell);
+static Addr  local dissNone     (Addr,String);
+static Addr  local dissInt      (Addr,String);
+static Addr  local dissDouble   (Addr,String);
+static Addr  local dissCell     (Addr,String);
+static Addr  local dissText     (Addr,String);
+static Addr  local dissAddr     (Addr,String);
+static Addr  local dissCellAddr (Addr,String);
 #endif
 
-static Void  local build        Args((Cell,Int));
-static Void  local buildGuards  Args((List,Int));
-static Int   local buildLoc     Args((List,Int));
+static Void  local build        (Cell,Int);
+static Void  local buildGuards  (List,Int);
+static Int   local buildLoc     (List,Int);
 #if BIGNUMS
-static Void  local buildBignum  Args((Bignum));
+static Void  local buildBignum  (Bignum);
 #endif
 #if TREX
-static Void  local buildName	Args((Cell));
+static Void  local buildName	(Cell);
 #endif
 
-static Void  local make         Args((Cell,Int,Label,Label));
-static Void  local makeCond     Args((Cell,Cell,Cell,Int,Label,Label));
-static Void  local makeNumcase  Args((Triple,Int,Label,Label));
+static Void  local make         (Cell,Int,Label,Label);
+static Void  local makeCond     (Cell,Cell,Cell,Int,Label,Label);
+static Void  local makeNumcase  (Triple,Int,Label,Label);
 #if TREX
-static Void  local makeExtcase  Args((Triple,Int,Label,Label));
+static Void  local makeExtcase  (Triple,Int,Label,Label);
 #endif
-static Void  local testGuard    Args((Pair,Int,Label,Label,Label));
-static Void  local testCase     Args((Pair,Int,Label,Label,Label));
+static Void  local testGuard    (Pair,Int,Label,Label,Label);
+static Void  local testCase     (Pair,Int,Label,Label,Label);
 
-static Void  local analyseAp    Args((Cell));
+static Void  local analyseAp    (Cell);
 #if TREX
-static Int   local fastBuildRec	Args((Cell,Int));
+static Int   local fastBuildRec	(Cell,Int);
 #endif
-static Void  local buildAp      Args((Cell,Int,Label,Bool));
+static Void  local buildAp      (Cell,Int,Label,Bool);
 
-static Void  local evalString   Args((Cell));
+static Void  local evalString   (Cell);
 
 /* --------------------------------------------------------------------------
  * Assembler: (Low level, instruction code storage)

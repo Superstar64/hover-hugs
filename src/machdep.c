@@ -97,12 +97,12 @@ int allow_break_count = 0;
 #define HScriptRoot ("SOFTWARE\\Haskell\\HaskellScript\\")
 #endif
 
-extern String readRegString        Args((HKEY, String, String, String));
+extern String readRegString        (HKEY, String, String, String);
 
-static Bool   local createKey      Args((HKEY, String, PHKEY, REGSAM));
-static Bool   local queryValue     Args((HKEY, String, String, LPDWORD, LPBYTE, DWORD));
-static Bool   local queryString    Args((HKEY,String,String,String*));
-static Bool   local setValue       Args((HKEY, String, String, DWORD, LPBYTE, DWORD));
+static Bool   local createKey      (HKEY, String, PHKEY, REGSAM);
+static Bool   local queryValue     (HKEY, String, String, LPDWORD, LPBYTE, DWORD);
+static Bool   local queryString    (HKEY,String,String,String*);
+static Bool   local setValue       (HKEY, String, String, DWORD, LPBYTE, DWORD);
 #endif
 
 /* --------------------------------------------------------------------------
@@ -176,35 +176,35 @@ Bool   isReg; {
  * Search for script files on the HUGS path:
  * ------------------------------------------------------------------------*/
 
-static String local homeDir	  Args((void));
+static String local homeDir	  (void);
 
 #if __MWERKS__ && macintosh
-static String local currentDir	  Args((void));
+static String local currentDir	  (void);
 #endif
 
 #if HSCRIPT
-static String local hscriptDir    Args((Void));
-static void   local hscriptSuffixes Args((Void));
+static String local hscriptDir    (Void);
+static void   local hscriptSuffixes (Void);
 #endif
 
 #if 0
 /* UNUSED */
-static int    local pathCmp       Args((String, String));
+static int    local pathCmp       (String, String);
 #endif
-static String local normPath      Args((String));
-static Void   local searchChr     Args((Int));
-static Void   local searchStr     Args((String));
-static Bool   local tryEndings    Args((Void));
-static Bool   local find1	  Args((String));
-static Bool   local find2	  Args((String));
-static String local expandVariable Args((String));
-static String local skipVariable  Args((String));
-static String local nextPath      Args((String));
-static Bool   local samePath      Args((String,String));
+static String local normPath      (String);
+static Void   local searchChr     (Int);
+static Void   local searchStr     (String);
+static Bool   local tryEndings    (Void);
+static Bool   local find1	  (String);
+static Bool   local find2	  (String);
+static String local expandVariable (String);
+static String local skipVariable  (String);
+static String local nextPath      (String);
+static Bool   local samePath      (String,String);
 #if DOS_FILENAMES
-static Bool   local isPathSep     Args((String));
+static Bool   local isPathSep     (String);
 #endif
-static Bool   local scanSubDirs   Args((String));
+static Bool   local scanSubDirs   (String);
 
 #if __MWERKS__ && macintosh
 typedef char FileName[FILENAME_MAX + 1];
@@ -430,7 +430,7 @@ String s;
 
 struct shellVariable {
     String var_name;
-    String (*var_value) Args((Void));
+    String (*var_value) (Void);
 };
 
 static struct shellVariable shell_var[] = {
@@ -956,7 +956,7 @@ Bool    broken         = FALSE;		/* pending break to be handled     */
 static  Bool breakReqd = FALSE;		/* currently trapping breaks       */
 static  Bool trapBreak = FALSE;		/* ever asked to trap breaks       */
 static  sigProto(ignoreBreak);
-static  Void local installHandlers Args((Void));
+static  Void local installHandlers (Void);
 
 Bool breakOn(reqd)                      /* set break trapping on if reqd,  */
 Bool reqd; {                            /* or off otherwise, returning old */
@@ -1310,9 +1310,9 @@ Int c1, c2; {
  * Dynamic loading:
  * ------------------------------------------------------------------------*/
 
-static void* local getModDLL Args((String));
-static void* local getDLL Args((String));
-static void* local getDLLSymbol Args((void*,String));
+static void* local getModDLL (String);
+static void* local getDLL (String);
+static void* local getDLLSymbol (void*,String);
 
 #include <stdio.h>
 #include <dlfcn.h>
@@ -1486,9 +1486,9 @@ void*  dll; {
 #define BUFSIZE 1000
 static char buffer[BUFSIZE];
 static Int used = 0;
-static Void local insert     Args((String));
-static Void local insertPath Args((String));
-static Void local insertChar Args((Char));
+static Void local insert     (String);
+static Void local insertPath (String);
+static Void local insertChar (Char);
 
 static Void local insert(s)
 String s; {
@@ -1793,7 +1793,7 @@ String readRegChildStrings(HKEY key, String regPath, String var, String def)
 /* --------------------------------------------------------------------------
  * Platform initialisation 
  * ------------------------------------------------------------------------*/
-extern Bool initSystem  Args((Void));
+extern Bool initSystem  (Void);
 Bool local
 initSystem()
 {

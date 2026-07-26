@@ -15,10 +15,6 @@
 
 #include "prelude.h"
 
-#ifndef HUGS_PROPER
-#  define Args(x) x
-#endif /* !defined Args */
-
 #ifdef __cplusplus 
 extern "C" {
 #endif
@@ -26,43 +22,43 @@ extern "C" {
 typedef int HVal;     /* Haskell values are represented by stable pointers */
 
 typedef struct _HugsServerAPI {
-    char* (*clearError     ) Args((void));
-    void  (*setHugsArgs    ) Args((int, char**));
-    int   (*getNumScripts  ) Args((void));
-    void  (*reset          ) Args((int));
-    void  (*setOutputEnable) Args((unsigned));
-    void  (*changeDir      ) Args((char*));
-    void  (*loadProject    ) Args((char*));
-    void  (*loadFile       ) Args((char*));
-    void  (*loadFromBuffer ) Args((char*));
-    void  (*setOptions     ) Args((char*));
-    char* (*getOptions     ) Args((void));
-    HVal  (*compileExpr    ) Args((char*,char*));
-    void  (*garbageCollect ) Args((void));
+    char* (*clearError     ) (void);
+    void  (*setHugsArgs    ) (int, char**);
+    int   (*getNumScripts  ) (void);
+    void  (*reset          ) (int);
+    void  (*setOutputEnable) (unsigned);
+    void  (*changeDir      ) (char*);
+    void  (*loadProject    ) (char*);
+    void  (*loadFile       ) (char*);
+    void  (*loadFromBuffer ) (char*);
+    void  (*setOptions     ) (char*);
+    char* (*getOptions     ) (void);
+    HVal  (*compileExpr    ) (char*,char*);
+    void  (*garbageCollect ) (void);
 
-    void  (*lookupName     ) Args((char*,char*)); /* push values onto stack*/
+    void  (*lookupName     ) (char*,char*); /* push values onto stack*/
 
-    void  (*mkInt          ) Args((int));
-    void  (*mkAddr         ) Args((void*));
-    void  (*mkString       ) Args((char*));
+    void  (*mkInt          ) (int);
+    void  (*mkAddr         ) (void*);
+    void  (*mkString       ) (char*);
 
-    void  (*apply          ) Args((void));      /* manipulate top of stack */
+    void  (*apply          ) (void);      /* manipulate top of stack */
 
-    int   (*evalInt        ) Args((void));      /* evaluate top of stack   */
-    void* (*evalAddr       ) Args((void));
-    char* (*evalString     ) Args((void));
+    int   (*evalInt        ) (void);      /* evaluate top of stack   */
+    void* (*evalAddr       ) (void);
+    char* (*evalString     ) (void);
 
-    int   (*doIO           ) Args((void));
-    int   (*doIO_Int       ) Args((int*));
-    int   (*doIO_Addr      ) Args((void**));
+    int   (*doIO           ) (void);
+    int   (*doIO_Int       ) (int*);
+    int   (*doIO_Addr      ) (void**);
 
-    HVal  (*popHVal        ) Args((void));      /* pop stack               */
-    void  (*pushHVal       ) Args((HVal));      /* push back onto stack    */
-    void  (*freeHVal       ) Args((HVal)); 
+    HVal  (*popHVal        ) (void);      /* pop stack               */
+    void  (*pushHVal       ) (HVal);      /* push back onto stack    */
+    void  (*freeHVal       ) (HVal); 
 } HugsServerAPI;
 
-DLLEXPORT(HugsServerAPI*) initHugsServer Args((Int, String[]));
-DLLEXPORT(Void) shutdownHugsServer Args((HugsServerAPI*));
+DLLEXPORT(HugsServerAPI*) initHugsServer (Int, String[]);
+DLLEXPORT(Void) shutdownHugsServer (HugsServerAPI*);
 
 #ifdef __cplusplus 
 };

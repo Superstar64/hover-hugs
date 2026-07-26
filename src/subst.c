@@ -40,41 +40,41 @@ List   btyvars = NIL;			/* explicitly scoped type vars	   */
  * local function prototypes:
  * ------------------------------------------------------------------------*/
 
-static Void local expandSubst		Args((Int));
-static Int  local findBtyvsInt		Args((Text));
-static Type local makeTupleType		Args((Int));
-static Kind local makeSimpleKind	Args((Int));
-static Kind local makeVarKind		Args((Int));
-static Void local expandSyn1		Args((Tycon, Type *, Int *));
-static List local listTyvar		Args((Int,List));
-static List local listTyvars		Args((Type,Int,List));
-static Cell local dupTyvar		Args((Int,List));
-static Cell local dupTyvars		Args((Cell,Int,List));
-static Pair local copyNoMark		Args((Cell,Int));
-static Type local dropRank1Body		Args((Type,Int,Int));
-static Type local liftRank1Body		Args((Type,Int));
+static Void local expandSubst		(Int);
+static Int  local findBtyvsInt		(Text);
+static Type local makeTupleType		(Int);
+static Kind local makeSimpleKind	(Int);
+static Kind local makeVarKind		(Int);
+static Void local expandSyn1		(Tycon, Type *, Int *);
+static List local listTyvar		(Int,List);
+static List local listTyvars		(Type,Int,List);
+static Cell local dupTyvar		(Int,List);
+static Cell local dupTyvars		(Cell,Int,List);
+static Pair local copyNoMark		(Cell,Int);
+static Type local dropRank1Body		(Type,Int,Int);
+static Type local liftRank1Body		(Type,Int);
 
-static Bool local matchTypeAbove	Args((Type,Int,Type,Int,Int));
-static Bool local varToVarBind		Args((Tyvar *,Tyvar *));
-static Bool local varToTypeBind		Args((Tyvar *,Type,Int));
+static Bool local matchTypeAbove	(Type,Int,Type,Int,Int);
+static Bool local varToVarBind		(Tyvar *,Tyvar *);
+static Bool local varToTypeBind		(Tyvar *,Type,Int);
 #if TREX
-static Bool local inserter		Args((Type,Int,Type,Int));
-static Int  local remover		Args((Text,Type,Int));
-static Int  local tailVar		Args((Type,Int));
+static Bool local inserter		(Type,Int,Type,Int);
+static Int  local remover		(Text,Type,Int);
+static Int  local tailVar		(Type,Int);
 #endif
 #if TREX || IO_MONAD
-static Void local expandSynFully	Args((Type *, Int *));
+static Void local expandSynFully	(Type *, Int *);
 #endif
 
-static Bool local improveAgainst	Args((Int,List,Cell,Int));
-static Bool local instImprove		Args((Int,Class,Cell,Int));
-static Bool local pairImprove		Args((Int,Class,Cell,Int,Cell,Int,Int));
+static Bool local improveAgainst	(Int,List,Cell,Int);
+static Bool local instImprove		(Int,Class,Cell,Int);
+static Bool local pairImprove		(Int,Class,Cell,Int,Cell,Int,Int);
 #if IPARAM
-static Bool local ipImprove		Args((Int,Cell,Int,Cell,Int));
+static Bool local ipImprove		(Int,Cell,Int,Cell,Int);
 #endif
 
-static Bool local kvarToVarBind		Args((Tyvar *,Tyvar *));
-static Bool local kvarToTypeBind	Args((Tyvar *,Type,Int));
+static Bool local kvarToVarBind		(Tyvar *,Tyvar *);
+static Bool local kvarToTypeBind	(Tyvar *,Type,Int);
 
 /* --------------------------------------------------------------------------
  * The substitution, types, and kinds:

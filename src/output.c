@@ -30,49 +30,49 @@
  * Local function prototypes:
  * ------------------------------------------------------------------------*/
 
-static Void local putChr         Args((Int));
-static Void local putStr         Args((String));
-static Void local putInt         Args((Int));
+static Void local putChr         (Int);
+static Void local putStr         (String);
+static Void local putInt         (Int);
 
-static Void local put            Args((Int,Cell));
-static Void local putFlds        Args((Cell,List));
-static Void local putComp        Args((Cell,List));
-static Void local putQual        Args((Cell));
-static Bool local isDictVal      Args((Cell));
-static Cell local maySkipDict    Args((Cell));
-static Void local putAp          Args((Int,Cell));
-static Void local putOverInfix   Args((Int,Text,Syntax,Cell));
-static Void local putInfix       Args((Int,Text,Syntax,Cell,Cell));
-static Void local putSimpleAp    Args((Cell,Int));
-static Void local putTuple       Args((Int,Cell));
-static Int  local unusedTups     Args((Int,Cell));
-static Void local unlexVar       Args((Text));
-static Void local unlexFullVar   Args((Name));
-static Void local unlexOp        Args((Text));
-static Void local unlexCharConst Args((Char));
-static Void local unlexStrConst  Args((Text));
+static Void local put            (Int,Cell);
+static Void local putFlds        (Cell,List);
+static Void local putComp        (Cell,List);
+static Void local putQual        (Cell);
+static Bool local isDictVal      (Cell);
+static Cell local maySkipDict    (Cell);
+static Void local putAp          (Int,Cell);
+static Void local putOverInfix   (Int,Text,Syntax,Cell);
+static Void local putInfix       (Int,Text,Syntax,Cell,Cell);
+static Void local putSimpleAp    (Cell,Int);
+static Void local putTuple       (Int,Cell);
+static Int  local unusedTups     (Int,Cell);
+static Void local unlexVar       (Text);
+static Void local unlexFullVar   (Name);
+static Void local unlexOp        (Text);
+static Void local unlexCharConst (Char);
+static Void local unlexStrConst  (Text);
 
-static Void local putSigType     Args((Cell));
-static Void local putContext     Args((List,List,Int));
-static Void local putPred        Args((Cell,Int));
-static Void local putType        Args((Cell,Int,Int));
-static Void local putModule      Args((Module));
-static Void local putTyVar       Args((Int));
-static Bool local putTupleType   Args((Cell,Int));
-static Void local putApType      Args((Type,Int,Int));
+static Void local putSigType     (Cell);
+static Void local putContext     (List,List,Int);
+static Void local putPred        (Cell,Int);
+static Void local putType        (Cell,Int,Int);
+static Void local putModule      (Module);
+static Void local putTyVar       (Int);
+static Bool local putTupleType   (Cell,Int);
+static Void local putApType      (Type,Int,Int);
 
-static Void local putKind        Args((Kind));
-static Void local putKinds	 Args((Kinds));
+static Void local putKind        (Kind);
+static Void local putKinds	 (Kinds);
 
 #if OBSERVATIONS
-static Bool local printObsList   Args((Cell,Int,Bool));
-static Void local printArg       Args((FILE *,Cell));
+static Bool local printObsList   (Cell,Int,Bool);
+static Void local printArg       (FILE *,Cell);
 #endif
 
-static Bool local isStrConst	 Args((Cell));
-static Void local putStrConst	 Args((Cell));
-static Bool local isCharCell	 Args((Cell));
-static Char local getCellChar    Args((Cell));
+static Bool local isStrConst	 (Cell);
+static Void local putStrConst	 (Cell);
+static Bool local isCharCell	 (Cell);
+static Char local getCellChar    (Cell);
 
 /* --------------------------------------------------------------------------
  * Basic output routines:
@@ -780,17 +780,17 @@ Text t; {
  * ------------------------------------------------------------------------*/
 
 #if DEBUG_SHOWSC
-static Void local pIndent       Args((Int));
-static Void local pPut          Args((Int,Cell,Int));
-static Void local pPutAp        Args((Int,Cell,Int));
-static Void local pPutSimpleAp  Args((Cell,Int));
-static Void local pPutTuple     Args((Int,Cell,Int));
-static Int  local punusedTups   Args((Int,Cell,Int));
-static Void local pPutOffset    Args((Int));
-static Int  local pPutLocals    Args((List,Int));
-static Void local pLiftedStart  Args((Cell,Int,String));
-static Void local pLifted       Args((Cell,Int,String));
-static Int  local pDiscr        Args((Cell,Int));
+static Void local pIndent       (Int);
+static Void local pPut          (Int,Cell,Int);
+static Void local pPutAp        (Int,Cell,Int);
+static Void local pPutSimpleAp  (Cell,Int);
+static Void local pPutTuple     (Int,Cell,Int);
+static Int  local punusedTups   (Int,Cell,Int);
+static Void local pPutOffset    (Int);
+static Int  local pPutLocals    (List,Int);
+static Void local pLiftedStart  (Cell,Int,String);
+static Void local pLifted       (Cell,Int,String);
+static Int  local pDiscr        (Cell,Int);
 
 static Void local pIndent(n)           /* indent to particular position    */
 Int n; {
@@ -1494,7 +1494,7 @@ Kinds ks; {
 #define DELTA 2
 
 Bool printingObservations = FALSE;
-Void newLine   Args((Int));
+Void newLine   (Int);
 
 Void newLine(indent)
 Int indent; {
@@ -1503,7 +1503,7 @@ Int indent; {
     while (indent--) putChr(' ');
 }
 
-Int countObsList   Args((Cell));
+Int countObsList   (Cell);
 Int countObsList(header)
 Cell header;
 {

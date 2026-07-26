@@ -26,35 +26,35 @@
  *
  */
 
-extern Void initScripts         Args((Void));
-extern Void stopScripts         Args((Void));
-extern Void setScriptStableMark Args((Void));
+extern Void initScripts         (Void);
+extern Void stopScripts         (Void);
+extern Void setScriptStableMark (Void);
 
-extern String getScriptName     Args((Script));
-extern String getScriptRealName Args((Script));
-extern Int    getScriptHwMark   Args((Void));
-extern Int    numLoadedScripts  Args((Void));
+extern String getScriptName     (Script);
+extern String getScriptRealName (Script);
+extern Int    getScriptHwMark   (Void);
+extern Int    numLoadedScripts  (Void);
 
-extern Void addScriptName       Args((String,Bool));
-extern Bool chase               Args((List));
-extern Void addScriptsFromArgs  Args((Int,String []));
+extern Void addScriptName       (String,Bool);
+extern Bool chase               (List);
+extern Void addScriptsFromArgs  (Int,String []);
 
-extern Void forgetScriptsFrom Args((Script));
-extern Void forgetAllScripts  Args((Void));
-extern Void forgetAScript     Args((Script));
+extern Void forgetScriptsFrom (Script);
+extern Void forgetAllScripts  (Void);
+extern Void forgetAScript     (Script);
 
 extern String scriptFile;
 
-extern Void whatScripts       Args((Void));
-extern Void readScripts       Args((Int));
+extern Void whatScripts       (Void);
+extern Void readScripts       (Int);
 
-extern Void script     Args((int));
+extern Void script     (int);
 
 #if HUGS_FOR_WINDOWS
-extern Void setNumLoadedScripts Args((Script));
-extern Void setScriptHwMark     Args((Script));
-extern Void setScriptName       Args((Script,String));
-extern Void setScriptRealName   Args((Script,String));
+extern Void setNumLoadedScripts (Script);
+extern Void setScriptHwMark     (Script);
+extern Void setScriptName       (Script,String);
+extern Void setScriptRealName   (Script,String);
 #endif
 
 

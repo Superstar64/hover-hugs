@@ -19,7 +19,7 @@
  * Break dialogue code
  * ------------------------------------------------------------------------*/
 #if OBSERVATIONS
-static Void   breakDialogue    Args((String));
+static Void   breakDialogue    (String);
 
 static struct cmd brkCmds[] =
     { {"p",   BRK_DISPLAY}

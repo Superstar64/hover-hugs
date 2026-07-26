@@ -22,7 +22,7 @@ struct cmd {
     Command cmdCode;
 };
 
-extern Command readCommand Args((struct cmd *, Char, Char));
+extern Command readCommand (struct cmd *, Char, Char);
 
 #define EDIT    0
 #define FIND    1

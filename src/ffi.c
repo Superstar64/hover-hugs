@@ -22,24 +22,24 @@
  * Local function prototypes:
  * ------------------------------------------------------------------------*/
 
-static Void local foreignType    Args((Int,Type));
+static Void local foreignType    (Int,Type);
 #ifdef DOTNET
-static Cell local foreignTypeTag Args((Int,Type));
+static Cell local foreignTypeTag (Int,Type);
 #endif
-static Void local foreignGet     Args((Int,Type,String,Int));
-static Void local foreignPut     Args((Int,Type,String,Int));
-static Void local ffiInclude     Args((Text));
-static Void local ffiDeclare     Args((Int,Type,String,Int));
-static Void local ffiDeclareList Args((Int,List,String));
-static Void local foreignType    Args((Int,Type));
-static Void local ffiGetList     Args((Int,List,String));
-static Void local ffiPutList     Args((Int,List,String));
-static Void local ffiCallFun     Args((Int,Text,List,List));
-static Void local ffiDeclareFun  Args((Int,Text,Bool,Bool,List,Type));
-static Void local ffiFunTypeCast Args((Int,List,Type));
-static Void local ffiPrimProto   Args((Text,Int));
-static Void local ffiPrimHeader  Args((Text,Int));
-static Void local ffiReturn      Args((Type,String,Int));
+static Void local foreignGet     (Int,Type,String,Int);
+static Void local foreignPut     (Int,Type,String,Int);
+static Void local ffiInclude     (Text);
+static Void local ffiDeclare     (Int,Type,String,Int);
+static Void local ffiDeclareList (Int,List,String);
+static Void local foreignType    (Int,Type);
+static Void local ffiGetList     (Int,List,String);
+static Void local ffiPutList     (Int,List,String);
+static Void local ffiCallFun     (Int,Text,List,List);
+static Void local ffiDeclareFun  (Int,Text,Bool,Bool,List,Type);
+static Void local ffiFunTypeCast (Int,List,Type);
+static Void local ffiPrimProto   (Text,Int);
+static Void local ffiPrimHeader  (Text,Int);
+static Void local ffiReturn      (Type,String,Int);
 
 static FILE* out = NIL;                /* file we're generating code into */
 static List  includes = NIL;           /* files already #included         */

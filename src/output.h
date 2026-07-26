@@ -14,21 +14,21 @@
 #include "prelude.h"
 #include "storage.h"
 
-extern Void printExp     Args((FILE *,Cell));
-extern Void printType    Args((FILE *,Cell));
-extern Void printContext Args((FILE *,List));
-extern Void printPred    Args((FILE *,Cell));
-extern Void printKind	 Args((FILE *,Kind));
-extern Void printKinds	 Args((FILE *,Kinds));
-extern Void printFD	 Args((FILE *,Pair));
+extern Void printExp     (FILE *,Cell);
+extern Void printType    (FILE *,Cell);
+extern Void printContext (FILE *,List);
+extern Void printPred    (FILE *,Cell);
+extern Void printKind	 (FILE *,Kind);
+extern Void printKinds	 (FILE *,Kinds);
+extern Void printFD	 (FILE *,Pair);
 
 #if OBSERVATIONS
 #define ALLTAGS ""
-extern Void printObserve Args((String));
+extern Void printObserve (String);
 #endif
 
 #if DEBUG_SHOWSC
-extern Void  printSc Args((FILE*, Text, Int, Cell));
+extern Void  printSc (FILE*, Text, Int, Cell);
 #endif
 
 

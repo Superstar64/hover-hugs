@@ -40,7 +40,7 @@ typedef Cell	     Kind;			 /* kind expression	   */
 typedef Cell	     Kinds;			 /* list of kinds	   */
 typedef Cell	     Constr;			 /* constructor expression */
 typedef Cell	     Name;			 /* named value 	   */
-typedef Void	     (*Prim) Args((StackPtr));	 /* primitive function	   */
+typedef Void	     (*Prim) (StackPtr);	 /* primitive function	   */
 typedef Cell	     Class;			 /* type class		   */
 typedef Cell	     Inst;			 /* instance of type class */
 typedef Cell	     Triple;			 /* triple of cell values  */
@@ -59,7 +59,7 @@ typedef Int          Breakpt;                    /* Breakpoint             */
 #endif
 
 #ifdef DOTNET
-extern  Void         primInvoker Args((StackPtr,Name));
+extern  Void         primInvoker (StackPtr,Name);
 #endif
 
 /* --------------------------------------------------------------------------
@@ -68,15 +68,15 @@ extern  Void         primInvoker Args((StackPtr,Name));
  * names, string literals, character constants etc...
  * ------------------------------------------------------------------------*/
 
-extern	String	     textToStr		Args((Text));
-extern	Text	     findText		Args((String));
-extern	Text         inventText		Args((Void));
-extern  Text	     inventDictText	Args((Void));
-extern  Bool	     inventedText	Args((Text));
-extern	String	     identToStr		Args((Cell));
-extern	Text	     fixLitText	 	Args((Text));
-extern	Text	     concatText		Args((String,String));
-extern  Text         subText            Args((String,Int));
+extern	String	     textToStr		(Text);
+extern	Text	     findText		(String);
+extern	Text         inventText		(Void);
+extern  Text	     inventDictText	(Void);
+extern  Bool	     inventedText	(Text);
+extern	String	     identToStr		(Cell);
+extern	Text	     fixLitText	 	(Text);
+extern	Text	     concatText		(String,String);
+extern  Text         subText            (String,Int);
 
 /* --------------------------------------------------------------------------
  * Specification of syntax (i.e. default written form of application)
@@ -167,22 +167,22 @@ struct primitive {		        /* entry in table of primitives	   */
  */
 
 struct primInfo {
-    Void              (*controlFun) Args((Int));
+    Void              (*controlFun) (Int);
     struct primitive  *primFuns;
     struct primInfo   *nextPrimInfo;
 };
 
-extern  Void registerPrims Args((struct primInfo*));
-extern  Void controlFuns   Args((Int)); /* Call all control functions in   */
+extern  Void registerPrims (struct primInfo*);
+extern  Void controlFuns   (Int); /* Call all control functions in   */
 					/* prim list.                      */
-extern  struct primInfoDef* setPrimInfoDll Args((void*));
+extern  struct primInfoDef* setPrimInfoDll (void*);
 
 /* --------------------------------------------------------------------------
  * Program code storage: for holding compiled function defns etc...
  * ------------------------------------------------------------------------*/
 
-extern	Addr	     getMem	Args((Int));
-extern  Void	     nextInstr	Args((Addr));
+extern	Addr	     getMem	(Int);
+extern  Void	     nextInstr	(Addr);
 
 /* --------------------------------------------------------------------------
  * Heap storage:
@@ -215,15 +215,15 @@ extern   Heap	     heapThd, heapTopThd;
 extern   Name	     producer;
 extern   Bool        profiling;
 extern   Int 	     profInterval;
-extern   Void	     profilerLog     Args((String));
+extern   Void	     profilerLog     (String);
 #endif
 
-extern	Pair	     pair	     Args((Cell,Cell));
-extern  Void         garbageCollect  Args((Void));
+extern	Pair	     pair	     (Cell,Cell);
+extern  Void         garbageCollect  (Void);
 
-extern  Void	     overwrite	     Args((Pair,Pair));
-extern  Cell	     markExpr	     Args((Cell));
-extern  Void	     markWithoutMove Args((Cell));
+extern  Void	     overwrite	     (Pair,Pair);
+extern  Cell	     markExpr	     (Cell);
+extern  Void	     markWithoutMove (Cell);
 
 #define mark(v)      v=markExpr(v)
 
@@ -234,7 +234,7 @@ extern  Void	     markWithoutMove Args((Cell));
 #define whatIs(c)    (isPair(c)? (isTag(fst(c)) ? fst(c) : AP ) : whatCode[c])
 extern unsigned char whatCode[];
 #else
-extern	Cell	     whatIs    Args((Cell));
+extern	Cell	     whatIs    (Cell);
 #endif
 
 /* --------------------------------------------------------------------------
@@ -325,30 +325,30 @@ extern	Cell	     whatIs    Args((Cell));
 #define isIP(p)		FALSE
 #endif
 
-extern	Bool		isVar       Args((Cell));
-extern	Bool		isCon       Args((Cell));
-extern	Bool		isQVar      Args((Cell));
-extern	Bool		isQCon      Args((Cell));
-extern	Bool		isQualIdent Args((Cell));
-extern	Bool		isIdent     Args((Cell));
+extern	Bool		isVar       (Cell);
+extern	Bool		isCon       (Cell);
+extern	Bool		isQVar      (Cell);
+extern	Bool		isQCon      (Cell);
+extern	Bool		isQualIdent (Cell);
+extern	Bool		isIdent     (Cell);
 
 #define isFloat(c)      (isPair(c) && fst(c)==FLOATCELL)
-extern	Cell	        mkFloat		Args((FloatPro));
-extern  FloatPro	floatOf		Args((Cell));
-extern  String		floatToString   Args((FloatPro));
+extern	Cell	        mkFloat		(FloatPro);
+extern  FloatPro	floatOf		(Cell);
+extern  String		floatToString   (FloatPro);
 
 #define isDouble(c)     (isPair(c) && fst(c)==DOUBLECELL)
-extern	Cell	        mkDouble	Args((DoublePro));
-extern  DoublePro	doubleOf	Args((Cell));
-extern  String		doubleToString  Args((DoublePro));
-extern  DoublePro	stringToDouble  Args((String));
-extern  Cell		part1Double	Args((DoublePro));
-extern  Cell		part2Double	Args((DoublePro));
-extern  DoublePro	doubleFromParts	Args((Cell,Cell));
+extern	Cell	        mkDouble	(DoublePro);
+extern  DoublePro	doubleOf	(Cell);
+extern  String		doubleToString  (DoublePro);
+extern  DoublePro	stringToDouble  (String);
+extern  Cell		part1Double	(DoublePro);
+extern  Cell		part2Double	(DoublePro);
+extern  DoublePro	doubleFromParts	(Cell,Cell);
 
 #define isPtr(c)        (isPair(c) && fst(c)==PTRCELL)
-extern  Cell            mkPtr           Args((Pointer));
-extern  Pointer         ptrOf           Args((Cell));
+extern  Cell            mkPtr           (Pointer);
+extern  Pointer         ptrOf           (Cell);
 
 /* --------------------------------------------------------------------------
  * Resizeable table struct type.
@@ -366,9 +366,9 @@ typedef struct strDynTable {
 } DynTable;
 
 #define IdxDynTable(eltTy,tab,idx)  (((eltTy *)(tab->data))[idx])
-extern DynTable* allocDynTable Args((unsigned long,unsigned long,unsigned long,const char*));
-extern void freeDynTable       Args((DynTable*));
-extern void growDynTable       Args((DynTable*));
+extern DynTable* allocDynTable (unsigned long,unsigned long,unsigned long,const char*);
+extern void freeDynTable       (DynTable*);
+extern void growDynTable       (DynTable*);
 
 /* --------------------------------------------------------------------------
  * Constructor cell tags are used as the fst element of a pair to indicate
@@ -589,7 +589,7 @@ extern void growDynTable       Args((DynTable*));
 #define extRow(c)    arg(c)
 
 extern Text	     DECTABLE(tabExt);
-extern Ext           mkExt Args((Text));
+extern Ext           mkExt (Text);
 #else
 #define mkExt(t) NIL
 #endif
@@ -631,11 +631,11 @@ struct strObserve {
 #define markedObs(c)  thd3(c)
 
 extern struct strObserve          DECTABLE(tabObserve);
-extern Observe   firstObserve	  Args((Void));
-extern Observe   nextObserve	  Args((Void));
-extern Void      clearObserve	  Args((Void));
-extern Cell      addObsInstance	  Args((String,Cell,Int));
-extern Void      insertAfterObs   Args((Cell,Cell));
+extern Observe   firstObserve	  (Void);
+extern Observe   nextObserve	  (Void);
+extern Void      clearObserve	  (Void);
+extern Cell      addObsInstance	  (String,Cell,Int);
+extern Void      insertAfterObs   (Cell,Cell);
 
 /* --------------------------------------------------------------------------
  * Breakpoints
@@ -650,10 +650,10 @@ struct strBreakpt {
 	Int  count;			/* number of breaks to skip 	   */
 };
 
-extern Void     clearAllBreak   Args((Void));
-extern Bool     breakNow	Args((String));
-extern Void     setBreakpt	Args((String,Bool));
-extern Void     setBreakCount   Args((String,Int));
+extern Void     clearAllBreak   (Void);
+extern Bool     breakNow	(String);
+extern Void     setBreakpt	(String,Bool);
+extern Void     setBreakCount   (String,Int);
 #endif
 
 /* --------------------------------------------------------------------------
@@ -717,12 +717,12 @@ struct strModule {
 extern Module currentModule;           /* Module currently being processed */
 extern struct strModule DECTABLE(tabModule);
 
-extern Bool   isValidModule Args((Module));
-extern Module newModule	    Args((Text));
-extern Module findModule    Args((Text));
-extern Module findModid     Args((Cell));
-extern Void   setCurrModule Args((Module));
-extern List   getModuleImports Args((Module));
+extern Bool   isValidModule (Module);
+extern Module newModule	    (Text);
+extern Module findModule    (Text);
+extern Module findModid     (Cell);
+extern Void   setCurrModule (Module);
+extern List   getModuleImports (Module);
 
 #define isPrelude(m) (m==modulePrelude)
 
@@ -749,12 +749,12 @@ struct strTycon {
 
 extern struct strTycon DECTABLE(tabTycon);
 
-extern Tycon newTycon	  Args((Text));
-extern Tycon findTycon	  Args((Text));
-extern Tycon addTycon	  Args((Tycon));
-extern Void  removeTycon  Args((Tycon));
-extern Tycon findQualTycon Args((Cell));
-extern Tycon addPrimTycon Args((Text,Kind,Int,Cell,Cell));
+extern Tycon newTycon	  (Text);
+extern Tycon findTycon	  (Text);
+extern Tycon addTycon	  (Tycon);
+extern Void  removeTycon  (Tycon);
+extern Tycon findQualTycon (Cell);
+extern Tycon addPrimTycon (Text,Kind,Int,Cell,Cell);
 
 #define isSynonym(h)	(isTycon(h) && tycon(h).what==SYNONYM)
 #define isNewtype(h)	(isTycon(h) && tycon(h).what==NEWTYPE)
@@ -831,17 +831,17 @@ extern struct strName DECTABLE(tabName);
 #define mfunOf(n)	((-1)-name(n).number)
 #define mfunNo(i)	((-1)-(i))
 
-extern Name   newName	    Args((Text,Cell));
-extern Name   findName	    Args((Text));
-extern Name   addName	    Args((Name));
-extern Void   removeName    Args((Name));
-extern Name   findQualName  Args((Cell));
-extern List   findQualNames Args((Cell));
-extern Name   findQualFun   Args((Text,Text));
-extern Void   addPrim	    Args((Int,Name,String,Module,Type));
-extern Name   addPrimCfun   Args((Text,Int,Int,Cell));
-extern Int    sfunPos	    Args((Name,Name));
-extern Bool   setOldDLLFlag Args((Bool));
+extern Name   newName	    (Text,Cell);
+extern Name   findName	    (Text);
+extern Name   addName	    (Name);
+extern Void   removeName    (Name);
+extern Name   findQualName  (Cell);
+extern List   findQualNames (Cell);
+extern Name   findQualFun   (Text,Text);
+extern Void   addPrim	    (Int,Name,String,Module,Type);
+extern Name   addPrimCfun   (Text,Int,Int,Cell);
+extern Int    sfunPos	    (Name,Name);
+extern Bool   setOldDLLFlag (Bool);
 
 /* --------------------------------------------------------------------------
  * Type class values:
@@ -903,17 +903,17 @@ extern struct strClass    DYNDECTABLE(tabClass);
 extern struct strInst     DYNDECTABLE(tabInst);
 #endif
 
-extern Class  newClass	     Args((Text));
-extern Class  classMax	     Args((Void));
-extern Class  findClass	     Args((Text));
-extern Class  addClass	     Args((Class));
-extern Class  findQualClass  Args((Cell));
-extern Inst   newInst	     Args((Void));
-extern Inst   findFirstInst  Args((Tycon));
-extern Inst   findNextInst   Args((Tycon,Inst));
-extern Module findQualifier  Args((Text));
-extern List   findQualifiers Args((Text));
-extern Text   findModAlias   Args((Text));
+extern Class  newClass	     (Text);
+extern Class  classMax	     (Void);
+extern Class  findClass	     (Text);
+extern Class  addClass	     (Class);
+extern Class  findQualClass  (Cell);
+extern Inst   newInst	     (Void);
+extern Inst   findFirstInst  (Tycon);
+extern Inst   findNextInst   (Tycon,Inst);
+extern Module findQualifier  (Text);
+extern List   findQualifiers (Text);
+extern Text   findModAlias   (Text);
 
 /* --------------------------------------------------------------------------
  * Character values:
@@ -935,9 +935,9 @@ extern Text   findModAlias   Args((Text));
 
 #define isShortChar(c)   ((CHARMIN<=(c))&&(INTMIN>(c)))
 
-extern	Bool isChar    Args((Cell));
-extern	Int  charOf    Args((Cell));
-extern	Cell mkChar    Args((Int));
+extern	Bool isChar    (Cell);
+extern	Int  charOf    (Cell);
+extern	Cell mkChar    (Int);
 
 #else	/* !UNICODE_CHARS */
 
@@ -981,11 +981,11 @@ extern	Cell mkChar    Args((Int));
 #define mkDigit(c)   ((Cell)((c)+INTMIN))
 #define digitOf(c)   ((Int)((c)-INTMIN))
 
-extern	Bool isInt    Args((Cell));
-extern	Int  intOf    Args((Cell));
-extern	Cell mkInt    Args((Int));
+extern	Bool isInt    (Cell);
+extern	Int  intOf    (Cell);
+extern	Cell mkInt    (Int);
 #if BIGNUMS
-extern  Bool isBignum Args((Cell));
+extern  Bool isBignum (Cell);
 #endif
 
 /* --------------------------------------------------------------------------
@@ -1010,32 +1010,32 @@ extern  Bool isBignum Args((Cell));
 #define hd(c)	     fst(c)
 #define tl(c)	     snd(c)
 
-extern	Int	     length	   Args((List));
-extern	List	     appendOnto    Args((List,List));	/* destructive	   */
-extern	List	     dupOnto       Args((List,List));
-extern  List	     dupList	   Args((List));
-extern  List	     dupUpto	   Args((List,Cell));
-extern	List	     revOnto	   Args((List, List));	/* destructive	   */
+extern	Int	     length	   (List);
+extern	List	     appendOnto    (List,List);	/* destructive	   */
+extern	List	     dupOnto       (List,List);
+extern  List	     dupList	   (List);
+extern  List	     dupUpto	   (List,Cell);
+extern	List	     revOnto	   (List, List);	/* destructive	   */
 #define rev(xs)      revOnto((xs),NIL)			/* destructive	   */
-extern	Cell	     cellIsMember  Args((Cell,List));
-extern  Cell         cellAssoc     Args((Cell,List));
-extern  Cell         cellRevAssoc  Args((Cell,List));
-extern	List	     concat	   Args((List));
-extern	List	     intersect	   Args((List,List));
-extern	Cell	     varIsMember   Args((Text,List));
-extern	Name	     nameIsMember  Args((Text,List));
-extern	Name	     nameInIEList  Args((Name,List));
-extern	Tycon	     tyconInIEList Args((Text,List));
-extern	Class	     classInIEList Args((Text,List));
-extern  Cell	     intIsMember   Args((Int,List));
-extern	List	     replicate	   Args((Int,Cell));
-extern	List	     diffList	   Args((List,List));	/* destructive	   */
-extern  List         deleteCell    Args((List,Cell));	/* non-destructive */
-extern  List	     take	   Args((Int,List));	/* destructive	   */
-extern  List	     splitAt	   Args((Int,List));	/* non-destructive */
-extern  Cell	     nth	   Args((Int,List));
-extern  List	     removeCell	   Args((Cell,List));	/* destructive	   */
-extern  List         nubList       Args((List));        /* non-destructive */
+extern	Cell	     cellIsMember  (Cell,List);
+extern  Cell         cellAssoc     (Cell,List);
+extern  Cell         cellRevAssoc  (Cell,List);
+extern	List	     concat	   (List);
+extern	List	     intersect	   (List,List);
+extern	Cell	     varIsMember   (Text,List);
+extern	Name	     nameIsMember  (Text,List);
+extern	Name	     nameInIEList  (Name,List);
+extern	Tycon	     tyconInIEList (Text,List);
+extern	Class	     classInIEList (Text,List);
+extern  Cell	     intIsMember   (Int,List);
+extern	List	     replicate	   (Int,Cell);
+extern	List	     diffList	   (List,List);	/* destructive	   */
+extern  List         deleteCell    (List,Cell);	/* non-destructive */
+extern  List	     take	   (Int,List);	/* destructive	   */
+extern  List	     splitAt	   (Int,List);	/* non-destructive */
+extern  Cell	     nth	   (Int,List);
+extern  List	     removeCell	   (Cell,List);	/* destructive	   */
+extern  List         nubList       (List);        /* non-destructive */
 
 /* The following macros provide `inline expansion' of some common ways of
  * traversing, using and modifying lists:
@@ -1078,12 +1078,12 @@ extern  List         nubList       Args((List));        /* non-destructive */
 #define fun(c)	     fst(c)
 #define arg(c)	     snd(c)
 #define isAp(c)      (isPair(c) && !isTag(fst(c)))
-extern	Cell	     getHead	 Args((Cell));
-extern	List	     getArgs	 Args((Cell));
+extern	Cell	     getHead	 (Cell);
+extern	List	     getArgs	 (Cell);
 extern	Int	     argCount;
-extern  Cell         nthArg	 Args((Int,Cell));
-extern  Int	     numArgs	 Args((Cell));
-extern  Cell	     applyToArgs Args((Cell,List));
+extern  Cell         nthArg	 (Int,Cell);
+extern  Int	     numArgs	 (Cell);
+extern  Cell	     applyToArgs (Cell,List);
 
 /* --------------------------------------------------------------------------
  * Stack implementation:
@@ -1116,7 +1116,7 @@ extern	StackPtr sp;
 #define topfun(f)    top()=ap((f),top())
 #define toparg(x)    top()=ap(top(),(x))
 
-extern  Void hugsStackOverflow Args((Void));
+extern  Void hugsStackOverflow (Void);
 
 #if __MWERKS__ && macintosh
 #include <Memory.h>
@@ -1132,20 +1132,20 @@ extern  Void hugsStackOverflow Args((Void));
  * The implementation of script file storage is hidden.
  * ------------------------------------------------------------------------*/
 
-extern Script	   startNewScript   Args((String));
-extern Bool        moduleThisScript Args((Module));
-extern Module      moduleOfScript   Args((Script));
-extern Bool        isPreludeScript  Args((Void));
-extern Module      lastModule       Args((Void));
-extern Script	   scriptThisFile   Args((Text));
-extern Script	   scriptThisName   Args((Name));
-extern Script	   scriptThisTycon  Args((Tycon));
-extern Script	   scriptThisInst   Args((Inst));
-extern Script	   scriptThisClass  Args((Class));
-extern String      fileOfModule     Args((Module));
-extern Void	   dropAScript      Args((Script));
-extern Void	   dropScriptsFrom  Args((Script));
-extern Void        setScriptPrims   Args((void*));
+extern Script	   startNewScript   (String);
+extern Bool        moduleThisScript (Module);
+extern Module      moduleOfScript   (Script);
+extern Bool        isPreludeScript  (Void);
+extern Module      lastModule       (Void);
+extern Script	   scriptThisFile   (Text);
+extern Script	   scriptThisName   (Name);
+extern Script	   scriptThisTycon  (Tycon);
+extern Script	   scriptThisInst   (Inst);
+extern Script	   scriptThisClass  (Class);
+extern String      fileOfModule     (Module);
+extern Void	   dropAScript      (Script);
+extern Void	   dropScriptsFrom  (Script);
+extern Void        setScriptPrims   (void*);
 
 /* --------------------------------------------------------------------------
  * I/O Handles:
@@ -1213,14 +1213,14 @@ struct strMallocPtr {		/* Malloc Ptr description                  */
     				/* or (finalizer, envptr) pairs		   */
 };
 
-typedef Void (*CFinalizer)       Args((Pointer));
-typedef Void (*CFinalizerEnv)    Args((Pointer, Pointer));
+typedef Void (*CFinalizer)       (Pointer);
+typedef Void (*CFinalizerEnv)    (Pointer, Pointer);
 
 extern struct strMallocPtr       mallocPtrs[];
-extern Cell   newMallocPtr       Args((Void *));
-extern Cell   mkMallocPtr        Args((Void *, CFinalizer));
-extern Void   freeMallocPtr      Args((Cell));
-extern Void   incMallocPtrRefCnt Args((Int, Int));
+extern Cell   newMallocPtr       (Void *);
+extern Cell   mkMallocPtr        (Void *, CFinalizer);
+extern Void   freeMallocPtr      (Cell);
+extern Void   incMallocPtrRefCnt (Int, Int);
 
 extern Int    mallocPtr_hw;
 
@@ -1248,28 +1248,28 @@ extern List liveWeakPtrs;
 
 #include "HsFFI.h"
 
-extern Int              part1Int64      Args((HsInt64));
-extern Int              part2Int64      Args((HsInt64));
-extern HsInt64          int64FromParts  Args((Int,Int));
+extern Int              part1Int64      (HsInt64);
+extern Int              part2Int64      (HsInt64);
+extern HsInt64          int64FromParts  (Int,Int);
 
 /* --------------------------------------------------------------------------
  * Stable pointers
  * ------------------------------------------------------------------------*/
 
 #if GC_STABLEPTRS
-extern  Int         mkStablePtr    Args((Cell));
-extern  Cell        derefStablePtr Args((Int));
-extern  Void        freeStablePtr  Args((Int));
+extern  Int         mkStablePtr    (Cell);
+extern  Cell        derefStablePtr (Int);
+extern  Void        freeStablePtr  (Int);
 #endif
 
 /* --------------------------------------------------------------------------
  * Misc:
  * ------------------------------------------------------------------------*/
 
-extern  Void   setLastExpr       Args((Cell));
-extern  Cell   getLastExpr       Args((Void));
-extern  List   addTyconsMatching Args((String,List));
-extern  List   addNamesMatching  Args((String,List));
+extern  Void   setLastExpr       (Cell);
+extern  Cell   getLastExpr       (Void);
+extern  List   addTyconsMatching (String,List);
+extern  List   addNamesMatching  (String,List);
 
 /*-------------------------------------------------------------------------*/
 

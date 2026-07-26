@@ -141,94 +141,94 @@ Name   nameNetException;
  * Local function prototypes:
  * ------------------------------------------------------------------------*/
 
-static Void   local emptyAssumption   Args((Void));
-static Void   local enterBindings     Args((Void));
-static Void   local leaveBindings     Args((Void));
-static Int    local defType	      Args((Cell));
-static Type   local useType	      Args((Cell));
-static Void   local markAssumList     Args((List));
-static Cell   local findAssum         Args((Text));
-static Pair   local findInAssumList   Args((Text,List));
-static List   local intsIntersect     Args((List,List));
-static List   local genvarAllAss      Args((List));
-static List   local genvarAnyAss      Args((List));
-static Int    local newVarsBind       Args((Cell));
-static Void   local newDefnBind       Args((Cell,Type));
+static Void   local emptyAssumption   (Void);
+static Void   local enterBindings     (Void);
+static Void   local leaveBindings     (Void);
+static Int    local defType	      (Cell);
+static Type   local useType	      (Cell);
+static Void   local markAssumList     (List);
+static Cell   local findAssum         (Text);
+static Pair   local findInAssumList   (Text,List);
+static List   local intsIntersect     (List,List);
+static List   local genvarAllAss      (List);
+static List   local genvarAnyAss      (List);
+static Int    local newVarsBind       (Cell);
+static Void   local newDefnBind       (Cell,Type);
 
-static Void   local enterPendingBtyvs Args((Void));
-static Void   local leavePendingBtyvs Args((Void));
-static Cell   local patBtyvs	      Args((Cell));
-static Void   local doneBtyvs	      Args((Int));
-static Void   local enterSkolVars     Args((Void));
-static Void   local leaveSkolVars     Args((Int,Type,Int,Int));
+static Void   local enterPendingBtyvs (Void);
+static Void   local leavePendingBtyvs (Void);
+static Cell   local patBtyvs	      (Cell);
+static Void   local doneBtyvs	      (Int);
+static Void   local enterSkolVars     (Void);
+static Void   local leaveSkolVars     (Int,Type,Int,Int);
 
-static Void   local typeError         Args((Int,Cell,Cell,String,Type,Int));
-static Void   local reportTypeError   Args((Int,Cell,Cell,String,Type,Type));
-static Void   local cantEstablish     Args((Int,String,Cell,Type,List));
-static Void   local tooGeneral        Args((Int,Cell,Type,Type));
+static Void   local typeError         (Int,Cell,Cell,String,Type,Int);
+static Void   local reportTypeError   (Int,Cell,Cell,String,Type,Type);
+static Void   local cantEstablish     (Int,String,Cell,Type,List);
+static Void   local tooGeneral        (Int,Cell,Type,Type);
 
-static Cell   local typeExpr          Args((Int,Cell));
+static Cell   local typeExpr          (Int,Cell);
 
-static Cell   local typeAp	      Args((Int,Cell));
-static Type   local typeExpected      Args((Int,String,Cell,Type,Int,Int,Bool));
-static Void   local typeAlt	      Args((String,Cell,Cell,Type,Int,Int));
-static Int    local funcType          Args((Int));
-static Void   local typeCase          Args((Int,Int,Cell));
-static Void   local typeComp	      Args((Int,Type,Cell,List));
-static Cell   local typeMonadComp     Args((Int,Cell));
+static Cell   local typeAp	      (Int,Cell);
+static Type   local typeExpected      (Int,String,Cell,Type,Int,Int,Bool);
+static Void   local typeAlt	      (String,Cell,Cell,Type,Int,Int);
+static Int    local funcType          (Int);
+static Void   local typeCase          (Int,Int,Cell);
+static Void   local typeComp	      (Int,Type,Cell,List);
+static Cell   local typeMonadComp     (Int,Cell);
 #if ZIP_COMP
-static Cell   local typeZComp	      Args((Int,Type,Cell,List));
-static Void   local typeCompy	      Args((Int,Type,List));
-static Cell   local typeMonadZComp    Args((Int,Cell));
-static List   local getPats           Args((List));
-static Cell   local tupleUp           Args((List));
+static Cell   local typeZComp	      (Int,Type,Cell,List);
+static Void   local typeCompy	      (Int,Type,List);
+static Cell   local typeMonadZComp    (Int,Cell);
+static List   local getPats           (List);
+static Cell   local tupleUp           (List);
 #endif
-static Void   local typeDo	      Args((Int,Cell));
+static Void   local typeDo	      (Int,Cell);
 #if MUDO
-static Void   local typeRecComp	      Args((Int,Type,Cell,List));
-static Void   local typeMDo	      Args((Int,Cell));
-static Void   local typeRecursiveDo   Args((Int,Cell));
+static Void   local typeRecComp	      (Int,Type,Cell,List);
+static Void   local typeMDo	      (Int,Cell);
+static Void   local typeRecursiveDo   (Int,Cell);
 #endif
-static Void   local typeConFlds	      Args((Int,Cell));
-static Void   local typeUpdFlds	      Args((Int,Cell));
+static Void   local typeConFlds	      (Int,Cell);
+static Void   local typeUpdFlds	      (Int,Cell);
 #if IPARAM
-static Cell   local typeWith	      Args((Int,Cell));
+static Cell   local typeWith	      (Int,Cell);
 #endif
-static Cell   local typeFreshPat      Args((Int,Cell));
+static Cell   local typeFreshPat      (Int,Cell);
 
-static Void   local typeBindings      Args((List));
-static Void   local removeTypeSigs    Args((Cell));
+static Void   local typeBindings      (List);
+static Void   local removeTypeSigs    (Cell);
 
-static Void   local monorestrict      Args((List));
-static Void   local restrictedBindAss Args((Cell));
-static Void   local restrictedAss     Args((Int,Cell,Type));
+static Void   local monorestrict      (List);
+static Void   local restrictedBindAss (Cell);
+static Void   local restrictedAss     (Int,Cell,Type);
 
-static Void   local unrestricted      Args((List));
-static List   local itbscc	      Args((List));
-static Void   local addEvidParams     Args((List,Cell));
+static Void   local unrestricted      (List);
+static List   local itbscc	      (List);
+static Void   local addEvidParams     (List,Cell);
 
-static Void   local typeClassDefn     Args((Class));
-static Void   local typeInstDefn      Args((Inst));
-static Void   local typeMember	      Args((String,Name,Cell,List,Cell,Int));
+static Void   local typeClassDefn     (Class);
+static Void   local typeInstDefn      (Inst);
+static Void   local typeMember	      (String,Name,Cell,List,Cell,Int);
 
-static Void   local typeBind          Args((Cell));
-static Void   local typeDefAlt        Args((Int,Cell,Pair));
-static Cell   local typeRhs           Args((Cell));
-static Void   local guardedType       Args((Int,Cell));
+static Void   local typeBind          (Cell);
+static Void   local typeDefAlt        (Int,Cell,Pair);
+static Cell   local typeRhs           (Cell);
+static Void   local guardedType       (Int,Cell);
 
-static Void   local genBind	      Args((List,Cell));
-static Void   local genAss	      Args((Int,List,Cell,Type));
-static Type   local genTest	      Args((Int,Cell,List,Type,Type,Int));
-static Type   local generalize	      Args((List,Type));
-static Bool   local equalTypes        Args((Type,Type));
+static Void   local genBind	      (List,Cell);
+static Void   local genAss	      (Int,List,Cell,Type);
+static Type   local genTest	      (Int,Cell,List,Type,Type,Int);
+static Type   local generalize	      (List,Type);
+static Bool   local equalTypes        (Type,Type);
 
-static Void   local typeDefnGroup     Args((List));
-static Void   local typeForeignExport Args((Name));
-static Pair   local typeSel	      Args((Name));
+static Void   local typeDefnGroup     (List);
+static Void   local typeForeignExport (Name);
+static Pair   local typeSel	      (Name);
 
-static Name   local linkName          Args((String));
-static Tycon  local linkTycon         Args((String));
-static Class  local linkClass         Args((String));
+static Name   local linkName          (String);
+static Tycon  local linkTycon         (String);
+static Class  local linkClass         (String);
 
 /* --------------------------------------------------------------------------
  * Frequently used type skeletons:
@@ -458,44 +458,44 @@ Type type; {
  * Local function prototypes:
  * ------------------------------------------------------------------------*/
 
-static Cell   local assumeEvid        Args((Cell,Int));
+static Cell   local assumeEvid        (Cell,Int);
 #if IPARAM
-static Cell   local findIPEvid	      Args((Text));
-static Void   local removeIPEvid      Args((Text));
+static Cell   local findIPEvid	      (Text);
+static Void   local removeIPEvid      (Text);
 #endif
-static List   local makePredAss	      Args((List,Int));
-static List   local copyPreds	      Args((List));
-static Void   local qualify	      Args((List,Cell));
-static Void   local qualifyBinding    Args((List,Cell));
-static Cell   local qualifyExpr	      Args((Int,List,Cell));
-static Void   local overEvid	      Args((Cell,Cell));
+static List   local makePredAss	      (List,Int);
+static List   local copyPreds	      (List);
+static Void   local qualify	      (List,Cell);
+static Void   local qualifyBinding    (List,Cell);
+static Cell   local qualifyExpr	      (Int,List,Cell);
+static Void   local overEvid	      (Cell,Cell);
 
-static Void   local cutoffExceeded    Args((Cell,Int,List));
-static Cell   local scFind	      Args((Cell,Cell,Int,Cell,Int,Int));
-static Cell   local scEntail	      Args((List,Cell,Int,Int));
-static Cell   local entail	      Args((List,Cell,Int,Int));
-static Cell   local inEntail	      Args((List,Cell,Int,Int));
+static Void   local cutoffExceeded    (Cell,Int,List);
+static Cell   local scFind	      (Cell,Cell,Int,Cell,Int,Int);
+static Cell   local scEntail	      (List,Cell,Int,Int);
+static Cell   local entail	      (List,Cell,Int,Int);
+static Cell   local inEntail	      (List,Cell,Int,Int);
 #if MULTI_INST
-static Cell   local inEntails	      Args((List,Cell,Int,Int));
-static Bool   local instCompare	      Args((Inst, Inst));
+static Cell   local inEntails	      (List,Cell,Int,Int);
+static Bool   local instCompare	      (Inst, Inst);
 #endif
 #if TREX
-static Cell   local lacksNorm	      Args((Type,Int,Cell));
+static Cell   local lacksNorm	      (Type,Int,Cell);
 #endif
 
-static List   local scSimplify	      Args((List));
-static Void   local elimTauts	      Args((Void));
-static Bool   local anyGenerics       Args((Type,Int));
-static List   local elimOuterPreds    Args((List));
-static List   local elimPredsUsing    Args((List,List));
-static Void   local reducePreds	      Args((Void));
-static Void   local normPreds	      Args((Int));
+static List   local scSimplify	      (List);
+static Void   local elimTauts	      (Void);
+static Bool   local anyGenerics       (Type,Int);
+static List   local elimOuterPreds    (List);
+static List   local elimPredsUsing    (List,List);
+static Void   local reducePreds	      (Void);
+static Void   local normPreds	      (Int);
 
-static Bool   local resolveDefs	      Args((List,Bool));
-static Bool   local resolveVar	      Args((Int,Bool));
-static Class  local classConstraining Args((Int,Cell,Int));
+static Bool   local resolveDefs	      (List,Bool);
+static Bool   local resolveVar	      (Int,Bool);
+static Class  local classConstraining (Int,Cell,Int);
 #if MULTI_INST
-static Bool   local instComp_         Args((Inst,Inst));
+static Bool   local instComp_         (Inst,Inst);
 #endif
 
 /* --------------------------------------------------------------------------
@@ -1780,7 +1780,7 @@ Type dt, it; {
 static int tcMode = EXPRESSION;
 
 #if DEBUG_TYPES
-static Cell local mytypeExpr	Args((Int,Cell));
+static Cell local mytypeExpr	(Int,Cell);
 static Cell local typeExpr(l,e)
 Int l;
 Cell e; {
@@ -3335,7 +3335,7 @@ List bs; {
 static Cell daSccs = NIL;
 static Int  daCount;
 
-static Int local sccMin	Args((Int,Int));
+static Int local sccMin	(Int,Int);
 
 static Int local sccMin(x,y)		/* calculate minimum of x,y	   */
 Int x, y; {				/* (unless y is zero)		   */
@@ -3359,7 +3359,7 @@ Int x, y; {				/* (unless y is zero)		   */
  * This would probably have been a good application for C++ templates ...
  * ------------------------------------------------------------------------*/
 
-static Int local LOWLINK Args((Cell));	/* local function		   */
+static Int local LOWLINK (Cell);	/* local function		   */
 static Int local LOWLINK(v)		/* calculate `lowlink' of v	   */
 Cell v; {
     Int  low = daCount;

@@ -26,234 +26,234 @@
  * local function prototypes:
  * ------------------------------------------------------------------------*/
 
-static Void   local kindError		Args((Int,Constr,Constr,String,Kind,Int));
-static Void   local checkQualImport	Args((Pair));
-static Void   local checkUnqualImport	Args((Triple));
+static Void   local kindError		(Int,Constr,Constr,String,Kind,Int);
+static Void   local checkQualImport	(Pair);
+static Void   local checkUnqualImport	(Triple);
 
-static Void   local checkTyconDefn	Args((Tycon));
-static Void   local depConstrs		Args((Tycon,List,Cell));
-static Int    local userArity		Args((Name));
-static List   local addSels		Args((Int,Name,List,List));
-static List   local selectCtxt		Args((List,List));
-static Void   local checkSynonyms	Args((List));
-static List   local visitSyn		Args((List,Tycon,List));
-static Type   local fullerExpand	Args((Type));
-static Type   local instantiateNewtype	Args((Name,Type));
-static Type   local instantiateSyn	Args((Type,Type));
+static Void   local checkTyconDefn	(Tycon);
+static Void   local depConstrs		(Tycon,List,Cell);
+static Int    local userArity		(Name);
+static List   local addSels		(Int,Name,List,List);
+static List   local selectCtxt		(List,List);
+static Void   local checkSynonyms	(List);
+static List   local visitSyn		(List,Tycon,List);
+static Type   local fullerExpand	(Type);
+static Type   local instantiateNewtype	(Name,Type);
+static Type   local instantiateSyn	(Type,Type);
 
-static Void   local checkClassDefn	Args((Class));
-static Void   local checkClassDefn2	Args((Class));
-static Void local checkClassDefn2_      Args((List));
-static Cell   local depPredExp		Args((Int,List,Cell));
-static Void   local checkMems		Args((Class,List,Cell));
-static Void   local checkMems2		Args((Class,Cell));
-static Void   local addMembers		Args((Class));
-static Name   local newMember		Args((Int,Int,Cell,Type,Class));
-static Name   local newDSel		Args((Class,Int));
-static Text   local generateText	Args((String,Class));
-static Int    local visitClass		Args((Class));
+static Void   local checkClassDefn	(Class);
+static Void   local checkClassDefn2	(Class);
+static Void local checkClassDefn2_      (List);
+static Cell   local depPredExp		(Int,List,Cell);
+static Void   local checkMems		(Class,List,Cell);
+static Void   local checkMems2		(Class,Cell);
+static Void   local addMembers		(Class);
+static Name   local newMember		(Int,Int,Cell,Type,Class);
+static Name   local newDSel		(Class,Int);
+static Text   local generateText	(String,Class);
+static Int    local visitClass		(Class);
 
-static List   local classBindings	Args((String,Class,List));
-static Name   local memberName		Args((Class,Text));
-static List   local numInsert		Args((Int,Cell,List));
+static List   local classBindings	(String,Class,List);
+static Name   local memberName		(Class,Text);
+static List   local numInsert		(Int,Cell,List);
 
-static List   local typeVarsIn		Args((Cell,List,List,List));
-static List   local maybeAppendVar	Args((Cell,List));
+static List   local typeVarsIn		(Cell,List,List,List);
+static List   local maybeAppendVar	(Cell,List);
 
-static Type   local checkSigType	Args((Int,String,Cell,Type));
-static Void   local checkOptQuantVars	Args((Int,List,List));
-static Type   local depTopType		Args((Int,List,Type));
-static Type   local depCompType		Args((Int,List,Type));
-static Type   local depTypeExp		Args((Int,List,Type));
-static Type   local depTypeVar		Args((Int,List,Text));
-static List   local checkQuantVars	Args((Int,List,List,Cell));
-static List   local offsetTyvarsIn	Args((Type,List));
-static List   local otvars		Args((Cell,List));
-static Bool   local osubset		Args((List,List));
-static Void   local kindConstr		Args((Int,Int,Int,Constr));
-static Kind   local kindAtom		Args((Int,Constr));
-static Void   local kindPred		Args((Int,Int,Int,Cell));
-static Void   local kindType		Args((Int,String,Type));
-static Void   local fixKinds		Args((Void));
+static Type   local checkSigType	(Int,String,Cell,Type);
+static Void   local checkOptQuantVars	(Int,List,List);
+static Type   local depTopType		(Int,List,Type);
+static Type   local depCompType		(Int,List,Type);
+static Type   local depTypeExp		(Int,List,Type);
+static Type   local depTypeVar		(Int,List,Text);
+static List   local checkQuantVars	(Int,List,List,Cell);
+static List   local offsetTyvarsIn	(Type,List);
+static List   local otvars		(Cell,List);
+static Bool   local osubset		(List,List);
+static Void   local kindConstr		(Int,Int,Int,Constr);
+static Kind   local kindAtom		(Int,Constr);
+static Void   local kindPred		(Int,Int,Int,Cell);
+static Void   local kindType		(Int,String,Type);
+static Void   local fixKinds		(Void);
 
-static Void   local kindTCGroup		Args((List));
-static Void   local initTCKind		Args((Cell));
-static Void   local kindTC		Args((Cell));
-static Void   local genTC		Args((Cell));
+static Void   local kindTCGroup		(List);
+static Void   local initTCKind		(Cell);
+static Void   local kindTC		(Cell);
+static Void   local genTC		(Cell);
 
-static Void   local checkInstDefn	Args((Inst));
-static Void   local insertInst		Args((Inst));
-static Bool   local instCompare		Args((Inst,Inst));
-static Name   local newInstImp		Args((Inst));
-static Void   local kindInst		Args((Inst,Int));
-static Void   local checkDerive		Args((Tycon,List,List,Cell));
-static Void   local addDerInst		Args((Int,Class,List,List,Type,Int));
-static Void   local deriveContexts	Args((List));
-static Void   local initDerInst		Args((Inst));
-static Void   local calcInstPreds	Args((Inst));
-static List   local calcFunDeps		Args((List));
-static Void   local maybeAddPred	Args((Cell,Int,Int,List));
-static Cell   local copyAdj		Args((Cell,Int,Int));
-static Void   local tidyDerInst		Args((Inst));
-static List   local inheritFundeps      Args((Class,Cell,Int));
-static Void   local extendFundeps       Args((Class));
+static Void   local checkInstDefn	(Inst);
+static Void   local insertInst		(Inst);
+static Bool   local instCompare		(Inst,Inst);
+static Name   local newInstImp		(Inst);
+static Void   local kindInst		(Inst,Int);
+static Void   local checkDerive		(Tycon,List,List,Cell);
+static Void   local addDerInst		(Int,Class,List,List,Type,Int);
+static Void   local deriveContexts	(List);
+static Void   local initDerInst		(Inst);
+static Void   local calcInstPreds	(Inst);
+static List   local calcFunDeps		(List);
+static Void   local maybeAddPred	(Cell,Int,Int,List);
+static Cell   local copyAdj		(Cell,Int,Int);
+static Void   local tidyDerInst		(Inst);
+static List   local inheritFundeps      (Class,Cell,Int);
+static Void   local extendFundeps       (Class);
 
-static List   local otvarsZonk		Args((Cell,List,Int));
-static Void   local addDerivImp		Args((Inst));
-static List   local getDiVars		Args((Int));
-static Cell   local mkBind		Args((String,List));
-static Cell   local mkVarAlts		Args((Int,Cell));
+static List   local otvarsZonk		(Cell,List,Int);
+static Void   local addDerivImp		(Inst);
+static List   local getDiVars		(Int);
+static Cell   local mkBind		(String,List);
+static Cell   local mkVarAlts		(Int,Cell);
 
-static List   local deriveEq		Args((Tycon));
-static Pair   local mkAltEq		Args((Int,List));
-static List   local deriveOrd		Args((Tycon));
-static Pair   local mkAltOrd		Args((Int,List));
-static List   local makeDPats2		Args((Cell,Int));
+static List   local deriveEq		(Tycon);
+static Pair   local mkAltEq		(Int,List);
+static List   local deriveOrd		(Tycon);
+static Pair   local mkAltOrd		(Int,List);
+static List   local makeDPats2		(Cell,Int);
 
-static List   local deriveEnum		Args((Tycon));
-static List   local deriveIx		Args((Tycon));
-static Bool   local isEnumType		Args((Tycon));
-static List   local mkIxBinds		Args((Int,Cell,Int));
-static Cell   local prodRange		Args((Int,List,Cell,Cell,Cell));
-static Cell   local prodIndex		Args((Int,List,Cell,Cell,Cell));
-static Cell   local prodInRange		Args((Int,List,Cell,Cell,Cell));
+static List   local deriveEnum		(Tycon);
+static List   local deriveIx		(Tycon);
+static Bool   local isEnumType		(Tycon);
+static List   local mkIxBinds		(Int,Cell,Int);
+static Cell   local prodRange		(Int,List,Cell,Cell,Cell);
+static Cell   local prodIndex		(Int,List,Cell,Cell,Cell);
+static Cell   local prodInRange		(Int,List,Cell,Cell,Cell);
 
-static List   local deriveShow		Args((Tycon));
-static Cell   local mkAltShow		Args((Int,Cell,Int));
-static Cell   local showsPrecRhs	Args((Cell,Cell,Int));
+static List   local deriveShow		(Tycon);
+static Cell   local mkAltShow		(Int,Cell,Int);
+static Cell   local showsPrecRhs	(Cell,Cell,Int);
 
-static List   local deriveRead		Args((Cell));
-static Cell   local mkReadCon		Args((Name,Cell,Cell));
-static Cell   local mkReadPrefix	Args((Cell));
-static Cell   local mkReadInfix		Args((Cell));
-static Cell   local mkReadTuple		Args((Cell));
-static Cell   local mkReadRecord	Args((Cell,List));
+static List   local deriveRead		(Cell);
+static Cell   local mkReadCon		(Name,Cell,Cell);
+static Cell   local mkReadPrefix	(Cell);
+static Cell   local mkReadInfix		(Cell);
+static Cell   local mkReadTuple		(Cell);
+static Cell   local mkReadRecord	(Cell,List);
 
-static List   local deriveBounded	Args((Tycon));
-static List   local mkBndBinds		Args((Int,Cell,Int));
+static List   local deriveBounded	(Tycon);
+static List   local mkBndBinds		(Int,Cell,Int);
 
-static Void   local checkDefaultDefns	Args((Void));
+static Void   local checkDefaultDefns	(Void);
 
-static List   local checkPrimDefn	Args((Triple));
-static Name   local addNewPrim		Args((Int,Text,String,Cell));
+static List   local checkPrimDefn	(Triple);
+static Name   local addNewPrim		(Int,Text,String,Cell);
 
-static Void   local checkForeignImport  Args((Name));
-static Void   local checkForeignExport  Args((Name));
-static Void   local linkForeign         Args((Name));
+static Void   local checkForeignImport  (Name);
+static Void   local checkForeignExport  (Name);
+static Void   local linkForeign         (Name);
 
-static Cell   local tidyInfix		Args((Int,Cell));
-static Pair   local attachFixity	Args((Int,Cell));
-static Syntax local lookupSyntax	Args((Text));
+static Cell   local tidyInfix		(Int,Cell);
+static Pair   local attachFixity	(Int,Cell);
+static Syntax local lookupSyntax	(Text);
 
-static Cell   local checkPat		Args((Int,Cell));
-static Cell   local checkMaybeCnkPat	Args((Int,Cell));
-static Cell   local checkApPat		Args((Int,Int,Cell));
-static Void   local addToPatVars	Args((Int,Cell));
-static Name   local conDefined		Args((Int,Cell,Bool));
-static Void   local checkIsCfun		Args((Int,Name));
-static Void   local checkCfunArgs	Args((Int,Cell,Int));
-static Cell   local checkPatType	Args((Int,String,Cell,Type));
-static Cell   local applyBtyvs		Args((Cell));
-static Cell   local bindPat		Args((Int,Cell));
-static Void   local bindPats		Args((Int,List));
+static Cell   local checkPat		(Int,Cell);
+static Cell   local checkMaybeCnkPat	(Int,Cell);
+static Cell   local checkApPat		(Int,Int,Cell);
+static Void   local addToPatVars	(Int,Cell);
+static Name   local conDefined		(Int,Cell,Bool);
+static Void   local checkIsCfun		(Int,Name);
+static Void   local checkCfunArgs	(Int,Cell,Int);
+static Cell   local checkPatType	(Int,String,Cell,Type);
+static Cell   local applyBtyvs		(Cell);
+static Cell   local bindPat		(Int,Cell);
+static Void   local bindPats		(Int,List);
 
-static List   local extractSigdecls	Args((List));
-static List   local extractFixdecls	Args((List));
-static List   local extractBindings	Args((List));
-static List   local getPatVars		Args((Int,Cell,List));
-static List   local addPatVar		Args((Int,Cell,List));
-static List   local eqnsToBindings	Args((List,List,List,List));
-static Void   local notDefined		Args((Int,List,Cell));
-static Cell   local findBinding		Args((Text,List));
-static Cell   local getAttr		Args((List,Cell));
-static Void   local addSigdecl		Args((List,Cell));
-static Void   local addFixdecl		Args((List,List,List,List,Triple));
-static Void   local dupFixity		Args((Int,Text));
-static Void   local missFixity		Args((Int,Text));
+static List   local extractSigdecls	(List);
+static List   local extractFixdecls	(List);
+static List   local extractBindings	(List);
+static List   local getPatVars		(Int,Cell,List);
+static List   local addPatVar		(Int,Cell,List);
+static List   local eqnsToBindings	(List,List,List,List);
+static Void   local notDefined		(Int,List,Cell);
+static Cell   local findBinding		(Text,List);
+static Cell   local getAttr		(List,Cell);
+static Void   local addSigdecl		(List,Cell);
+static Void   local addFixdecl		(List,List,List,List,Triple);
+static Void   local dupFixity		(Int,Text);
+static Void   local missFixity		(Int,Text);
 
-static List   local dependencyAnal	Args((List));
-static List   local topDependAnal	Args((List));
-static Void   local addDepField		Args((Cell));
-static Void   local remDepField		Args((List));
-static Void   local remDepField1	Args((Cell));
-static Void   local clearScope		Args((Void));
-static Void   local withinScope		Args((List));
-static Void   local leaveScope		Args((Void));
-static Void   local saveSyntax		Args((Cell,Cell));
-static Void   local dropNameClash	Args((Cell));
+static List   local dependencyAnal	(List);
+static List   local topDependAnal	(List);
+static Void   local addDepField		(Cell);
+static Void   local remDepField		(List);
+static Void   local remDepField1	(Cell);
+static Void   local clearScope		(Void);
+static Void   local withinScope		(List);
+static Void   local leaveScope		(Void);
+static Void   local saveSyntax		(Cell,Cell);
+static Void   local dropNameClash	(Cell);
 #if IPARAM
-static Bool   local checkIBindings      Args((Int,List));
+static Bool   local checkIBindings      (Int,List);
 #endif
 
-static Void   local depBinding		Args((Cell));
-static Void   local depDefaults		Args((Class));
-static Void   local depInsts		Args((Inst));
-static Void   local depClassBindings	Args((List));
-static Void   local depAlt		Args((Cell));
-static Cell   local depLetRec		Args((Bool,Int,Cell));
-static Void   local depRhs		Args((Cell));
-static Void   local depGuard		Args((Cell));
-static Void   local depPair		Args((Int,Cell));
-static Void   local depTriple		Args((Int,Cell));
-static Void   local depComp		Args((Int,Cell,List));
+static Void   local depBinding		(Cell);
+static Void   local depDefaults		(Class);
+static Void   local depInsts		(Inst);
+static Void   local depClassBindings	(List);
+static Void   local depAlt		(Cell);
+static Cell   local depLetRec		(Bool,Int,Cell);
+static Void   local depRhs		(Cell);
+static Void   local depGuard		(Cell);
+static Void   local depPair		(Int,Cell);
+static Void   local depTriple		(Int,Cell);
+static Void   local depComp		(Int,Cell,List);
 #if ZIP_COMP
-static Void   local depZComp		Args((Int,Cell,List));
-static Void   local depZCompBranch	Args((Int,List));
-static List   local intersectBinds	Args((List bs1,List bs2));
-static List   local getBindVars		Args((List bs));
+static Void   local depZComp		(Int,Cell,List);
+static Void   local depZCompBranch	(Int,List);
+static List   local intersectBinds	(List bs1,List bs2);
+static List   local getBindVars		(List bs);
 #endif
-static Void   local depCaseAlt		Args((Int,Cell));
-static Cell   local depVar		Args((Int,Cell,Bool));
-static Cell   local depQVar		Args((Int,Cell,Bool));
-static Void   local depConFlds		Args((Int,Cell,Bool));
-static Void   local depUpdFlds		Args((Int,Cell));
-static List   local depFields		Args((Int,Cell,List,Bool));
-static Void   local checkNameAmbigName  Args((Int,Name,Bool));
-static Void   local checkNameAmbig      Args((Int,Text,Cell));
-static Cell   local checkTyconAmbig     Args((Int,Text,Cell));
+static Void   local depCaseAlt		(Int,Cell);
+static Cell   local depVar		(Int,Cell,Bool);
+static Cell   local depQVar		(Int,Cell,Bool);
+static Void   local depConFlds		(Int,Cell,Bool);
+static Void   local depUpdFlds		(Int,Cell);
+static List   local depFields		(Int,Cell,List,Bool);
+static Void   local checkNameAmbigName  (Int,Name,Bool);
+static Void   local checkNameAmbig      (Int,Text,Cell);
+static Cell   local checkTyconAmbig     (Int,Text,Cell);
 #if IPARAM
-static Void   local depWith		Args((Int,Cell));
-static List   local depDwFlds		Args((Int,Cell,List));
+static Void   local depWith		(Int,Cell);
+static List   local depDwFlds		(Int,Cell,List);
 #endif
 #if TREX
-static Void   local trexUsed            Args((Void));
-static Void   local trexLoad            Args((Void));
-static Cell   local depRecord		Args((Int,Cell));
+static Void   local trexUsed            (Void);
+static Void   local trexLoad            (Void);
+static Cell   local depRecord		(Int,Cell);
 #endif
 
 #if MUDO
-static Void   local mdoLoad             Args((Void));
-static Void   local mdoUsed             Args((Void));
-static List   local mdoGetPatVarsLet	Args((Int,List,List));
-static List   local mdoBVars		Args((Int,List));
-static List   local mdoUsedVars		Args((List,Cell,List,List));
-static Void   local depRecComp		Args((Int,Cell,List));
-static Void   local mdoExpandQualifiers Args((Int,Cell,List,List));
-static Bool   local mdoIsConnected	Args((Cell,List));
-static Int    local mdoSegment		Args((Cell,List));
-static Void   local mdoSCC		Args((List));
-static List   local mdoCleanSegment	Args((Triple));
-static List   local mdoNoLets		Args((Triple));
-static Void   local mdoComputeExports	Args((Triple,Cell));
-static Bool   local mdoUsedInAnySeg	Args((Text,List));
+static Void   local mdoLoad             (Void);
+static Void   local mdoUsed             (Void);
+static List   local mdoGetPatVarsLet	(Int,List,List);
+static List   local mdoBVars		(Int,List);
+static List   local mdoUsedVars		(List,Cell,List,List);
+static Void   local depRecComp		(Int,Cell,List);
+static Void   local mdoExpandQualifiers (Int,Cell,List,List);
+static Bool   local mdoIsConnected	(Cell,List);
+static Int    local mdoSegment		(Cell,List);
+static Void   local mdoSCC		(List);
+static List   local mdoCleanSegment	(Triple);
+static List   local mdoNoLets		(Triple);
+static Void   local mdoComputeExports	(Triple,Cell);
+static Bool   local mdoUsedInAnySeg	(Text,List);
 /*#define DEBUG_MDO_SEGMENTS*/
 #endif
 
-static List   local tcscc		Args((List,List));
-static List   local bscc		Args((List));
+static List   local tcscc		(List,List);
+static List   local bscc		(List);
 
-static Void   local addRSsigdecls	Args((Pair));
-static Void   local allNoPrevDef	Args((Cell));
-static Void   local noPrevDef		Args((Int,Cell));
-static Bool   local odiff		Args((List,List));
+static Void   local addRSsigdecls	(Pair);
+static Void   local allNoPrevDef	(Cell);
+static Void   local noPrevDef		(Int,Cell);
+static Bool   local odiff		(List,List);
 
-static Void   local duplicateError	Args((Int,Module,Text,String));
-static Void   local checkTypeIn		Args((Pair));
+static Void   local duplicateError	(Int,Module,Text,String);
+static Void   local checkTypeIn		(Pair);
 
-static Bool   local h98Pred		Args((Bool,Cell));
-static Cell   local h98Context		Args((Bool,List));
-static Void   local h98CheckCtxt	Args((Int,String,Bool,List,Inst));
-static Void   local h98CheckType	Args((Int,String,Cell,Type));
+static Bool   local h98Pred		(Bool,Cell);
+static Cell   local h98Context		(Bool,List);
+static Void   local h98CheckCtxt	(Int,String,Bool,List,Inst);
+static Void   local h98CheckType	(Int,String,Cell,Type);
 
 /* --------------------------------------------------------------------------
  * The code in this file is arranged in roughly the following order:
@@ -3963,7 +3963,7 @@ Bool generateFFI = FALSE;
 
 Bool generate_ffi = FALSE;	/* generate FFI for the current module? */
 
-static Int checkCallConv  Args((Int,Text));
+static Int checkCallConv  (Int,Text);
 
 /* Checking if the calling convention is supported */
 static Int checkCallConv(line,t)
@@ -4081,11 +4081,11 @@ Cell type; {
     foreignExports   = cons(n,foreignExports);
 }
 
-static String skipSpaces  Args((String));
-static String matchToken  Args((String,String));
-static String skipToSpace Args((String));
-static String skipToChar  Args((String,int));
-static String matchFname  Args((String));
+static String skipSpaces  (String);
+static String matchToken  (String,String);
+static String skipToSpace (String);
+static String skipToChar  (String,int);
+static String matchFname  (String);
 
 static String skipSpaces(s)
 String s; {
@@ -6995,7 +6995,7 @@ Cell e; {				/* to make construction and update */
 static Cell daSccs = NIL;
 static Int  daCount;
 
-static Int local sccMin	Args((Int,Int));
+static Int local sccMin	(Int,Int);
 
 static Int local sccMin(x,y)		/* calculate minimum of x,y	   */
 Int x, y; {				/* (unless y is zero)		   */
@@ -7019,7 +7019,7 @@ Int x, y; {				/* (unless y is zero)		   */
  * This would probably have been a good application for C++ templates ...
  * ------------------------------------------------------------------------*/
 
-static Int local LOWLINK Args((Cell));	/* local function		   */
+static Int local LOWLINK (Cell);	/* local function		   */
 static Int local LOWLINK(v)		/* calculate `lowlink' of v	   */
 Cell v; {
     Int  low = daCount;
@@ -7108,7 +7108,7 @@ List bs, cs; {				/* info into SCCs		   */
 static Cell daSccs = NIL;
 static Int  daCount;
 
-static Int local sccMin	Args((Int,Int));
+static Int local sccMin	(Int,Int);
 
 static Int local sccMin(x,y)		/* calculate minimum of x,y	   */
 Int x, y; {				/* (unless y is zero)		   */
@@ -7132,7 +7132,7 @@ Int x, y; {				/* (unless y is zero)		   */
  * This would probably have been a good application for C++ templates ...
  * ------------------------------------------------------------------------*/
 
-static Int local LOWLINK Args((Cell));	/* local function		   */
+static Int local LOWLINK (Cell);	/* local function		   */
 static Int local LOWLINK(v)		/* calculate `lowlink' of v	   */
 Cell v; {
     Int  low = daCount;

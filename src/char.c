@@ -28,14 +28,14 @@ static const struct CharProperties null_properties = { GENCAT_Cn, 0, 0, 0 };
  * Local function prototypes:
  * ------------------------------------------------------------------------*/
 
-static Void local initConsCharTable	Args((Void));
-static Void local markConsCharTable	Args((Void));
+static Void local initConsCharTable	(Void);
+static Void local markConsCharTable	(Void);
 #if UNICODE_CHARS
-static Void local freeConsCharTable	Args((Void));
-static const struct CharProperties * local get_properties Args((Char));
+static Void local freeConsCharTable	(Void);
+static const struct CharProperties * local get_properties (Char);
 #endif
-static Int  local utfseqlen		Args((Int));
-static Int  local utfcodelen		Args((Char));
+static Int  local utfseqlen		(Int);
+static Int  local utfcodelen		(Char);
 
 /* --------------------------------------------------------------------------
  * Character set handling:
