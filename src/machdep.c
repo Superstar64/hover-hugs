@@ -100,15 +100,10 @@ static Bool   local scanSubDirs   (String);
 # define isPATHSEP(x)            (*(x) == PATHSEP)
 # define DLL_ENDING              ".so"
 
+char hugsdir_path[PATH_MAX];
 
 String hugsdir() {		/* directory containing libraries/Prelude.hs */
-    /* On Unix systems, data is not typically stored relative to a binary
-     * (it's also harder for a binary to determine where it lives).
-     * First, check for an environment var, then fall back to
-     * a configuration-time constant (--datadir=...).
-     */
-    char *hugsdir = getenv("HUGSDIR");
-    return hugsdir ? hugsdir : HUGSDIR;
+    return hugsdir_path;
 }
 
 static String homeDir() {
@@ -1190,6 +1185,36 @@ initSystem()
 {
   /* Called right away by main()  */
     setlocale(LC_CTYPE, "");
+#if defined(__linux__)
+    // get the executable path
+    char executable_path[PATH_MAX];
+    size_t length = readlink("/proc/self/exe", executable_path, PATH_MAX - 1);
+    if (length == -1) {
+        perror("Unable to read executable path");
+        return FALSE;
+    }
+    executable_path[length] = '\0';
+
+    char* root_path = dirname(executable_path);
+    
+    // concat ../lib/hugs to it
+
+    char temporary_path[PATH_MAX];
+    int result = snprintf(temporary_path, PATH_MAX, "%s/../lib/hugs", root_path);
+    if(result <0 || result >= PATH_MAX) {
+        fprintf(stderr, "Unable to concat executable path\n");
+        return FALSE;
+    }
+
+    // canonical the hugs dir path
+
+    if(realpath(temporary_path, hugsdir_path) == NULL) {
+        perror("Unable to access hugs directory");
+        return FALSE;
+    }
+#else
+#error "Getting the executable location only works on Linux."
+#endif
     return TRUE;
 }
 
