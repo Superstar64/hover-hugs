@@ -14,6 +14,8 @@
 #ifndef __STORAGE_H__
 #define __STORAGE_H__
 
+#include "prelude.h"
+
 /* --------------------------------------------------------------------------
  * Typedefs for main data types:
  * Many of these type names are used to indicate the intended us of a data

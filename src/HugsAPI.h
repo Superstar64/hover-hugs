@@ -13,6 +13,7 @@
 #ifndef __HUGSAPI_H__
 #define __HUGSAPI_H__
 
+#include "prelude.h"
 
 #ifndef Args
 #  define Args(x) x

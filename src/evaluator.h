@@ -10,6 +10,9 @@
 #ifndef __EVALUATOR_H__
 #define __EVALUATOR_H__
 
+#include "prelude.h"
+#include "storage.h"
+
 extern Void startEvaluator    Args((Void));
 extern Void stopEvaluator     Args((Void));
 extern Void evaluator         Args((Module));

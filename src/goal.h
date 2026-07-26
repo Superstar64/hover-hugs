@@ -4,6 +4,8 @@
 #ifndef __GOAL_H__
 #define __GOAL_H__
 
+#include "prelude.h"
+
 typedef long   Target;
 extern Void setGoal Args((String,Target));
 extern Void soFar   Args((Target));

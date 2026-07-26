@@ -11,6 +11,7 @@
  * $Date: 2003/10/14 13:56:25 $
  * ------------------------------------------------------------------------*/
 #include "HugsAPI.h"
+#include "storage.h"
 
 /* These have non-local scope, as they're used when creating 
  * extended/delegated versions of the server API (cf. the server

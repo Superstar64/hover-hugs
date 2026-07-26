@@ -4,6 +4,8 @@
 #ifndef __STRUTIL_H__
 #define __STRUTIL_H__
 
+#include "prelude.h"
+
 /* string copy operator, allocates new via malloc() */
 extern String strCopy Args((String));
 

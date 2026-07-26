@@ -13,6 +13,9 @@
 #ifndef __SUBST_H__
 #define __SUBST_H__
 
+#include "prelude.h"
+#include "storage.h"
+
 /* #define DEBUG_TYPES    1 */
 /* #define DEBUG_KINDS    1 */
 /* #define DEBUG_DEFAULTS 1 */

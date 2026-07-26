@@ -10,6 +10,9 @@
 #ifndef __SCRIPT_H__
 #define __SCRIPT_H__
 
+#include "prelude.h"
+#include "storage.h"
+
 /*
  * The Script module handles the management of the stack of scripts
  * known to the interpreter. 

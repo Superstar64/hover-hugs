@@ -6,6 +6,8 @@
 #ifndef __OPTS_H__
 #define __OPTS_H__
 
+#include "prelude.h"
+
 /* --------------------------------------------------------------------------
  * Functions for processing and displaying Hugs options:
  * ------------------------------------------------------------------------*/

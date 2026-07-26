@@ -1,6 +1,5 @@
 # --------------------------------------------------------------------------
 # Makefile for Hugs interpreter
-# (this should be a POSIX 1003.2-1992 Makefile)
 #
 # The Hugs 98 system is Copyright (c) Mark P Jones, Alastair Reid, the
 # Yale Haskell Group, and the OGI School of Science & Engineering at OHSU,
@@ -31,7 +30,7 @@ LIBS		= -lreadline -lncurses -lm -ldl
 HFILES		= HsFFI.h builtin.h char.h command.h config.h connect.h \
 		  errors.h evaluator.h goal.h machdep.h module.h observe.h \
 		  options.h opts.h output.h prelude.h script.h server.h \
-		  storage.h strutil.h subst.h
+		  storage.h strutil.h subst.h unitable.h
 CFILES		= hugs.c runhugs.c server.c edit.c observe.c \
 		  builtin.c char.c compiler.c errors.c evaluator.c ffi.c \
 		  goal.c input.c machdep.c machine.c module.c opts.c \
@@ -124,6 +123,14 @@ UnicodeData-License.txt:
 depend: $(SOURCES) parser.c unitable.c
 	gcc -MM $(CFILES) parser.c unitable.c > MkDepend.mk
 
+################################################################
+# Checking header files (requires gcc)
+################################################################
+
+check: $(HFILES:%.h=%.h-check)
+
+%.h-check: %.h
+	gcc -fsyntax-only $<
 
 ################################################################
 # Object dependencies

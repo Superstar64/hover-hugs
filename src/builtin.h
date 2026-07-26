@@ -13,6 +13,9 @@
 #ifndef __BUILTIN_H__
 #define __BUILTIN_H__
 
+#include "prelude.h"
+#include "storage.h"
+
 extern String evalName  Args((Cell));
 extern Cell   mkIOError Args((Cell *,Name,String,String,Cell *));
 

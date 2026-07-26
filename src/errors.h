@@ -13,6 +13,8 @@
 #ifndef __ERRORS_H__
 #define __ERRORS_H__
 
+#include "prelude.h"
+
 extern Void internal	    Args((String)) HUGS_noreturn;
 extern Void fatal	    Args((String)) HUGS_noreturn;
 extern Void stopAnyPrinting Args((Void));

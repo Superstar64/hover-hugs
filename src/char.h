@@ -1,6 +1,8 @@
 #ifndef CHAR_H
 #define CHAR_H
 
+#include "prelude.h"
+
 /* --------------------------------------------------------------------------
  * Character set handling:
  *
