@@ -49,9 +49,6 @@
 
 # include <dirent.h>
 
-#if HAVE_DIRECT_H
-# include <direct.h>
-#endif
 
 # include <fcntl.h>
 

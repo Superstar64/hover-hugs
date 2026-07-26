@@ -465,9 +465,6 @@ int macsystem(char *filenames);
  *-------------------------------------------------------------------------*/
 
 
-#if HAVE_DIRECT_H
-#include <direct.h>
-#endif
 
 #ifndef FILENAME_MAX	   /* should already be defined in an ANSI compiler*/
 # define FILENAME_MAX 256
