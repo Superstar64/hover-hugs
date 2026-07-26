@@ -900,11 +900,7 @@ Bool reqd; {                            /* or off otherwise, returning old */
 	    sigRaise(breakHandler);
 	    /* not reached */
 	}
-#if HANDLERS_CANT_LONGJMP
-	ctrlbrk(ignoreBreak);
-#else
 	ctrlbrk(breakHandler);
-#endif
     } else if (trapBreak) {		/* If we have been trapping breaks, */
 	ctrlbrk(ignoreBreak);		/* switch to deferring them.        */
     }
@@ -929,21 +925,9 @@ static sigHandler(panic) {              /* exit in a panic, on receipt of  */
 }
 #endif /* !DONT_PANIC */
 
-#if IS_WINDOWS
-BOOL WINAPI consoleHandler(DWORD dwCtrlType) {
-    switch (dwCtrlType) {		/* Allows Hugs to be terminated    */
-	case CTRL_CLOSE_EVENT :		/* from the window's close menu.   */
-	    ExitProcess(0);
-    }
-    return FALSE;
-}
-#endif
 
 static Void local installHandlers() { /* Install handlers for all fatal    */ 
 				      /* signals except SIGINT and SIGBREAK*/
-#if IS_WINDOWS
-    SetConsoleCtrlHandler(consoleHandler,TRUE);
-#endif
 #if !DONT_PANIC && !DOS
 # ifdef SIGABRT
     signal(SIGABRT,panic);

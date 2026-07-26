@@ -4187,7 +4187,7 @@ primFun(primHIsWritable) {		/* Test is handle writable         */
     IOBoolResult(handles[h].hmode&(HWRITE|HREADWRITE|HAPPEND));
 }
 
-#if defined(IS_WINDOWS) && !defined(S_ISREG)
+#if !defined(S_ISREG)
 #define S_ISREG(x)  ((x) & _S_IFREG)
 #endif
 
@@ -5248,18 +5248,6 @@ static Bool local isDirectory(s)
 String s; {
   int rc;
   struct stat st;
-#ifdef _WIN32
-  /* For whatever reason, stat()ing a directory name
-   * like "foo/" returns an error, while both "foo" and "foo/."
-   * is fine. We want them all to be treated equal.
-   */
-  int len = strlen(s);
-  while (len > 0 && 
-	 (s[len-1] == '/' || s[len-1] == '\\')) {
-      s[len-1] = '\0';
-      len--;
-  }
-#endif
   rc = stat(s, &st);
   return (rc==0 && S_ISDIR(st.st_mode));
 }

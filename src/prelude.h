@@ -40,17 +40,6 @@
  * test to the configure script.
  *-------------------------------------------------------------------------*/
 
-#if defined(_WIN32) || defined(__WIN32__)
-# define IS_WIN32 1
-# define IS_WINDOWS 1
-#elif defined(_WIN64)
-# define IS_WIN64 1
-# define IS_WINDOWS 1
-#else
-# define IS_WIN32 0
-# define IS_WINDOWS 0
-#endif
-
 /* using a (possibly multi-byte) encoding of Chars in Strings and I/O? */
 # define CHAR_ENCODING 1
 
@@ -237,9 +226,6 @@ int macsystem(char *filenames);
 #if defined(__BORLANDC__)
 # define DLLIMPORT(rty) rty far _import
 # define DLLEXPORT(rty) rty far _export
-#elif defined(_WIN32) /* Microsoft Windows */
-# define DLLIMPORT(rty) __declspec(dllimport) rty
-# define DLLEXPORT(rty) __declspec(dllexport) rty
 #else 
 # define DLLIMPORT(rty) rty
 # define DLLEXPORT(rty) rty
@@ -286,24 +272,6 @@ int macsystem(char *filenames);
  * ctrlbrk:    set control break handler
  */
 
-/* On Unix (and almost every other system), the interrupt handlers perform
- * a longjmp to break out of the current computation.
- * On Win32 this does not work because the interrupt handler is run in
- * a separate thread from the main computation.  Instead we set a 
- * flag (the global variable "broken") to request an interrupt and
- * all potentially infinite loops of the evaluator check the flag using
- * the "allowBreak" call.
- */ 
-#define HANDLERS_CANT_LONGJMP IS_WINDOWS
-
-
-#if   HANDLERS_CANT_LONGJMP /* eg Win32 */
-
-# define ctrlbrk(bh)	do { signal(SIGINT,bh); signal(SIGBREAK,bh); } while (0)
-# define allowBreak()	if (broken) { broken = FALSE; sigRaise(breakHandler); }
-
-#else /* !DOS && !HANDLERS_CANT_LONGJMP - eg Unix */
-
 #  include <signal.h>
 #  define ctrlbrk(bh)	{ sigset_t mask; \
 			  signal(SIGINT,bh); \
@@ -317,7 +285,6 @@ int macsystem(char *filenames);
 # define allowBreak()   doNothing()
 #endif
 
-#endif /* !DOS && !HANDLERS_CANT_LONGJMP */
 
 
 #ifndef SIGBREAK /* Sigh, not defined in cygwin32 beta release 16 */

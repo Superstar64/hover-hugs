@@ -306,9 +306,6 @@ extern void hs_free_fun_ptr(HsFunPtr fp);
 #if defined(__BORLANDC__)
 # define DLLIMPORT(rty) rty far _import
 # define DLLEXPORT(rty) rty far _export
-#elif defined(_WIN32) /* Microsoft Windows */
-# define DLLIMPORT(rty) __declspec(dllimport) rty
-# define DLLEXPORT(rty) __declspec(dllexport) rty
 #else 
 # define DLLIMPORT(rty) rty
 # define DLLEXPORT(rty) rty
