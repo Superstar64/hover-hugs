@@ -252,10 +252,6 @@ String p2; {
     strcpy(path1,p1);
     strcpy(path2,p2);
 #endif
-#if CASE_INSENSITIVE_FILENAMES
-    strlwr(path1);
-    strlwr(path2);
-#endif
     return filenamecmp(path1,path2);
 }
 #endif
@@ -264,9 +260,6 @@ static String local normPath(s) /* Try, as much as possible, to normalize  */
 String s; {                     /* a pathname in some appropriate manner.  */
 #if PATH_CANONICALIZATION
     String path = RealPath(s);
-#if CASE_INSENSITIVE_FILENAMES
-    strlwr(path);                       /* and convert to lowercase        */
-#endif
     return path;
 #else /* ! PATH_CANONICALIZATION */
     return s;

@@ -257,17 +257,7 @@ int macsystem(char *filenames);
  * File operations:
  *-------------------------------------------------------------------------*/
 
-/* Hack, hack: if you have dos.h, you probably have a DOS filesystem */
-/* No dos.h but a DOS filesystem */
-#define DOS_FILENAMES              HAVE_DOS_H
-
-#define CASE_INSENSITIVE_FILENAMES (DOS_FILENAMES | RISCOS)
-
-#if CASE_INSENSITIVE_FILENAMES
-#  define filenamecmp(s1,s2) strcasecmp(s1,s2)
-#else
 # define filenamecmp(s1,s2) strcmp(s1,s2)
-#endif
 
 /*---------------------------------------------------------------------------
  * General settings:
