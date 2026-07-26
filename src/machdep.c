@@ -50,10 +50,6 @@
 # include <std.h>
 #endif
 
-#if DOS
-#include <mem.h>
-extern unsigned _stklen = 8000;         /* Allocate an 8k stack segment    */
-#endif
 
 
 /* Macintosh include files */

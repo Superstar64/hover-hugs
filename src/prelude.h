@@ -40,12 +40,6 @@
  * test to the configure script.
  *-------------------------------------------------------------------------*/
 
-#if defined __MSDOS__ && __MSDOS__ && !DJGPP2
-# define DOS 1
-#else
-# define DOS 0
-#endif
-
 #ifdef __SYMBIAN32__
 #define IS_WIN32 0
 #define IS_WINDOWS 0
@@ -194,12 +188,8 @@ int macsystem(char *filenames);
 
 /* local = prefix for locally defined functions */
 /* far   = prefix for far pointers              */
-#if DOS
-# define local near pascal
-#else
 # define local
 # define far
-#endif
 
 #ifdef __GNUC__     /* Avoid spurious warnings                             */
 #if __GNUC__ > 2 || __GNUC__ == 2 && __GNUC_MINOR__ >= 7
@@ -312,11 +302,7 @@ int macsystem(char *filenames);
 #define HANDLERS_CANT_LONGJMP IS_WINDOWS
 
 
-#if DOS
-
-# define allowBreak()	;
-
-#elif HANDLERS_CANT_LONGJMP /* eg Win32 */
+#if   HANDLERS_CANT_LONGJMP /* eg Win32 */
 
 # define ctrlbrk(bh)	do { signal(SIGINT,bh); signal(SIGBREAK,bh); } while (0)
 # define allowBreak()	if (broken) { broken = FALSE; sigRaise(breakHandler); }
