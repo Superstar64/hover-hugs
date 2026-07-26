@@ -2,6 +2,9 @@
 
 // Refurbished Hugs configuration file
 
+// {Home} gets substituted for the user's home directory
+// {Hugs} gets substituted for the `<executable folder>/../lib/hugs`
+
 #define HUGSPATH ".:{Home}/lib/hugs/packages/*:{Hugs}/packages/*"
 #define HUGSSUFFIXES ".hs:.lhs"
 #define HUGSDIR "/usr/local/lib/hugs"
