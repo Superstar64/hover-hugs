@@ -1872,13 +1872,6 @@ Cell body; {				/* type/constr for scope of vars   */
 			     textToStr(u)
 		EEND;
 	    }
-#if 0
-	    if (varIsMember(u,tvs)) {
-		ERRMSG(line) "Local quantifier for %s hides an outer use",
-			     textToStr(u)
-		EEND;
-	    }
-#endif
 	    if (!varIsMember(u,bvs)) {
 		ERRMSG(line) "Locally quantified variable %s is not used",
 			     textToStr(u)
@@ -4729,13 +4722,6 @@ List ds; {				/* given list of equations	   */
 		bs = cons(pair(pat,pair(NIL,singleton(pair(NIL,rhs)))),bs);
 	    } else {
 		List vs	= getPatVars(line,pat,NIL);
-#if 0
-		/* Legal Haskell, and a bit useful (intros typing constraints.) */
-		if (isNull(vs)) {
-		    ERRMSG(line) "No variables defined in lhs pattern"
-		    EEND;
-		}
-#endif
 		map2Proc(notDefined,line,bs,vs);
 		bs	= cons(pair(vs,pair(NIL,snd(d))),bs);
 	    }
@@ -5476,13 +5462,6 @@ Cell b; {
 	patVars = NIL;
 	fst(defpart) = checkPat(line,fst(defpart));
 	depRhs(snd(defpart));
-#if 0
-	if (nonNull(hd(btyvars))) {
-	    ERRMSG(line)
-	      "Sorry, no type variables are allowed in pattern binding type annotations"
-	    EEND;
-	}
-#endif
 	fst(defpart) = applyBtyvs(fst(defpart));
     }
     depVal(b) = hd(depends);
@@ -7141,9 +7120,6 @@ Void checkDefns() {			/* Top level static analysis	   */
 	if (need_stubs && (generate_ffi || !generateFFI)) {
 	  needPrims(0, NULL);
 	  mapProc(linkForeign,foreignImports);
-#if 0
-	  mapProc(linkForeign,foreignExports);
-#endif
 	}
 
         /* We are now finished with foreign import declarations but

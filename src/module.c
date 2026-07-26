@@ -112,44 +112,6 @@ Text   textParent; {
     return imports;
 }
 
-#if 0
-/* debugging code - dumping IE lists */
-static Void showIEEntity (Cell);
-static Void showIEList   (List,char);
-
-static Void
-showIEEntity(e)
-Cell e; {
-  if (isName(e)) {
-    fprintf(stderr, "%s", textToStr(name(e).text));
-  } else if (isClass(e)) {
-    fprintf(stderr, "%s", textToStr(cclass(e).text));
-  } else if (isTycon(e)) {
-    fprintf(stderr, "%s", textToStr(tycon(e).text));
-  } else if (isPair(e)) {
-    showIEEntity(fst(e));
-    fprintf(stderr, "(");
-    showIEList(snd(e),' ');
-    fprintf(stderr, ")");
-  } else {
-    fprintf(stderr, "showIEEntity: unknown entity kind %d\n", whatIs(e));
-    fflush(stderr);
-  }
-}
-
-static Void
-showIEList(ieList,sep)
-List ieList;
-char sep; {
-  List xs = ieList;
-  for(;nonNull(xs);xs=tl(xs)) {
-    showIEEntity(hd(xs));
-    if (tl(xs) != NIL) {
-      fputc(sep, stderr);
-    }
-  }
-}
-#endif
 
 static List getIEOrphans(ieList) /* locate methods/dcons appearing on their */
 List ieList; {                   /* own in an import/export list.           */
@@ -201,11 +163,6 @@ List ieList; {
   orphans = getIEOrphans(ieList);
   
   if (nonNull(orphans)) {
-#if 0
-    /* Debugging - show the orphan list */
-    fprintf(stderr, "Orphan list{%s}:", textToStr(module(currentModule).text)); fflush(stderr);
-    showIEList(orphans,'\n'); fflush(stderr);
-#endif
     /* Transformation 1 (we're actually being a bit sloppy here
        and not removing the orphan from the IE list if it
        can be floated inside its parent.) */

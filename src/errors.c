@@ -167,10 +167,8 @@ va_list     ap; {
     Int charsAdded = vsnprintf(p, spaceLeft, fmt, ap);
     if (0 <= charsAdded && charsAdded < spaceLeft)
 	stream->next += charsAdded;
-#if 1 /* we can either buffer the first n chars or buffer the last n chars */
     else
 	stream->next = 0;
-#endif
 }
 
 static Void local bufferedPutchar(stream, c)

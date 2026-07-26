@@ -3203,26 +3203,6 @@ Class c; {				/* defaults for class c		   */
     for (; nonNull(mems); mems=tl(mems)) {
 	Name   n;
 	Text member           = name(hd(mems)).text;
-#if 0
-	char buf[FILENAME_MAX+1];
-	Int  j      = 0;
-	/* This is unsafe, creating a new name that's in the
-	   same namespace as the user's -- indeed, a bug was
-	   reported as a result of this.
-	   
-	   Instead, invent a new name. Simpler and safer.
-	*/
-	static String deftext = "default_";
-	String s	      = textToStr(member);
-	for (i = 0; i<FILENAME_MAX && deftext[i]!='\0'; i++) {
-	    buf[i] = deftext[i];
-	}
-	for(j = 0; (i+j)<FILENAME_MAX && s[j]!='\0'; j++) {
-	    buf[i+j] = s[j];
-	}
-	buf[i+j] = '\0';
-	n = newName(findText(buf),c);
-#endif
 	n = newName(inventText(),c);
 
 	if (isNull(hd(defs))) {		/* No default definition	   */
@@ -3844,29 +3824,8 @@ static Void local typeForeignExport(n)	/* Typecheck a foreign export decl */
 Name n; {				
     Int line = name(n).line;
     /* todo */
-#if 0
-    /* Old comment from checkForeignExport: */
-
-    /* The following doesn't work because the type written into the
-     * dummy binding has been through the typechecker once already
-     * so it has the wrong type.
-     * What's needed here is something like what we do for bindings
-     * in instance decls: insert enough dictionaries to make the export
-     * have the stated type (or report why this can't be done).
-     */
-    /* We have to generate a dummy definition to
-     * pass to the typechecker.  This is done here rather than in
-     * foreign export because valDefns gets set at the end of parsing
-     * which would overwrite the result of the following assignment.
-     */
-    Cell v   = mkVar(name(p).text);
-    Cell rhs = pair(mkInt(line),name(p).defn);
-    Cell alt = pair(NIL,rhs);
-    valDefns = cons(pair(v,pair(name(p).type,singleton(alt))),valDefns);
-#else
     ERRMSG(line) "Foreign export not implemented yet."
     EEND;
-#endif
 }
 
 static Pair local typeSel(s)		/* Calculate a suitable type for a */

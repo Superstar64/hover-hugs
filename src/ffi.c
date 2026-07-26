@@ -526,12 +526,6 @@ Type resultTy; {
     ffiPrimHeader(cid,id);
     fprintf(out,"{\n");
 
-#if 0
-    /* Prototype for function we're going to call */
-    fprintf(out,"    extern ");
-    ffiDeclareFun(line,cid,FALSE,FALSE,argTys,resultTy);
-    fprintf(out,";\n");
-#endif
 
     ffiDeclareList(line,argTys,"arg");
     ffiDeclare(line,resultTy,"res",1);

@@ -303,9 +303,6 @@ static Void local menu() {
     Printf(":xplain <context>   explain instance resolution for <context>\n");
 #endif
     Printf(":find <name>        edit module containing definition of name\n");
-#if 0
-    Printf(":!command           shell escape\n");
-#endif
     Printf(":cd dir             change directory\n");
     Printf(":gc                 force garbage collection\n");
     Printf(":version            print Hugs version\n");

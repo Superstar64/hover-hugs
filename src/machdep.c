@@ -81,10 +81,6 @@ Bool   isReg; {
 
 static String local homeDir	  (void);
 
-#if 0
-/* UNUSED */
-static int    local pathCmp       (String, String);
-#endif
 static String local normPath      (String);
 static Void   local searchChr     (Int);
 static Void   local searchStr     (String);
@@ -133,30 +129,6 @@ String s; {
     return path;
 }
 
-#if 0
-/* UNUSED */
-static int local pathCmp(p1,p2)       /* Compare paths after normalisation */
-String p1;
-String p2; {
-#if HAVE__FULLPATH  /* eg DOS */
-    static char path1[FILENAME_MAX+1];
-    static char path2[FILENAME_MAX+1];
-    _fullpath(path1,p1,FILENAME_MAX+1);
-    _fullpath(path2,p2,FILENAME_MAX+1);
-#elif HAVE_REALPATH /* eg Unix */
-    static char path1[MAXPATHLEN+1];
-    static char path2[MAXPATHLEN+1];
-    realpath(p1,path1);                
-    realpath(p2,path2);                
-#else
-    static char path1[FILENAME_MAX+1];
-    static char path2[FILENAME_MAX+1];
-    strcpy(path1,p1);
-    strcpy(path2,p2);
-#endif
-    return filenamecmp(path1,path2);
-}
-#endif
 
 static String local normPath(s) /* Try, as much as possible, to normalize  */
 String s; {                     /* a pathname in some appropriate manner.  */
@@ -1197,9 +1169,6 @@ String flags; {
         insert(flags);
     }
 
-#if 0
-    printf("Executing '%s'\n",buffer);
-#endif
     if (shellEsc(buffer,TRUE,TRUE) != 0) {
         ERRMSG(0) "Error while running compilation command '%s'", buffer
         EEND;

@@ -934,7 +934,6 @@ List addNamesMatching(pat,ns)           /* Add names matching pattern pat  */
 String pat;                             /* to list of names ns             */
 List   ns; {                            /* Null pattern matches every name */
     Name nm;				/* (Names with NIL type, or hidden */
-#if 1
     for (nm=NAMEMIN; nm<nameHw; ++nm)	/* or invented names are excluded) */
 	if (!inventedText(name(nm).text) && nonNull(name(nm).type)) {
 	    String str = textToStr(name(nm).text);
@@ -942,18 +941,6 @@ List   ns; {                            /* Null pattern matches every name */
 		ns = insertName(nm,ns);
 	}
     return ns;
-#else
-    List mns = module(currentModule).names;
-    for(; nonNull(mns); mns=tl(mns)) {
-	Name nm = hd(mns);
-	if (!inventedText(name(nm).text)) {
-	    String str = textToStr(name(nm).text);
-	    if (str[0]!='_' && (!pat || stringMatch(pat,str)))
-		ns = insertName(nm,ns);
-	}
-    }
-    return ns;
-#endif
 }
 
 /* --------------------------------------------------------------------------
@@ -2374,11 +2361,6 @@ Cell c;
 Int  depth; {
     if (0 == depth) {
 	Printf("...");
-#if 0 /* Not in this version of Hugs */
-    } else if (isPair(c) && !isGenPair(c)) {
-	extern Void printEvalCell (Cell, Int);
-	printEvalCell(c,depth);
-#endif
     } else {
 	Int tag = whatIs(c);
 	switch (tag) {
@@ -2776,26 +2758,6 @@ List xs, ys; {                         /* list xs onto list ys...          */
     return ys;
 }
 
-#if 0
-List delete(xs,y)                      /* Delete first use of y from xs    */
-List xs;
-Cell y; {
-    if (isNull(xs)) {
-	return xs;
-    } else if (hs(xs) == y) {
-	return tl(xs);
-    } else {
-	tl(xs) = delete(tl(xs),y);
-	return xs;
-    }
-}
-
-List minus(xs,ys)                      /* Delete members of ys from xs     */
-List xs, ys; {
-    mapAccum(delete,xs,ys);
-    return xs;
-}
-#endif
 
 List concat(xss)
 List xss; {
@@ -3316,10 +3278,6 @@ DynTable* tab; {
    } else if ( newSize == 0 ) {
      newSize = 1;
    }
-#if 0
-   fprintf(stderr, "growing \"%s\" from %d to %d elements\n", tab->tabName, tab->maxIdx, newSize);
-   fflush(stderr); 
-#endif
    newData = (void*)realloc(tab->data, newSize*tab->eltSize);
    
    if ( newData == NULL ) {

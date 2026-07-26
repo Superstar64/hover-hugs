@@ -219,9 +219,6 @@ PROTO_PRIM(primTanFloat);
 PROTO_PRIM(primAsinFloat);
 PROTO_PRIM(primAcosFloat);
 PROTO_PRIM(primAtanFloat);
-#if 0 /* Not used in current Prelude */
-PROTO_PRIM(primAtan2Float);
-#endif
 PROTO_PRIM(primExpFloat);
 PROTO_PRIM(primLogFloat);
 PROTO_PRIM(primSqrtFloat);
@@ -239,9 +236,6 @@ PROTO_PRIM(primTanDouble);
 PROTO_PRIM(primAsinDouble);
 PROTO_PRIM(primAcosDouble);
 PROTO_PRIM(primAtanDouble);
-#if 0 /* Not used in current Prelude */
-PROTO_PRIM(primAtan2Double);
-#endif
 PROTO_PRIM(primExpDouble);
 PROTO_PRIM(primLogDouble);
 PROTO_PRIM(primSqrtDouble);
@@ -2046,9 +2040,6 @@ Float2Float(primTanFloat,tan(x))       /* Float tan (trig) primitive       */
 Float2Float(primAsinFloat,asin(x))     /* Float arc sin (trig) primitive   */
 Float2Float(primAcosFloat,acos(x))     /* Float arc cos (trig) primitive   */
 Float2Float(primAtanFloat,atan(x))     /* Float arc tan (trig) primitive   */
-#if 0 /* not used in current version of Prelude */
-FloatFloat2Float(primAtan2Float,atan2(x,y)) /* Float arc tan with quadrant info*/
-#endif
 				       /*               (trig) primitive   */
 Float2Float(primExpFloat,exp(x))       /* Float exponential primitive      */
 Float2FloatPre(primLogFloat,log(x),x>0)/* Float logarithm primitive        */
@@ -2064,9 +2055,6 @@ Double2Double(primExpDouble,exp(x))    /* Double exponential primitive     */
 Double2DoublePre(primLogDouble,log(x),x>0)/* Double logarithm primitive    */
 Double2DoublePre(primSqrtDouble,sqrt(x),x>=0) /* Double square root primitive */
 
-#if 0 /* This was in Hugs 1.01 - not needed by prelude */
-Float2FloatPre(primLog10Float,log10(x),x>0) /* Float logarithm (base 10) prim*/
-#endif
 /* Not used in Hugs prelude, rounds towards zero */
 Float2Int(primFloatToInt,(Int) x)      /* Adhoc Float --> Int conversion   */
 Double2Int(primDoubleToInt,(Int) x)    /* Adhoc Double --> Int conversion  */
@@ -2485,10 +2473,6 @@ Int  d; {				/* precedence level		   */
 			    /* Fall into line with how GHC shows Addrs  */
 			    sprintf(spec,"0x%%.%dx", (SIZEOF_INTP)*2);
 			    sprintf(buffer,spec,(long)p);
-#if 0
-			    /* Old skool */
-			    sprintf(buffer,"%p",p);
-#endif
 			    outStr(buffer);
 			    pr  = nameNPrint;
 			}
