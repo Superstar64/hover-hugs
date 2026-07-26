@@ -264,9 +264,7 @@ int macsystem(char *filenames);
  *-------------------------------------------------------------------------*/
 
 #define Void     void   /* older compilers object to: typedef void Void;   */
-#if !defined(_XLIB_H_)  /* clashes with similar declaration in Xlib.h      */
 typedef unsigned Bool;
-#endif
 #define TRUE     1
 #define FALSE    0
 typedef char    *String;
