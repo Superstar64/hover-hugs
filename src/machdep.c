@@ -174,13 +174,6 @@ static Bool   local scanSubDirs   (String);
 # define PATHSEP                 ';'
 # define isPATHSEP(x)            isPathSep(x)
 # define DLL_ENDING              ".dll"
-#elif MAC_FILENAMES
-# define SLASH                   ':'
-# define isSLASH(c)              ((c)==SLASH)
-# define PATHSEP                 ';'
-# define isPATHSEP(x)            (*(x) == PATHSEP)
-/* Mac PEF (Preferred Executable Format) file */
-# define DLL_ENDING              ".pef" 
 #else
 # define SLASH                   '/'
 # define isSLASH(c)              ((c)==SLASH)

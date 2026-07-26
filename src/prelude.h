@@ -260,8 +260,6 @@ int macsystem(char *filenames);
 /* Hack, hack: if you have dos.h, you probably have a DOS filesystem */
 /* No dos.h but a DOS filesystem */
 #define DOS_FILENAMES              HAVE_DOS_H
-/* ToDo: can we replace this with a feature test? */
-#define MAC_FILENAMES              macintosh
 
 #define CASE_INSENSITIVE_FILENAMES (DOS_FILENAMES | RISCOS)
 
