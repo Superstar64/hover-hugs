@@ -627,7 +627,6 @@ static Void local runmain() {
 static String local objToStr(m,c)
 Module m;
 Cell   c; {
-#if 1 || DISPLAY_QUANTIFIERS
     static char newVar[60];
     switch (whatIs(c)) {
 	case NAME  : if (m == name(c).mod) {
@@ -660,22 +659,6 @@ Cell   c; {
 	default    : internal("objToStr");
     }
     return newVar;
-#else
-    static char newVar[33];
-    switch (whatIs(c)) {
-	case NAME  : sprintf(newVar,"%s", textToStr(name(c).text));
-		     break;
-
-	case TYCON : sprintf(newVar,"%s", textToStr(tycon(c).text));
-		     break;
-
-	case CLASS : sprintf(newVar,"%s", textToStr(cclass(c).text));
-		     break;
-
-	default    : internal("objToStr");
-    }
-    return newVar;
-#endif
 }
 
 static Void local info() {              /* describe objects                */
