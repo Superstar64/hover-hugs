@@ -1209,6 +1209,7 @@ initSystem()
     // canonical the hugs dir path
 
     if(realpath(temporary_path, hugsdir_path) == NULL) {
+        printf("%s\n", temporary_path);
         perror("Unable to access hugs directory");
         return FALSE;
     }

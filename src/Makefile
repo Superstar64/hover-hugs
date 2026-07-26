@@ -8,17 +8,12 @@
 # included in the distribution.
 # --------------------------------------------------------------------------
 
-# Targets:
+# Main targets:
 #
-# <default>:   	  make hugs and runhugs
-# install:	  make and install programs
+# <default>:   	  hugs, runhugs, and ffihugs
 # hugs:	  make minimal working system
 # runhugs: make batch-mode version of Hugs
-# clean:       	  delete files not required in running system
-# distclean:      delete files that can be regenerated using C compiler
-# veryclean:      delete all machine generated files 
-#                   (you need perl, bison/yacc, etc to rebuild these files)
-# TAGS:           build emacs TAGS table
+# ffihugs: make ffi interface to hugs
 
 OPTFLAGS	= -O2
 

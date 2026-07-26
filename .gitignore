@@ -6,3 +6,4 @@ src/unitable.c
 src/hugs
 src/runhugs
 src/ffihugs
+dist/
