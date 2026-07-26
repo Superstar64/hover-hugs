@@ -272,39 +272,6 @@ int macsystem(char *filenames);
 #endif
 
 /*---------------------------------------------------------------------------
- * Optimisations:
- *-------------------------------------------------------------------------*/
-
-#ifdef  __GNUC__			/* look for GCC 2.x extensions	   */
-#if     __GNUC__ >= 2 && !defined(NeXT)	/* NeXT cc lies and says it's 2.x  */
-
-/* WARNING: if you use the following optimisations to assign registers for
- * particular global variables, you should be very careful to make sure that
- * storage(RESET) is called after a longjump (usually resulting from an error
- * condition) and before you try to access the heap.  The current version of
- * main deals with this using everybody(RESET) at the head of the main read,
- * eval, print loop
- */
-
-#ifdef  m68k				/* global registers on an m68k	   */
-#define GLOBALfst	asm("a4")
-#define GLOBALsnd	asm("a5")
-#define GLOBALsp	asm("a3")
-#endif
-
-#ifdef  sparc				/* global registers on a sparc	   */
-/* sadly, although the gcc documentation suggests that the following reg   */
-/* assignments should be ok, experience shows (at least on Suns) that they */
-/* are not -- it seems that atof() and friends spoil things.		   */
-/*#define GLOBALfst	asm("g5")*/
-/*#define GLOBALsnd	asm("g6")*/
-/*#define GLOBALsp	asm("g7")*/
-#endif /* sparc */
-
-#endif
-#endif /* defined(__GNUC__) */
-
-/*---------------------------------------------------------------------------
  * General settings:
  *-------------------------------------------------------------------------*/
 
