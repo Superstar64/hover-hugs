@@ -44,9 +44,6 @@
  * Platform-dependent settings:
  *-------------------------------------------------------------------------*/
 
-#if HAVE_MACSYSTEM	/* Macintosh system() prototype. */
-int macsystem(char *filenames);
-#endif
 
 
 /*---------------------------------------------------------------------------

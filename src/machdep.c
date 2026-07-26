@@ -911,14 +911,10 @@ Bool   sync;
 Bool   useShell; {
 
   /* currently ignore the 'useShell' and 'sync' flags */
-# if HAVE_MACSYSTEM
-    return macsystem(cmd);
-# else
     if (cmd[0]=='\0') {
 	cmd = fromEnv("SHELL","/bin/sh");
     }
     return system(cmd);
-# endif
 }
 
 
