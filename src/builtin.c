@@ -3498,10 +3498,6 @@ primFun(primGetEnv) {                 /* primGetEnv :: String -> IO String */
 
 #include <sys/types.h>
 # include <sys/wait.h>
-#ifndef WEXITSTATUS
-/* If it's not defined, return it verbatim. */
-# define WEXITSTATUS(stat_val) (stat_val)
-#endif
 
 primFun(primSystem) {                   /* primSystem :: String -> IO Int  */
     String s = evalName(IOArg(1));	/* Eval name	                   */
