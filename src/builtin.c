@@ -4166,12 +4166,7 @@ primFun(primHSetEcho) {
  * Mutable variables
  * ------------------------------------------------------------------------*/
 
-
-#if CHECK_TAGS
-#define checkRef() if (MUTVAR != whatIs(whnfHead)) internal("Ref expected")
-#else
-#define checkRef() /* do nothing */
-#endif
+#define checkRef() if (CHECK_TAGS) if (MUTVAR != whatIs(whnfHead)) { internal("Ref expected"); }
 
 primFun(primNewRef) {			/* a -> IO (Ref a)		   */
     IOReturn(ap(MUTVAR,IOArg(1)));
@@ -4203,11 +4198,7 @@ primFun(primEqRef) {			/* Ref a -> Ref a -> Bool	   */
  * Stable Pointers
  * ------------------------------------------------------------------------*/
 
-#if CHECK_TAGS
-#define checkSP() checkInt()
-#else
-#define checkSP() /* do nothing */
-#endif
+#define checkSP() if (CHECK_TAGS) { checkInt(); }
 
 #define SPArg(nm,offset)                          \
     eval(primArg(offset));                        \
@@ -4264,11 +4255,7 @@ primFun(primCastPToSP) {		/* Ptr () -> StablePtr a   	   */
  * Foreign Objects
  * ------------------------------------------------------------------------*/
 
-#if CHECK_TAGS
-#define checkForeign() if (MPCELL != whatIs(whnfHead)) internal("ForeignObj expected")
-#else
-#define checkForeign() /* do nothing */
-#endif
+#define checkForeign() if (CHECK_TAGS) { if (MPCELL != whatIs(whnfHead)) internal("ForeignObj expected"); }
 
 primFun(primNewFP) { /* Ptr a -> IO (ForeignPtr a) */
     Pointer addr = 0;
@@ -4357,11 +4344,7 @@ primFun(primEqSN) {		/* StableName a -> StableName a -> Bool	   */
  * Weak Pointers
  * ------------------------------------------------------------------------*/
 
-#if CHECK_TAGS
-#define checkWeak() if(WEAKCELL!=whatIs(whnfHead)) internal("weakPtr expected");
-#else
-#define checkWeak() /* do nothing */
-#endif
+#define checkWeak() if (CHECK_TAGS) { if(WEAKCELL!=whatIs(whnfHead)) internal("weakPtr expected"); }
 
 primFun(primWeakPtrEq) {		/* Weak a -> Weak a -> Bool	   */
     eval(primArg(2));

@@ -18,11 +18,6 @@
    bytecodes (requires INTERNAL_PRIMS). */
 /* #undef BYTECODE_PRIMS */
 
-/* Define to 1 if you want to perform runtime tag-checks as an internal
-   consistency check. This makes Hugs run very slowly - but is very effective
-   at detecting and locating subtle bugs. */
-/* #undef CHECK_TAGS */
-
 /* Define if you want to use a low-level printer from within a debugger. */
 /* #undef DEBUG_PRINTER */
 
@@ -64,3 +59,8 @@
 // Debug Options
 enum { DEBUG_BIGNUMS = false };
 enum { VERBOSE_PRINT = false };
+
+/* Define to true if you want to perform runtime tag-checks as an internal
+   consistency check. This makes Hugs run very slowly - but is very effective
+   at detecting and locating subtle bugs. */
+enum { CHECK_TAGS = false };

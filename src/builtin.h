@@ -42,31 +42,18 @@ extern Cell   mkIOError (Cell *,Name,String,String,Cell *);
 #define updapRoot(l,r)          update(l,r)
 #define blackHoleRoot()         update(nameBlackHole,nameBlackHole)
 
-#if CHECK_TAGS
 
-# define checkChar()  if (!isChar(whnfHead))  internal("Char expected")
-# define checkInt()   if (!isInt(whnfHead))   internal("Int expected")
-# define checkWord()  if (!isInt(whnfHead))   internal("Word expected")
-# define checkPtr()   if (!isPtr(whnfHead))   internal("Ptr expected")
-# define checkFloat() if (!isFloat(whnfHead)) internal("Float expected")
-# define checkDouble() if (!isDouble(whnfHead)) internal("Double expected")
+# define checkChar()  if(CHECK_TAGS) { if (!isChar(whnfHead))  internal("Char expected"); }
+# define checkInt()   if(CHECK_TAGS) { if (!isInt(whnfHead))   internal("Int expected"); }
+# define checkWord()  if(CHECK_TAGS) { if (!isInt(whnfHead))   internal("Word expected"); }
+# define checkPtr()   if(CHECK_TAGS) { if (!isPtr(whnfHead))   internal("Ptr expected"); }
+# define checkFloat() if(CHECK_TAGS) { if (!isFloat(whnfHead)) internal("Float expected"); }
+# define checkDouble() if(CHECK_TAGS) { if (!isDouble(whnfHead)) internal("Double expected"); }
 
-# define checkBool()  if (whnfHead != nameTrue && whnfHead != nameFalse) internal("Bool expected");
+# define checkBool()  if(CHECK_TAGS) { if (whnfHead != nameTrue && whnfHead != nameFalse) internal("Bool expected"); }
 
-# define checkCon()   if (!isName(whnfHead) || !isCfun(whnfHead)) internal("Constructor expected");
+# define checkCon()   if(CHECK_TAGS) { if (!isName(whnfHead) || !isCfun(whnfHead)) internal("Constructor expected"); }
 
-#else
-
-# define checkChar()  doNothing()
-# define checkInt()   doNothing()
-# define checkWord()  doNothing()
-# define checkPtr()   doNothing()
-# define checkFloat() doNothing()
-# define checkDouble() doNothing()
-# define checkBool()  doNothing()
-# define checkCon()   doNothing()
-
-#endif
 
 /* e is a constant expression                     */
 #define CAFPtr(nm,e)                               \
