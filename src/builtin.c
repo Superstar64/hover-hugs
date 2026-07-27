@@ -3963,9 +3963,6 @@ primFun(primHIsWritable) {		/* Test is handle writable         */
     IOBoolResult(handles[h].hmode&(HWRITE|HREADWRITE|HAPPEND));
 }
 
-#if !defined(S_ISREG)
-#define S_ISREG(x)  ((x) & _S_IFREG)
-#endif
 
 primFun(primHIsSeekable) {		/* Test if handle is writable   */
     Int h;
@@ -4747,13 +4744,7 @@ static	Bool	local	isDirectory	(String);
  * case, please adjust the conditional below to suit your platform
  * (and feed back the tweak you make.)
  */
-#if !defined(S_ISDIR)
-#define S_ISDIR(st_mode)  ((st_mode & S_IFMT) == S_IFDIR)
-#endif
 
-#if !defined(S_ISREG)
-#define S_ISREG(st_mode)  ((st_mode & S_IFMT) == S_IFREG)
-#endif
 
 /* --------------------------------------------------------------------------
  * Directory primitives:
