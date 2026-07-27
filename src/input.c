@@ -131,9 +131,6 @@ Text   textThreadsafe;                  /* threadsafe                      */
 Text   textExport;                      /* export                          */
 
 /* Platform-specific calling conventions */
-#if STDCALL_SUPPORTED
-Text   textStdcall;                     /* stdcall                         */
-#endif
 
 Text   textNum;                         /* Num                             */
 Text   textPrelude;                     /* Prelude / Hugs.Prelude          */
@@ -1798,9 +1795,6 @@ Int what; {
 		       textSafe       = findText("safe");
 		       textUnsafe     = findText("unsafe");
 		       textThreadsafe = findText("threadsafe");
-#if STDCALL_SUPPORTED		       
-		       textStdcall    = findText("stdcall");
-#endif
 		       textAsMod      = findText("as");
 		       textWildcard   = findText("_");
 		       textAll	      = findText("forall");

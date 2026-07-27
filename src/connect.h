@@ -123,9 +123,6 @@ extern Text  textSafe;
 extern Text  textUnsafe;
 extern Text  textThreadsafe;
 extern Text  textExport;
-#if STDCALL_SUPPORTED
-extern Text  textStdcall;
-#endif
 
 extern Text  textPrelude;
 extern Text  textUserPrelude;

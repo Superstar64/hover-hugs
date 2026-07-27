@@ -3895,10 +3895,6 @@ static Int checkCallConv(line,t)
 Int line;
 Text t; {
   if (t == textCCall ) return FFI_CCONV_CCALL;
-#if STDCALL_SUPPORTED
-  /* also support the stdcall calling convention */
-  if (t == textStdcall) return FFI_CCONV_STDCALL;
-#endif
   return FFI_CCONV_UNKNOWN;
 }
 
