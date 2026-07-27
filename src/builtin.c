@@ -4653,13 +4653,7 @@ primFun(primMkTime) { /* Int{-year-}  -> Int{-month-} -> Int{-day-} ->
  * CPUTime primitives:
  * ------------------------------------------------------------------------*/
 
-#ifdef CLK_TCK
-CAFInt(primClockTicks, CLK_TCK)
-#elif defined(CLOCKS_PER_SEC)
 CAFInt(primClockTicks, CLOCKS_PER_SEC)
-#else
-CAFInt(primClockTicks, sysconf(_SC_CLK_TCK))
-#endif
 
 /* 
  * The code for grabbing the process times has been lifted from GHC.
