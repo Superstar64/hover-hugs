@@ -249,9 +249,7 @@ extern  Void   stringInput       (String);
 extern  Bool   parseScript       (String,Long);
 extern  Void   parseScriptString (String);
 extern  Void   parseExp          (Void);
-#if EXPLAIN_INSTANCE_RESOLUTION
 extern  Void   parseContext     (Void);
-#endif
 extern  String readFilename     (Void);
 extern  String readLine		(Void);
 extern  Bool   isModuleId	(String);
@@ -287,9 +285,7 @@ extern  Type   zonkType		(Type,Int);
 extern  Void   primDefn		(Cell,List,Cell);
 extern  Void   defaultDefn	(Int,List);
 extern  Void   checkExp		(Void);
-#if EXPLAIN_INSTANCE_RESOLUTION
 extern  Void   checkContext	(Void);
-#endif
 extern  Void   checkDefns	(Void);
 extern  Void   h98CheckInferredType	(Int,Cell,Type);
 extern  Void   h98DoesntSupport	(Int,String);

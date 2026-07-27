@@ -17,15 +17,12 @@
 #include "errors.h"
 #include "char.h"
 #include "opts.h"	/* needed for DEBUG_CODE */
+#include "output.h"
 #include <setjmp.h>
 
 Bool   rootOpt       = TRUE;		/* TRUE => enable root optimisation*/
-#if DEBUG_CODE
 Bool   debugCode     = FALSE;		/* TRUE => print G-code to screen  */
-#endif
-#if DEBUG_SHOWSC
 Bool   debugSC	     = FALSE;		/* TRUE => print SC-code to screen */
-#endif
 
 Int    evalDepth;			/* depth of nested eval()'s        */
 
@@ -157,7 +154,6 @@ static Void  local asUPDATE     (Int);
 static Void  local asRUPDATE    (Void);
 static Void  local asGOTO       (Label);
 
-#if DEBUG_CODE
 static Void  local dissassemble (Addr,Addr);
 static Addr  local dissInstr    (Addr);
 static Void  local printCell    (Cell);
@@ -168,7 +164,6 @@ static Addr  local dissCell     (Addr,String);
 static Addr  local dissText     (Addr,String);
 static Addr  local dissAddr     (Addr,String);
 static Addr  local dissCellAddr (Addr,String);
-#endif
 
 static Void  local build        (Cell,Int);
 static Void  local buildGuards  (List,Int);
@@ -531,7 +526,6 @@ Int  i; {                               /* representative cfun n           */
  * Dissassembler:
  * ------------------------------------------------------------------------*/
 
-#if DEBUG_CODE
 #define printAddr(a) Printf("0x%04X",a)/* printable representation of Addr */
 
 static Void local dissassemble(pc,end)    /* print dissassembly of code    */
@@ -642,7 +636,6 @@ String s; {
     Printf("\n");
     return pc+3;
 }
-#endif
 
 /* --------------------------------------------------------------------------
  * Compile expression to code which will build expression without any
@@ -1112,14 +1105,12 @@ Int  arity;                            /* differently to functs with args  */
 Cell e; {
     definingName  = n;
     definingArity = arity;
-#if DEBUG_CODE
     if (debugCode) {
 	Printf("------------------\n");
 	if (nonNull(n)) Printf("name=%s\n",textToStr(name(n).text));
 	Printf("Arity   = %d\n",arity);
 	Printf("codeGen = "); printExp(stdout,e); Putchar('\n');
     }
-#endif
     asSTART();
     if (nonNull(n)) {
 	Int i;
@@ -1132,14 +1123,12 @@ Cell e; {
 	asRETURN();
     }
     asEND();
-#if DEBUG_CODE
     if (debugCode) {
 	if (nonNull(n))
 	    Printf("name=%s\n",textToStr(name(n).text));
 	dissassemble(startInstr,lastInstr);
 	Printf("------------------\n");
     }
-#endif
     return startInstr;
 }
 
@@ -1167,7 +1156,6 @@ List scs; {                             /* in incr order of strict comps.  */
 	asRUPDATE();
 	asEND();
 	name(n).code = startInstr;
-#if DEBUG_CODE
 	if (debugCode) {
 	    Printf("Implement constructor ");
 	    printExp(stdout,c);
@@ -1177,7 +1165,6 @@ List scs; {                             /* in incr order of strict comps.  */
 	    dissassemble(startInstr,lastInstr);
 	    Printf("------------------\n");
 	}
-#endif
     }
 }
 
@@ -1282,13 +1269,11 @@ unw:switch (whatIs(n)) {                /* unwind spine of application     */
 
 	case NAME      : allowBreak();
 			 {
-#if DEBUG_CODE
 			 Name saveName = n;
 			 if (debugCode) {
 			     Printf("%*sEntering name(%d): %s\n", base, "", 
 				    n - NAMEMIN, textToStr(name(n).text));
 			 }
-#endif
     if (!obsCount) {
 			 if (!isCfun(n) && (ar=name(n).arity)<=(sp-base)) {
 			    if (ar>0) {                     /* fn with args*/
@@ -1330,12 +1315,10 @@ unw:switch (whatIs(n)) {                /* unwind spine of application     */
 				 if (sp>base)
 				     fun(top()) = n;
 			     }
-#if DEBUG_CODE
 			     if (debugCode) {
 				 Printf("%*sLeaving name(%d): %s\n", base, "", 
 					saveName - NAMEMIN, textToStr(name(saveName).text));
 			     }
-#endif
 			     goto unw;
 			 }
     }
@@ -1448,12 +1431,10 @@ unw:switch (whatIs(n)) {                /* unwind spine of application     */
 		if (p > base)
 		    fun(stack(p)) = n;
             }
-#if DEBUG_CODE
             if (debugCode) {
                 Printf("%*sLeaving name(%d): %s\n", base, "", 
                        saveName - NAMEMIN, textToStr(name(saveName).text));
             }
-#endif
             goto unw;
         }
     }
@@ -1584,31 +1565,17 @@ Addr     start;                        /* address with local stack starting*/
 StackPtr root; {                       /* at given root offset             */
     register Memory pc = memory+start;
 
-#if     !DEBUG_CODE && HAVE_LABELS_AS_VALUES
-#define Ins(x)          &&l##x
-static  void *labs[] = { INSTRLIST };
-#undef  Ins
-#define Case(x)         l##x
-#define Continue        goto *labs[(pc++)->instr]
-#define Dispatch        Continue;
-#define EndDispatch
-#else
-#if DEBUG_CODE
 #define Dispatch        for (;;) {                                        \
 			    if (debugCode) {                              \
 				Printf("%*s0x%04X: ", root, "", pc-memory);  \
 				dissInstr(pc-memory);                     \
 			    }                                             \
 			    switch((pc++)->instr) {
-#else
-#define Dispatch        for (;;) { switch((pc++)->instr) {
-#endif
 #define Case(x)         case x
 #define Continue        continue
 #define EndDispatch     default : internal("illegal instruction"); \
 				  break;                           \
 			}}
-#endif
 
     Dispatch
 

@@ -667,7 +667,6 @@ Int  d; {
 	    ps = cons(triple(hd(scs),mkInt(beta),ap(hd(dsels),e)),ps);
 	ps = rev(ps);
 
-#if EXPLAIN_INSTANCE_RESOLUTION
 	if (showInstRes) {
 	    int i;
 	    for (i = 0; i < d; i++)
@@ -678,17 +677,14 @@ Int  d; {
 	    printPred(stdout, copyPred(pi, o));
 	    fputc('\n', stdout);
 	}
-#endif
 	improve1(0,ps,pi,o);
 	ev = scEntail(ps,pi,o,d);
-#if EXPLAIN_INSTANCE_RESOLUTION
 	if (showInstRes && nonNull(ev)) {
 	    int i;
 	    for (i = 0; i < d; i++)
 	      fputc(' ', stdout);
 	    fputs("scSat.\n", stdout);
 	}
-#endif
 	return ev;
     }
     return NIL;
@@ -766,7 +762,6 @@ Int  o;
 Int  d; {
     Cell ev = NIL;
 
-#if EXPLAIN_INSTANCE_RESOLUTION
     if (showInstRes) {
 	int i;
 	for (i = 0; i < d; i++)
@@ -777,29 +772,24 @@ Int  d; {
 	printPred(stdout, copyPred(pi, o));
 	fputc('\n', stdout);
     }
-#endif
 
     ev = scEntail(ps,pi,o,d);
     if (nonNull(ev)) {
-#if EXPLAIN_INSTANCE_RESOLUTION
 	if (showInstRes) {
 	    int i;
 	    for (i = 0; i < d; i++)
 	      fputc(' ', stdout);
 	    fputs("scSat.\n", stdout);
 	}
-#endif
     } else {
 	ev =
              inEntail(ps,pi,o,d);
-#if EXPLAIN_INSTANCE_RESOLUTION
 	if (nonNull(ev) && showInstRes) {
 	    int i;
 	    for (i = 0; i < d; i++)
 	      fputc(' ', stdout);
 	    fputs("inSat.\n", stdout);
 	}
-#endif
     }
     return ev;
 }
@@ -809,9 +799,7 @@ List ps;				/* using a top-level instance	   */
 Cell pi;				/* entailment			   */
 Int  o;
 Int  d; {
-#if EXPLAIN_INSTANCE_RESOLUTION
     int i;
-#endif
     Inst in;
 
     if (d++ >= cutoff)
@@ -852,7 +840,6 @@ Int  d; {
 	    fs = cons(triple(hd(es),mkInt(beta),NIL),fs);
 	fs = rev(fs);
 	improve(0,ps,fs);
-#if EXPLAIN_INSTANCE_RESOLUTION
 	if (showInstRes) {
 	    for (i = 0; i < d; i++)
 	      fputc(' ', stdout);
@@ -862,7 +849,6 @@ Int  d; {
 	    printPred(stdout, copyPred(inst(in).head,beta));
 	    fputc('\n', stdout);
 	}
-#endif
 	for (es=inst(in).specifics; nonNull(es); es=tl(es)) {
 	    Cell ev;
 	    improve1(0,ps,hd(es),beta);
@@ -874,7 +860,6 @@ Int  d; {
 	}
 	return e;
     }
-#if EXPLAIN_INSTANCE_RESOLUTION
       else {
 	if (showInstRes) {
 	    for (i = 0; i < d; i++)
@@ -884,7 +869,6 @@ Int  d; {
 	    fputc('\n', stdout);
 	}
     }
-#endif
     return NIL;
     }
 }
@@ -963,7 +947,6 @@ List qs; {				/* returning equiv minimal subset  */
     while (0<n--) {
 	Cell pi = hd(qs);
 	Cell ev = NIL;
-#if EXPLAIN_INSTANCE_RESOLUTION
 	if (showInstRes) {
 	    fputs("scSimplify: ", stdout);
 	    printContext(stdout,copyPreds(tl(qs)));
@@ -971,13 +954,10 @@ List qs; {				/* returning equiv minimal subset  */
 	    printPred(stdout, copyPred(fst3(pi),intOf(snd3(pi))));
 	    fputc('\n', stdout);
 	}
-#endif
 	ev = scEntail(tl(qs),fst3(pi),intOf(snd3(pi)),0);
 	if (nonNull(ev)) {
-#if EXPLAIN_INSTANCE_RESOLUTION
 	    if (showInstRes)
 	        fputs("Simplified!\n", stdout);
-#endif
 	    overEvid(thd3(pi),ev);	/* Overwrite dict var with evidence*/
 	    qs      = tl(qs);		/* ... and discard predicate	   */
 	}
@@ -3318,7 +3298,6 @@ Inst in; {				/* member functions for instance in*/
     for (ps=supers; nonNull(ps); ps=tl(ps)) {	/* Superclass dictionaries */
 	Cell pi = hd(ps);
 	Cell ev = NIL;
-#if EXPLAIN_INSTANCE_RESOLUTION
 	if (showInstRes) {
 	    fputs("scEntail: ", stdout);
 	    printContext(stdout,copyPreds(params));
@@ -3326,10 +3305,8 @@ Inst in; {				/* member functions for instance in*/
 	    printPred(stdout, copyPred(fst3(pi),intOf(snd3(pi))));
 	    fputc('\n', stdout);
 	}
-#endif
 	ev = scEntail(params,fst3(pi),intOf(snd3(pi)),0);
 	if (isNull(ev)) {
-#if EXPLAIN_INSTANCE_RESOLUTION
 	    if (showInstRes) {
 		fputs("inEntail: ", stdout);
 		printContext(stdout,copyPreds(evids));
@@ -3337,7 +3314,6 @@ Inst in; {				/* member functions for instance in*/
 		printPred(stdout, copyPred(fst3(pi),intOf(snd3(pi))));
 		fputc('\n', stdout);
 	    }
-#endif
 	    ev = inEntail(evids,fst3(pi),intOf(snd3(pi)),0);
 	}
 	if (isNull(ev)) {

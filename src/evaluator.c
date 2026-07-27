@@ -132,13 +132,11 @@ Module m; {        /* evaluate expr and print value    */
     compileExp();                       
     clearStack();
     run(inputCode,sp);  /* Build graph for redex */
-#if DEBUG_CODE
     if (debugCode) {
 	Printf("evaluator() builds: ");
 	printExp(stdout,top());
 	Putchar('\n');
     }
-#endif
     numCells      = 0;
     numReductions = 0;
     numGcs        = 0;

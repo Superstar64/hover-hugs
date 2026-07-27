@@ -249,13 +249,9 @@ Cell e; {
 			  break;
 
 	case LETREC     : OPEN(d>WHERE_PREC);
-#if DEBUG_CODE
 			  putStr("let {");
 			  put(NEVER,fst(snd(e)));
 			  putStr("} in ");
-#else
-			  putStr("let {...} in ");
-#endif
 			  put(WHERE_PREC+1,snd(snd(e)));
 			  CLOSE(d>WHERE_PREC);
 			  break;
@@ -305,13 +301,9 @@ Cell e; {
 
 	case CASE       : putStr("case ");
 			  put(NEVER,fst(snd(e)));
-#if DEBUG_CODE
 			  putStr(" of {");
 			  put(NEVER,snd(snd(e)));
 			  putChr('}');
-#else
-			  putStr(" of {...}");
-#endif
 			  break;
 
 	case CONFLDS    : putFlds(fst(snd(e)),snd(snd(e)));
@@ -735,7 +727,6 @@ Text t; {
  * (i.e., for lambda-lifter output, immediately prior to code generation.)
  * ------------------------------------------------------------------------*/
 
-#if DEBUG_SHOWSC
 static Void local pIndent       (Int);
 static Void local pPut          (Int,Cell,Int);
 static Void local pPutAp        (Int,Cell,Int);
@@ -1120,7 +1111,6 @@ Cell  e; {
     putChr(' ');
     pLiftedStart(e,arity,"=");
 }
-#endif /* defined( DEBUG_SHOWSC ) */
 
 /* --------------------------------------------------------------------------
  * Print type expression:

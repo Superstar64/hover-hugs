@@ -30,9 +30,7 @@ String  prompt     = 0;          /* Prompt string                   */
 
 Bool haskell98 = TRUE;		 /* TRUE => Haskell 98 compatibility*/
 
-#if EXPLAIN_INSTANCE_RESOLUTION
 Bool showInstRes = FALSE;
-#endif
 
 Bool printTypeUseDefaults = FALSE;
 
@@ -95,15 +93,9 @@ struct options toggle[] = {     /* List of command line toggles    */
     Option('I', 1, "Display results of IO programs",        &displayIO),
     Option('T', 1, "Apply 'defaulting' when printing types", &printTypeUseDefaults),
 /* Conditional toggles: */
-#if EXPLAIN_INSTANCE_RESOLUTION
     Option('x', 1, "Explain instance resolution",           &showInstRes),
-#endif
-#if DEBUG_CODE
     Option('D', 1, "Debug: show generated G code",          &debugCode),
-#endif
-#if DEBUG_SHOWSC
     Option('C', 1, "Debug: show generated SC code",         &debugSC),
-#endif
     Option('R', 1, "Enable root optimisation",              &rootOpt),
     Option('H', 0, "Enable `here documents'",               &hereDocs),
     Option(0, 0, 0, 0)

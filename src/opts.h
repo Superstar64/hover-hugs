@@ -62,15 +62,9 @@ extern Bool profiling;                 /* TRUE => perform profiling.      */
 extern Int  profInterval;              /* interval between samples        */
 #endif
 
-#if EXPLAIN_INSTANCE_RESOLUTION
 extern Bool  showInstRes;              /* TRUE => show instance resolution */
-#endif
-#if DEBUG_CODE
 extern Bool  debugCode;		        /* TRUE => print G-code to screen  */
-#endif
-#if DEBUG_SHOWSC
 extern Bool  debugSC;			/* TRUE => print SC to screen  */
-#endif
 extern Bool   rootOpt;                  /* TRUE => enable root optimisation*/
 extern Bool  hereDocs;                  /* TRUE => enable `here documents' */
 

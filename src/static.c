@@ -7020,7 +7020,6 @@ Void checkExp() {			/* Top level static check on Expr  */
     staticAnalysis(RESET);
 }
 
-#if EXPLAIN_INSTANCE_RESOLUTION
 Void checkContext() {			/* Top level static check on Expr  */
     List vs, qs;
 
@@ -7035,7 +7034,6 @@ Void checkContext() {			/* Top level static check on Expr  */
     leaveScope();
     staticAnalysis(RESET);
 }
-#endif
 
 Void checkDefns() {			/* Top level static analysis	   */
     List tcs;

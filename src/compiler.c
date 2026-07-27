@@ -24,9 +24,7 @@
 
 Addr inputCode;                        /* Addr of compiled code for expr   */
 static Name currentName;               /* Top level name being processed   */
-#if DEBUG_SHOWSC
 static FILE *scfp;		       /* super combinator file pointer    */
-#endif
 
 /* --------------------------------------------------------------------------
  * Local function prototypes:
@@ -96,10 +94,8 @@ static Void local compileGenFunction	(Name);
 static Name local compileSelFunction	(Pair);
 static Void local newGlobalFunction     (Name,Int,List,Int,Cell);
 
-#if DEBUG_SHOWSC
 static Void local debugConstructors     (FILE *fp,Cell c);
 static Void local debugConstructor      (FILE *fp,Name c);
-#endif
 
 /* --------------------------------------------------------------------------
  * Translation:    Convert input expressions into a less complex language
@@ -1688,7 +1684,6 @@ Triple fd; {
  *     to find the required solution.
  */
 
-#if DEBUG_CODE
 extern Void dumpFundefs (List);
 
 Void dumpFundefs(fs)
@@ -1712,7 +1707,6 @@ List fs; {
     }
     Printf("----------------\n");
 }
-#endif
 
 static Void local solve(fs)		/* Solve eqns for lambda-lifting   */
 List fs; {				/* of local function definitions   */
@@ -1891,10 +1885,8 @@ Void compileExp() {			/* compile input expression	   */
     localOffset  = 0;
     localArity   = 0;
     inputExpr    = preComp(inputExpr);
-#if DEBUG_SHOWSC
     if (debugSC)
 	printSc(stdout,findText("main"),0,inputExpr);
-#endif
     inputCode    = codeGen(NIL,0,inputExpr);
     inputExpr    = NIL;
 }
@@ -1904,7 +1896,6 @@ Void compileDefns() {			/* compile script definitions	   */
     Target t = length(valDefns) + length(genDefns) + length(selDefns);
     Target i = 0;
 
-#if DEBUG_SHOWSC
     Module mod;
     String modName;
     char name[256];
@@ -1949,7 +1940,6 @@ Void compileDefns() {			/* compile script definitions	   */
 	  }
       }
     }
-#endif
 
     setGoal("Compiling",t);
 
@@ -1967,17 +1957,14 @@ Void compileDefns() {			/* compile script definitions	   */
 	soFar(i++);
     }
 
-#if DEBUG_SHOWSC
     if (debugSC) {
       fprintf(scfp,"\n-- end of module %s --\n",modName);
       fclose(scfp);
     }
-#endif
 
     done();
 }
 
-#if DEBUG_SHOWSC
 static Void local debugConstructors(FILE *fp,Cell c) {
   char ch = '=';
   while(isAp(c)) {
@@ -2003,7 +1990,6 @@ static Void local debugConstructor(FILE *fp,Name c) {
     fprintf(fp,"** unknown constructor **");
   }
 }
-#endif
 
 static Void local compileGlobalFunction(bind)
 Pair bind; {
@@ -2058,11 +2044,9 @@ Cell e; {
     localArity    = arity;
     name(n).arity = arity+numExtraVars;
     e             = preComp(e);
-#if DEBUG_SHOWSC
     if (debugSC) {
 	printSc(scfp,name(n).text,name(n).arity,e);
     }
-#endif
     name(n).code  = codeGen(n,name(n).arity,e);
 }
 

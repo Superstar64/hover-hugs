@@ -25,9 +25,7 @@ extern Void printFD	 (FILE *,Pair);
 #define ALLTAGS ""
 extern Void printObserve (String);
 
-#if DEBUG_SHOWSC
 extern Void  printSc (FILE*, Text, Int, Cell);
-#endif
 
 
 #endif /* __OUTPUT_H__ */

@@ -1731,11 +1731,9 @@ Void parseExp() {                      /* Read an expression to evaluate   */
     setLastExpr(inputExpr);
 }
 
-#if EXPLAIN_INSTANCE_RESOLUTION
 Void parseContext() {                  /* Read a context to prove   */
     parseInput(CTXT);
 }
-#endif
 
 /* --------------------------------------------------------------------------
  * Input control:

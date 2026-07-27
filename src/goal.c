@@ -22,9 +22,7 @@ Void setGoal(what, t)                  /* Set goal for what to be t        */
 String what;
 Target t; {
     if (quiet
-#if EXPLAIN_INSTANCE_RESOLUTION
 	      || showInstRes
-#endif
 			    ) return;
     currTarget = (t?t:1);
     aiming     = TRUE;
@@ -42,9 +40,7 @@ Target t; {
 Void soFar(t)                          /* Indicate progress towards goal   */
 Target t; {                            /* has now reached t                */
     if (quiet
-#if EXPLAIN_INSTANCE_RESOLUTION
 	      || showInstRes
-#endif
 			    ) return;
     if (useDots) {
 	Int newPos = (Int)((maxPos * ((long)t))/currTarget);
@@ -64,9 +60,7 @@ Target t; {                            /* has now reached t                */
 
 Void done() {                          /* Goal has now been achieved       */
     if (quiet
-#if EXPLAIN_INSTANCE_RESOLUTION
 	      || showInstRes
-#endif
 			    ) return;
     if (useDots) {
 	while (maxPos>currPos++)
