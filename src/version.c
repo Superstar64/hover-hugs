@@ -28,12 +28,6 @@
 
 #include "prelude.h"
 
-#if defined(_MSC_VER)
-/* When compiling via MSVC (by using {msc,winhugs}/Makefile),
- * echodate.h contains the generated define for YYYYMMDD
- */
-#include "echodate.h"
-#endif
 
 #define VERSION_STRING "<snapshot>"
 

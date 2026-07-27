@@ -4754,18 +4754,6 @@ static	Bool	local	isDirectory	(String);
 
 #define ToBool(v) ( (v) ? nameTrue : nameFalse)
 
-#ifdef _MSC_VER
-/* If not provided, define em. */
-#ifndef R_OK
-#define R_OK 04
-#endif
-#ifndef W_OK
-#define W_OK 02
-#endif
-#ifndef X_OK
-#define X_OK 06
-#endif
-#endif
 
 /* MSVC6 doesn't define these helper macros in <sys/stat.h> there
  * might be other platforms too, so... The assumption here is that
@@ -5046,15 +5034,9 @@ primFun(primGetPermissions) { /* FilePath -> IO (Bool,Bool,Bool,Bool) */
 	     NULL)); \
    }
 
-#ifdef _MSC_VER
-#define READ_FLAG   S_IREAD
-#define WRITE_FLAG  S_IWRITE
-#define EXEC_FLAG   S_IEXEC
-#else
 #define READ_FLAG   S_IRUSR
 #define WRITE_FLAG  S_IWUSR
 #define EXEC_FLAG   S_IXUSR
-#endif
 
 #define SET_CHMOD_FLAG(x,y)  (x ? y : 0)
 

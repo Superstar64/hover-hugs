@@ -7,13 +7,8 @@ typedef unsigned int       hugs_uint32_t;
 typedef signed   char      hugs_int8_t;
 typedef signed   short     hugs_int16_t;
 typedef signed   int       hugs_int32_t;
-# ifdef _MSC_VER
-typedef unsigned __int64   hugs_uint64_t;
-typedef          __int64   hugs_int64_t;
-# else
 typedef unsigned long long hugs_uint64_t;
 typedef signed   long long hugs_int64_t;
-# endif
 
 #ifdef HUGS_PROPER /* #included into Hugs */
 

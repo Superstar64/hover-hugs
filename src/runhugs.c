@@ -22,9 +22,6 @@
 #include "observe.h"
 #include "server.h"
 
-#if defined(_MSC_VER) && !defined(_MANAGED)
-#include <windows.h>
-#endif
 
 extern int  main      (int, char**);
 static void check     (void);
@@ -99,9 +96,6 @@ char* argv[]; {
 	exit(1);
     }
 
-#if defined(_MSC_VER) && !defined(_MANAGED)
-    __try {
-#endif
 
     loadHugs(hugs_argc, hugs_argv);
 
@@ -126,11 +120,6 @@ char* argv[]; {
     check();
 #endif
 
-#if defined(_MSC_VER) && !defined(_MANAGED)
-    } __except ( ((GetExceptionCode() == EXCEPTION_STACK_OVERFLOW) ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH) ) {
-      fatal("C stack overflow");
-    }
-#endif
 
     shutdownHugsServer(hugs);
     
