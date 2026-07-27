@@ -945,16 +945,12 @@ primFun(primW32toW64) {
  * $Date: 2004/10/29 12:43:09 $
  * ------------------------------------------------------------------------*/
 
-/*#define DEBUG_BIGNUMS*/
-
-#if DEBUG_BIGNUMS
 static Void local bigDump(List ds, Int n) {
     while (nonNull(ds) && 0<n--) {
 	Printf(":%04d",digitOf(hd(ds)));
 	ds = tl(ds);
     }
 }
-#endif
 
 static Cell bn;			/* Bignum accumulator; used in bignum	   */
 				/* calcs, visited by the garbage collector.*/
@@ -1638,11 +1634,11 @@ List us, vs; {
 	 *   vs     = digits of vs with least significant digit first
 	 */
 
-#if DEBUG_BIGNUMS
+if (DEBUG_BIGNUMS) {
 Printf("initial vs (n=%d, v1=%d, v2=%d): ",n,v1,v2);
 bigDump(vs,n);
 Putchar('\n');
-#endif
+}
 	while (nonNull(us)) {
 	    uj2 = uj1;
 	    uj1 = digitOf(hd(us));
@@ -1670,18 +1666,18 @@ Putchar('\n');
 	 *	  uj is actually zero.)
 	 */
 
-#if DEBUG_BIGNUMS
+if (DEBUG_BIGNUMS) {
 Printf("initial us (uj=%d, uj1=%d, uj2=%d): ",uj,uj1,uj2);
 bigDump(us,n);
 Putchar('\n');
 Printf("initial ds: ");
 bigDump(ds,1000);
 Putchar('\n');
-#endif
+}
 	sc = BIGBASE / (v1+1);
-#if DEBUG_BIGNUMS
+if (DEBUG_BIGNUMS){
 Printf("scaling factor %d\n",sc);
-#endif
+}
 	if (sc!=1) {			/* Scale numerator and denominator */
 	    Int c = 0;
 	    v1 = v2 = 0;
@@ -1709,7 +1705,7 @@ Printf("scaling factor %d\n",sc);
 	    }				/* no carry here, guaranteed	   */
 	}
 
-#if DEBUG_BIGNUMS
+if (DEBUG_BIGNUMS){
 Printf("scaled vs (n=%d, v1=%d, v2=%d): ",n,v1,v2);
 bigDump(vs,n);
 Putchar('\n');
@@ -1719,7 +1715,7 @@ Putchar('\n');
 Printf("scaled ds: ");
 bigDump(ds,1000);
 Putchar('\n');
-#endif
+}
 	/* Most of the conditions above are still valid, except that both
 	 * the numerator and denominator have been multiplied by the scaling
 	 * factor sc, and the values of the various digit positions have been
@@ -1740,13 +1736,13 @@ Putchar('\n');
 	    ds	   = us1;
 	    nd     = isNull(ds) ? 0 : digitOf(hd(ds));	/* next digit of ds*/
 
-#if DEBUG_BIGNUMS
+if (DEBUG_BIGNUMS){
 Printf("To divide us (uj=%d, uj1=%d, uj2=%d): ",uj,uj1,uj2);
 bigDump(us,n+1);
 Printf(" by vs (v1=%d, v2=%d): ",v1,v2);
 bigDump(vs,n);
 Printf(", guess qhat=%d\n",qhat);
-#endif
+}
 	    uj  = nd;			/* us := us - qhat * vs		   */
 	    uj1 = uj2 = c = 0;
 	    us1 = us;
@@ -1767,9 +1763,9 @@ Printf(", guess qhat=%d\n",qhat);
 	    } while (nonNull(vs1));
 
 	    if (digitOf(hd(us1))<c) {	/* maybe we overestimated qhat?	   */
-#if DEBUG_BIGNUMS
+if (DEBUG_BIGNUMS) {
 Printf("overestimated qhat by one!\n");
-#endif
+}
 		qhat--;			/* so reduce guess		   */
 		uj  = nd;		/* and set us := us + vs	   */
 		uj1 = uj2 = c = 0;	/* (we can't have overestimated by */
@@ -1788,11 +1784,11 @@ Printf("overestimated qhat by one!\n");
 		    vs1     = tl(vs1);
 		} while (nonNull(vs1));
 	    }
-#if DEBUG_BIGNUMS
+if (DEBUG_BIGNUMS){
 Printf("There remains (uj=%d, uj1=%d, uj2=%d): ",uj,uj1,uj2);
 bigDump(us,n);
 Putchar('\n');
-#endif
+}
 
 	    if (nonNull(qs) || qhat)	/* output quotient digit, without  */
 		qs = cons(mkDigit(qhat),qs);	/* leading zeros	   */
@@ -1800,9 +1796,9 @@ Putchar('\n');
 	    allowBreak();
 	}
 
-#if DEBUG_BIGNUMS
+if (DEBUG_BIGNUMS) {
 Printf("done quotient\n");
-#endif
+}
 	/* Now we have the quotient digits (if any) with least significant
 	 * digit first in qs, and sc times the remainder is the first n
 	 * digits of us.  All that remains is to adjust the remainder:

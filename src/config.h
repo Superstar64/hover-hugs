@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdbool.h>
+
 // Refurbished Hugs configuration file
 
 // {Home} gets substituted for the user's home directory
@@ -57,3 +59,7 @@
 
 /* Define to 1 if heap profiling should be used. */
 /* #undef PROFILING */
+
+
+// Debug Options
+enum { DEBUG_BIGNUMS = false };
