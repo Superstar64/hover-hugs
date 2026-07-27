@@ -139,37 +139,7 @@ String argv[]; {
 
     setLastEdit((String)0,0);
 
-#if HUGS_FOR_WINDOWS || HAVE_WINDOWS_H
-#define DEFAULT_EDITOR "\\notepad.exe"
-    /*
-     * Check first to see if the user has explicitly defined
-     * an editor via the environment variable EDITOR..
-     */
     hugsEdit      = strCopy(fromEnv("EDITOR",NULL));
-    if (hugsEdit == NULL) {
-      UINT rc;
-      int notePadLen = strlen(DEFAULT_EDITOR);
-      char* notePadLoc;
-      /*
-       * Nope, the default editor is used instead. In our case
-       * this is 'notepad', which we assume is always residing
-       * in the windows directory, so locate it first..
-       * (it would be somewhat odd for a user not to have that
-       * directory in his/her PATH, but the less we assume, the better.)
-       */
-      notePadLoc = 
-	  alloca
-		  (sizeof(char)*(MAX_PATH + notePadLen + 2));
-      notePadLoc[0] = '&';
-      rc = GetWindowsDirectory(notePadLoc+1, MAX_PATH);
-      if ( !(rc == 0 || rc > MAX_PATH) ) {
-	strcat(notePadLoc, DEFAULT_EDITOR);
-	hugsEdit = strCopy(notePadLoc);
-      }
-    }
-#else
-    hugsEdit      = strCopy(fromEnv("EDITOR",NULL));
-#endif
 
     readOptions("-p\"%s> \" -r$$",FALSE);
     readOptionSettings();
