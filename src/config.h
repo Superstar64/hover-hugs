@@ -63,3 +63,4 @@
 
 // Debug Options
 enum { DEBUG_BIGNUMS = false };
+enum { VERBOSE_PRINT = false };

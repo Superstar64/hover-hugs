@@ -16,6 +16,7 @@
  * "name" as a normal identifier (with no arguments).  ADR
  */
 #include <math.h>
+#include "config.h"
 #include "prelude.h"
 #include "storage.h"
 #include "connect.h"
@@ -2331,9 +2332,9 @@ Int  d; {				/* precedence level		   */
 				    name(whnfHead).arity>whnfArgs)
 				pr = nameNPrint;
 
-#ifndef VERBOSE_PRINT
+if(!VERBOSE_PRINT) {
 			    /* don't print dictionary arguments */
-			    while (used<whnfArgs) {
+			    while (used<whnfArgs) { {}
 				Cell h;
 				Int w;
 				h=pushed(used);
@@ -2354,7 +2355,7 @@ Int  d; {				/* precedence level		   */
 				else
 				    break;
 			    }
-#endif
+}
 
 			    if (whnfHead==nameCons && whnfArgs==2) {/*list */
 				StackPtr ksp = sp;
@@ -2396,16 +2397,15 @@ Int  d; {				/* precedence level		   */
 				}
 				return;
 			    }
-#ifndef VERBOSE_PRINT
+
 			    /* hide fromInt/fromDouble */
-			    else if (whnfArgs==2 &&
+			    else if (!VERBOSE_PRINT && whnfArgs==2 &&
 				     ((whnfHead==nameFromInt && whatIs(pushed(1))==INTCELL) ||
 				      (whnfHead==nameFromDouble && (whatIs(pushed(1))==FLOATCELL || whatIs(pushed(1))==DOUBLECELL)))) {
 				unwind(pushed(1));
 				printer(pr,d);
 				return;
 			    }
-#endif
 			    else if (whnfArgs-used==1 && sy!=APPLIC) { /* (e1+) */
 				outCh('(');
 				outPr(pr,FUN_PREC-1,pushed(used));
@@ -2667,20 +2667,27 @@ static Void local outName(nm)  /* output nm using parent field if possible */
 Name nm; {
     Cell p = name(nm).parent;
     switch (whatIs(p)) {
-#ifdef VERBOSE_PRINT
-	case INSTANCE : outStr("inst");
+	case INSTANCE :
+    if(VERBOSE_PRINT) {
+            outStr("inst");
 			outStr(textToStr(cclass(inst(p).c).text));
 			outCh('_');
+    }
 			break;
 
-	case CLASS    : outStr(textToStr(cclass(p).text));
+	case CLASS    :
+    if(VERBOSE_PRINT) {
+            outStr(textToStr(cclass(p).text));
 			outCh('_');
+    }
 			break;
 
-	case TYCON    : outStr(textToStr(tycon(p).text));
+	case TYCON    :
+    if(VERBOSE_PRINT) {
+            outStr(textToStr(tycon(p).text));
 			outCh('_');
+    }
 			break;
-#endif
 
 	case NAME     : outName(p);
 			outCh('_');
