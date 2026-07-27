@@ -2795,11 +2795,7 @@ Cell   ex; {
  * Evaluate name, obtaining a C string from a Hugs string:
  * ------------------------------------------------------------------------*/
 
-#if FILENAME_MAX < 1024
-# define MAX_STRING 1024
-#else
 # define MAX_STRING FILENAME_MAX
-#endif
 
 String evalName(es)                     /* evaluate es :: [Char] and save  */
 Cell es; {                              /* in char array... return ptr to  */
