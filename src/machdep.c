@@ -701,30 +701,14 @@ static sigHandler(panic) {              /* exit in a panic, on receipt of  */
 
 static Void local installHandlers() { /* Install handlers for all fatal    */ 
 				      /* signals except SIGINT and SIGBREAK*/
-# ifdef SIGABRT
     signal(SIGABRT,panic);
-# endif
-# ifdef SIGBUS
     signal(SIGBUS,panic);
-# endif
-# ifdef SIGFPE
     signal(SIGFPE,panic);
-# endif
-# ifdef SIGHUP
     signal(SIGHUP,panic);
-# endif
-# ifdef SIGILL
     signal(SIGILL,panic);
-# endif
-# ifdef SIGQUIT
     signal(SIGQUIT,panic);
-# endif
-# ifdef SIGSEGV
     signal(SIGSEGV,panic);
-# endif
-# ifdef SIGTERM
     signal(SIGTERM,panic);
-# endif
 
 }
 
