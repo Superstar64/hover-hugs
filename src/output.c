@@ -12,6 +12,7 @@
  * $Date: 2005/11/02 15:57:56 $
  * ------------------------------------------------------------------------*/
 
+#include "opts.h"
 #include "prelude.h"
 #include "storage.h"
 #include "connect.h"
@@ -250,7 +251,11 @@ Cell e; {
 
 	case LETREC     : OPEN(d>WHERE_PREC);
 			  putStr("let {");
-			  put(NEVER,fst(snd(e)));
+			  if(debugCode) {
+			  	put(NEVER,fst(snd(e)));
+			  } else {
+				putStr("...");
+			  }
 			  putStr("} in ");
 			  put(WHERE_PREC+1,snd(snd(e)));
 			  CLOSE(d>WHERE_PREC);
@@ -302,7 +307,11 @@ Cell e; {
 	case CASE       : putStr("case ");
 			  put(NEVER,fst(snd(e)));
 			  putStr(" of {");
-			  put(NEVER,snd(snd(e)));
+			  if(debugCode) {
+			  	put(NEVER,snd(snd(e)));
+			  } else {
+				putStr("...");
+			  }
 			  putChr('}');
 			  break;
 
