@@ -1755,12 +1755,8 @@ void* p; {
 Int     heapSize = DEFAULTHEAP;         /* number of cells in heap         */
 Heap    heapFst;                        /* array of fst component of pairs */
 Heap    heapSnd;                        /* array of snd component of pairs */
-#ifndef GLOBALfst
 Heap    heapTopFst;
-#endif
-#ifndef GLOBALsnd
 Heap    heapTopSnd;
-#endif
 Bool    consGC = TRUE;                  /* Set to FALSE to turn off gc from*/
 					/* C stack; use with extreme care! */
 
@@ -3320,12 +3316,6 @@ Int what; {
 
     switch (what) {
 	case RESET   : clearStack();
-
-		       /* the next 2 statements are particularly important
-			* if you are using GLOBALfst or GLOBALsnd since the
-			* corresponding registers may be reset to their
-			* uninitialised initial values by a longjump.
-			*/
 		       heapTopFst = heapFst + heapSize;
 		       heapTopSnd = heapSnd + heapSize;
 if (PROFILING) {

@@ -173,16 +173,8 @@ extern  Void	     nextInstr	(Addr);
 #define heapBuilt()  (heapFst)
 extern  Int          heapSize;
 extern  Heap	     heapFst, heapSnd;
-#ifdef  GLOBALfst
-register Heap	     heapTopFst GLOBALfst;
-#else
 extern   Heap        heapTopFst;
-#endif
-#ifdef  GLOBALsnd
-register Heap	     heapTopSnd GLOBALsnd;
-#else
 extern   Heap        heapTopSnd;
-#endif
 extern   Bool        consGC;		/* Set to FALSE to turn off gc from*/
 					/* C stack; use with extreme care! */
 extern   Int	     cellsRecovered;	/* cells recovered by last gc	   */
