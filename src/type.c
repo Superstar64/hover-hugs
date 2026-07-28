@@ -2884,7 +2884,7 @@ List bs; {
 	for (bs1=hd(bs); nonNull(bs1); bs1=tl(bs1))
 	    fst(snd(hd(bs1))) = NIL; 	/* reset imps type fields	   */
 
-#if DEBUG_DEPENDS
+if (DEBUG_DEPENDS) {
     Printf("Binding group:");
     for (bs1=imps; nonNull(bs1); bs1=tl(bs1)) {
 	Printf(" [imp:");
@@ -2899,7 +2899,7 @@ List bs; {
 	Printf("]");
     }
     Printf("\n");
-#endif
+}
 
     /* ----------------------------------------------------------------------
      * STEP 2: Add type assumptions about any explicitly typed variable.

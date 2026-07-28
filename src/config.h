@@ -69,3 +69,4 @@ enum { DEBUG_TYPES = false };
 enum { DEBUG_KINDS = false };
 enum { DEBUG_DEFAULTS = false };
 enum { DEBUG_SELS = false };
+enum { DEBUG_DEPENDS = false };
