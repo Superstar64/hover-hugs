@@ -36,10 +36,6 @@ enum { PATH_CANONICALIZATION = false };
    convert heap profile (in "profile.hp") to PostScript. */
 // #define HAVE_HP2PS 1
 
-/* Define to 1 if compiler supports gcc's "labels as values" (aka computed
-   goto) feature (which is used to speed up instruction dispatch in the
-   interpreter). */
-// #define HAVE_LABELS_AS_VALUES 1
 
 /* Define to 1 if jmpbufs can be treated like arrays. */
 // #define JMPBUF_ARRAY 1
