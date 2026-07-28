@@ -690,7 +690,6 @@ static sigHandler(ignoreBreak) {        /* record but don't respond to break*/
     sigResume;
 }
 
-#if !DONT_PANIC
 static sigProto(panic);
 static sigHandler(panic) {              /* exit in a panic, on receipt of  */
     everybody(EXIT);                    /* an unexpected signal            */
@@ -698,12 +697,10 @@ static sigHandler(panic) {              /* exit in a panic, on receipt of  */
     exit(1);
     sigResume;/*NOTREACHED*/
 }
-#endif /* !DONT_PANIC */
 
 
 static Void local installHandlers() { /* Install handlers for all fatal    */ 
 				      /* signals except SIGINT and SIGBREAK*/
-#if !DONT_PANIC && !DOS
 # ifdef SIGABRT
     signal(SIGABRT,panic);
 # endif
@@ -728,7 +725,6 @@ static Void local installHandlers() { /* Install handlers for all fatal    */
 # ifdef SIGTERM
     signal(SIGTERM,panic);
 # endif
-#endif /* !DONT_PANIC && !DOS */
 
 }
 
