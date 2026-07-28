@@ -11,6 +11,7 @@
  * $Date: 2006/02/14 16:12:19 $
  * ------------------------------------------------------------------------*/
 
+#include "config.h"
 #include "prelude.h"
 #include "storage.h"
 #include "connect.h"
@@ -1226,10 +1227,8 @@ Long  numReductions;                    /* number of reductions counted    */
 static Cell    exception;               /* Exception thrown                */
 static jmp_buf *evalError = 0;          /* jump buffer for eval errors     */
 
-#if GIMME_STACK_DUMPS
 Int  rootsp = (-1);
-Cell evalRoots[NUM_STACK];
-#endif
+Cell evalRoots[(NUM_STACK - 1) * GIMME_STACK_DUMPS + GIMME_STACK_DUMPS];
 
 #define obsMarker(p) (whatIs(stack(p))==OBSERVESTK)
 #define isFree(n) (whatIs(n)==OBSERVE && whatIs(markedExpr(n))==FREECELL)
@@ -1244,11 +1243,11 @@ Cell n; {
     STACK_CHECK
     if (++evalDepth == MAX_EVAL_DEPTH)
 	hugsStackOverflow();
-#if GIMME_STACK_DUMPS
+if (GIMME_STACK_DUMPS) {
     evalRoots[++rootsp] = n;		/* Save pointer to root expression */
 					/* should probably test that rootsp*/
 					/* is in interval 0..NUM_STACK-1   */
-#endif
+}
 
 unw:switch (whatIs(n)) {                /* unwind spine of application     */
 
@@ -1471,9 +1470,9 @@ unw:switch (whatIs(n)) {                /* unwind spine of application     */
 	n                   = stack(base+ar);
 	stack(base+ar)      = arg(n);
     }
-#if GIMME_STACK_DUMPS
+if (GIMME_STACK_DUMPS) {
     rootsp--;
-#endif
+}
     evalDepth--;
 }
 
@@ -1773,9 +1772,9 @@ Int what; {
 
 	case RESET   : evalError = 0;
 		       evalDepth = 0;
-#if GIMME_STACK_DUMPS
+if (GIMME_STACK_DUMPS) {
 		       rootsp = (-1);
-#endif
+}
 		       break;
 
 	case BREAK   : obsCount = 0;

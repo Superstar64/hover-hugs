@@ -26,7 +26,9 @@ enum { PATH_CANONICALIZATION = false };
    the objects currently under evaluation. The information isn't perfect and
    can be pretty hard to understand but it's better than a poke in the eye
    with a blunt stick. This is a very experimental feature! */
-/* #undef GIMME_STACK_DUMPS */
+
+enum { GIMME_STACK_DUMPS = false };
+
 
 /* Define to 1 if heap profiler can (and should) automatically invoke hp2ps to
    convert heap profile (in "profile.hp") to PostScript. */

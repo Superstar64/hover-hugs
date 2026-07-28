@@ -11,6 +11,7 @@
  * $Date: 2004/01/06 19:45:11 $
  * ------------------------------------------------------------------------*/
 
+#include "config.h"
 #include "prelude.h"
 #include "storage.h"
 #include "connect.h"
@@ -1171,8 +1172,6 @@ Cell DEFTABLE(cellStack,NUM_STACK); /* Storage for cells on stack          */
 StackPtr sp;                        /* stack pointer                       */
 #endif
 
-#if GIMME_STACK_DUMPS
-
 #define UPPER_DISP  5               /* # display entries on top of stack   */
 #define LOWER_DISP  5               /* # display entries on bottom of stack*/
 
@@ -1180,7 +1179,8 @@ extern Int  rootsp;
 extern Cell evalRoots[];
 
 Void hugsStackOverflow() {	    /* Report stack overflow               */
-    ERRMSG(0) "Control stack overflow" ETHEN
+if(GIMME_STACK_DUMPS) {
+	ERRMSG(0) "Control stack overflow" ETHEN
     if (rootsp>=0) {
 	Int i;
 	if (rootsp>=UPPER_DISP+LOWER_DISP) {
@@ -1203,16 +1203,11 @@ Void hugsStackOverflow() {	    /* Report stack overflow               */
     }
     ERRTEXT "\n"
     EEND;
-}
-
-#else /* !GIMME_STACK_DUMPS */
-
-Void hugsStackOverflow() {          /* Report stack overflow               */
-    ERRMSG(0) "Control stack overflow"
+} else {
+	ERRMSG(0) "Control stack overflow"
     EEND;
 }
-
-#endif /* !GIMME_STACK_DUMPS */
+}
 
 /* --------------------------------------------------------------------------
  * Observation storage
