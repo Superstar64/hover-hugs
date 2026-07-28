@@ -32,13 +32,14 @@ enum { GIMME_STACK_DUMPS = false };
 
 /* Define to 1 if heap profiler can (and should) automatically invoke hp2ps to
    convert heap profile (in "profile.hp") to PostScript. */
-// #define HAVE_HP2PS 1
+enum { HAVE_HP2PS = false };
 
 /* Define to 1 if heap profiling should be used. */
 enum { PROFILING = false };
 
 
 // Debug Options
+
 enum { DEBUG_BIGNUMS = false };
 enum { VERBOSE_PRINT = false };
 

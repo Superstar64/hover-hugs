@@ -3333,9 +3333,9 @@ if (PROFILING) {
 		       if (profile) {
 			   garbageCollect();
 			   fclose(profile);
-#if HAVE_HP2PS
+if (HAVE_HP2PS) {
 			   system("hp2ps profile.hp");
-#endif
+}
 			   profile = 0;
 		       }
 }
