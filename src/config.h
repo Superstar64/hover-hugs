@@ -36,10 +36,6 @@ enum { PATH_CANONICALIZATION = false };
    convert heap profile (in "profile.hp") to PostScript. */
 // #define HAVE_HP2PS 1
 
-
-/* Define to 1 if jmpbufs can be treated like arrays. */
-// #define JMPBUF_ARRAY 1
-
 /* Define to 1 if you want to use the primitives which let you examine Hugs
    internals. */
 /* #undef INTERNAL_PRIMS */

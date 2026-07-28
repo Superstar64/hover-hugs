@@ -1723,16 +1723,6 @@ Cell e; {                              /* NIL if successful,               */
     Cell caughtEx;                     /* Exception value if not...        */
     jmp_buf *oldCatch = evalError;
 
-#if JMPBUF_ARRAY
-    jmp_buf catcherr[1];
-    evalError = catcherr;
-    if (setjmp(catcherr[0])==0) {
-	eval(e);
-	caughtEx = NIL;
-    }
-    else
-	caughtEx = exception;
-#else
     jmp_buf catcherr;
     evalError = &catcherr;
     if (setjmp(catcherr)==0) {
@@ -1741,7 +1731,6 @@ Cell e; {                              /* NIL if successful,               */
     }
     else
 	caughtEx = exception;
-#endif
     evalError = oldCatch;
     return caughtEx;
 }
