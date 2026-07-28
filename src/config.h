@@ -24,9 +24,6 @@ enum { PATH_CANONICALIZATION = false };
    bytecodes (requires INTERNAL_PRIMS). */
 /* #undef BYTECODE_PRIMS */
 
-/* Define if you want to use a low-level printer from within a debugger. */
-/* #undef DEBUG_PRINTER */
-
 /* If you get really desperate to understand why your Hugs programs keep
    crashing or running out of stack, you might like to set this flag and
    recompile Hugs. When you hit a stack error, it will print out a list of all

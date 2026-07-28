@@ -2348,7 +2348,6 @@ Cell c; {                               /* except that Cells refering to   */
 /* performance for whatIs() using a binary search for part of the analysis */
 
 
-#if DEBUG_PRINTER
 /* A very, very simple printer.
  * Output is uglier than from printExp - but the printer is more
  * robust and can be used on any data structure irrespective of
@@ -2531,7 +2530,6 @@ Int  depth; {
 	}
     Putchar(']');
 }
-#endif
 
 Bool isVar(c)                           /* is cell a VARIDCELL/VAROPCELL ? */
 Cell c; {                               /* also recognises DICTVAR cells   */
