@@ -16,8 +16,6 @@
 #include "prelude.h"
 #include "storage.h"
 
-/* #define DEBUG_DERIVING 1 */
-
 typedef struct {			/* Each type variable contains:	   */
     Type bound;				/* A type skeleton (unbound==NIL)  */
     Int  offs;				/* Offset for skeleton		   */

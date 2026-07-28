@@ -2801,13 +2801,13 @@ Inst in; {				/* of derived instance context	   */
     }
     inst(in).numSpecifics = beta;
 
-#if DEBUG_DERIVING
+if (DEBUG_DERIVING) {
     Printf("initDerInst: ");
     printPred(stdout,inst(in).head);
     Printf("\n");
     printContext(stdout,snd(snd(inst(in).specifics)));
     Printf("\n");
-#endif
+}
 }
 
 static Void local calcInstPreds(in)	/* Calculate next approximation	   */
@@ -2819,11 +2819,11 @@ Inst in; {				/* of the context for a derived	   */
     Int  its    = 1;
     Int  factor = 1+length(ps);
 
-#if DEBUG_DERIVING
+if (DEBUG_DERIVING) {
     Printf("calcInstPreds: ");
     printPred(stdout,inst(in).head);
     Printf("\n");
-#endif
+}
 
     while (nonNull(ps)) {
 	Cell p = hd(ps);
@@ -2965,13 +2965,13 @@ Inst in; {				/* calculations			   */
     h98CheckCtxt(inst(in).line,"derived instance",FALSE,inst(in).specifics,in);
     inst(in).numSpecifics = length(inst(in).specifics);
 
-#if DEBUG_DERIVING
+if (DEBUG_DERIVING) {
     Printf("Derived instance: ");
     printContext(stdout,inst(in).specifics);
     Printf(" ||- ");
     printPred(stdout,inst(in).head);
     Printf("\n");
-#endif
+}
 }
 
 /* --------------------------------------------------------------------------
