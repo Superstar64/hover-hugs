@@ -1,5 +1,4 @@
-#ifndef CHAR_H
-#define CHAR_H
+#pragma once
 
 #include "prelude.h"
 
@@ -109,6 +108,3 @@ extern	Char	extc_mb		(String *);
 #define	ExtractChar(s)	extc_mb(&s)
 
 #define	charIsRepresentable(c)	TRUE
-
-
-#endif /* CHAR_H */

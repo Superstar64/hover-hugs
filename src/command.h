@@ -10,8 +10,7 @@
  * $Revision: 1.15 $
  * $Date: 2006/01/10 23:31:44 $
  * ------------------------------------------------------------------------*/
-#ifndef __COMMAND_H__
-#define __COMMAND_H__
+#pragma once
 
 #include "prelude.h"
 
@@ -56,5 +55,3 @@ extern Command readCommand (struct cmd *, Char, Char);
 #define BRK_RESET       3
 
 /*-------------------------------------------------------------------------*/
-
-#endif /* __COMMAND_H__ */

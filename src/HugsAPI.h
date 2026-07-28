@@ -10,8 +10,7 @@
  * $Revision: 1.3 $
  * $Date: 2004/02/04 17:53:38 $
  * ------------------------------------------------------------------------*/
-#ifndef __HUGSAPI_H__
-#define __HUGSAPI_H__
+#pragma once
 
 #include "prelude.h"
 
@@ -63,5 +62,3 @@ DLLEXPORT(Void) shutdownHugsServer (HugsServerAPI*);
 #ifdef __cplusplus 
 };
 #endif
-
-#endif /* __HUGSAPI_H__ */

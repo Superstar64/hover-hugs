@@ -11,8 +11,7 @@
  * $Revision: 1.80 $
  * $Date: 2005/09/11 00:33:00 $
  * ------------------------------------------------------------------------*/
-#ifndef __PRELUDE_H__
-#define __PRELUDE_H__
+#pragma once
 
 #include "config.h"
 #include <stdio.h>
@@ -315,5 +314,3 @@ typedef void*    Pointer;
 #define maskInSet(n)       (1<<((-(n)-1)&wordMask))
 
 /*-------------------------------------------------------------------------*/
-
-#endif /* __PRELUDE_H__ */

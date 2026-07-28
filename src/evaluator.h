@@ -7,8 +7,7 @@
  * the license in the file "License", which is included in the distribution.
  *
  */
-#ifndef __EVALUATOR_H__
-#define __EVALUATOR_H__
+#pragma once
 
 #include "prelude.h"
 #include "storage.h"
@@ -18,5 +17,3 @@ extern Void stopEvaluator     (Void);
 extern Void evaluator         (Module);
 extern Void everybody         (Int);
 extern Void loadPrelude       (Void);
-
-#endif /* __EVALUATOR_H__ */

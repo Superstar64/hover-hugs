@@ -125,7 +125,7 @@ depend: $(SOURCES) parser.c unitable.c
 check: $(HFILES:%.h=%.h-check)
 
 %.h-check: %.h
-	gcc -fsyntax-only $<
+	gcc -fsyntax-only -w $<
 
 ################################################################
 # Object dependencies

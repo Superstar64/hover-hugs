@@ -7,8 +7,7 @@
  * the license in the file "License", which is included in the distribution.
  *
  */
-#ifndef __SCRIPT_H__
-#define __SCRIPT_H__
+#pragma once
 
 #include "prelude.h"
 #include "storage.h"
@@ -49,7 +48,3 @@ extern Void whatScripts       (Void);
 extern Void readScripts       (Int);
 
 extern Void script     (int);
-
-
-
-#endif /* __SCRIPT_H__ */

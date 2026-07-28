@@ -10,8 +10,7 @@
  * $Revision: 1.11 $
  * $Date: 2004/11/04 00:01:31 $
  * ------------------------------------------------------------------------*/
-#ifndef __SUBST_H__
-#define __SUBST_H__
+#pragma once
 
 #include "prelude.h"
 #include "storage.h"
@@ -117,5 +116,3 @@ extern Bool  sameType		(Type,Int,Type,Int);
 extern Bool  matchType		(Type,Int,Type,Int);
 
 /*-------------------------------------------------------------------------*/
-
-#endif /* __SUBST_H__ */

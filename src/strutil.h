@@ -1,8 +1,7 @@
 /*
  * String utilities needed throughout the Hugs codebase.
  */ 
-#ifndef __STRUTIL_H__
-#define __STRUTIL_H__
+#pragma once
 
 #include "prelude.h"
 
@@ -87,5 +86,3 @@ extern Bool           appendStringFormat (StringBuilder* b, char* fmt, char* arg
  * 
  */
 extern char*          toString           (StringBuilder* b);
-
-#endif /* __STRUTIL_H__ */

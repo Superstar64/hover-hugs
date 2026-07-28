@@ -1,5 +1,4 @@
-#ifndef __HSFFI_H__
-#define __HSFFI_H__
+#pragma once
 
 typedef unsigned char      hugs_uint8_t;
 typedef unsigned short     hugs_uint16_t;
@@ -300,5 +299,3 @@ extern void hs_free_fun_ptr(HsFunPtr fp);
 
 # define DLLIMPORT(rty) rty
 # define DLLEXPORT(rty) rty
-
-#endif /* __HSFFI_H__ */

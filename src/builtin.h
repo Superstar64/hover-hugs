@@ -10,8 +10,7 @@
  * $Revision: 1.7 $
  * $Date: 2004/09/30 16:49:04 $
  * ------------------------------------------------------------------------*/
-#ifndef __BUILTIN_H__
-#define __BUILTIN_H__
+#pragma once
 
 #include "prelude.h"
 #include "storage.h"
@@ -550,5 +549,3 @@ extern Cell   mkIOError (Cell *,Name,String,String,Cell *);
 #define IOArg(n)    primArg((n)+IOArity)
 #define IOReturn(r) { updapRoot(primArg(1),r); return; }
 #define IOFail(r)   throwException(ap(nameIOException,r))
-
-#endif /* __BUILTIN_H__ */

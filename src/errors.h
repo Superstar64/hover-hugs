@@ -10,8 +10,7 @@
  * $Revision: 1.13 $
  * $Date: 2005/09/01 14:57:50 $
  * ------------------------------------------------------------------------*/
-#ifndef __ERRORS_H__
-#define __ERRORS_H__
+#pragma once
 
 #include "prelude.h"
 
@@ -77,5 +76,3 @@ extern Bool breakOn      (Bool);		   /* in machdep.c	   */
 extern jmp_buf catch_error;          /* jump buffer for error trapping  */
 
 /*-------------------------------------------------------------------------*/
-
-#endif /* __ERRORS_H__ */

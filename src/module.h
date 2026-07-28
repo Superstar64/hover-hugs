@@ -9,8 +9,7 @@
  * -sof 2002.
  * 
  * ------------------------------------------------------------------------*/
-#ifndef __MODULE_H__
-#define __MODULE_H__
+#pragma once
 
 #include "prelude.h"
 #include "storage.h"
@@ -23,5 +22,3 @@ extern Void checkQualImportList (Pair);
 extern Void fixupImportExports  (List);
 extern List checkExports        (List);
 extern Void browseModule	(Module,Bool);
-
-#endif /* __MODULE_H__ */

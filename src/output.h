@@ -8,8 +8,7 @@
  * the license in the file "License", which is included in the distribution.
  *
  * ------------------------------------------------------------------------*/
-#ifndef __OUTPUT_H__
-#define __OUTPUT_H__
+#pragma once
 
 #include "prelude.h"
 #include "storage.h"
@@ -26,6 +25,3 @@ extern Void printFD	 (FILE *,Pair);
 extern Void printObserve (String);
 
 extern Void  printSc (FILE*, Text, Int, Cell);
-
-
-#endif /* __OUTPUT_H__ */

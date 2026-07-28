@@ -11,8 +11,7 @@
  * $Revision: 1.68 $
  * $Date: 2004/11/14 11:02:38 $
  * ------------------------------------------------------------------------*/
-#ifndef __STORAGE_H__
-#define __STORAGE_H__
+#pragma once
 
 #include "prelude.h"
 
@@ -1103,6 +1102,3 @@ extern  List   addNamesMatching  (String,List);
 #define whatIs1(c)  (isPair(c)? (isTag1(fst(c))? fst(c) : AP ) : whatCode[c])
 
 #define isAp1(c)    (isPair(c) && !isTag1(fst(c)))
-
-
-#endif /* __STORAGE_H__ */

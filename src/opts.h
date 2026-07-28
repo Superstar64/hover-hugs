@@ -3,8 +3,7 @@
  *
  *
  */
-#ifndef __OPTS_H__
-#define __OPTS_H__
+#pragma once
 
 #include "prelude.h"
 
@@ -111,4 +110,3 @@ struct options {                        /* command line option toggles     */
 
 extern struct options toggle[];
 
-#endif /* __OPTS_H__ */

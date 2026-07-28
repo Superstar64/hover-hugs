@@ -5,8 +5,7 @@
  *       in batch mode.
  *
  */
-#ifndef __OBSERVE_H__
-#define __OBSERVE_H__
+#pragma once
 
 #include "builtin.h"
 
@@ -31,5 +30,3 @@ extPrimFun(primSetBkpt) {
    EEND;
 }
 #endif
-
-#endif /* __OBSERVE_H__ */

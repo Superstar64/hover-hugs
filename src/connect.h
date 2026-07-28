@@ -10,8 +10,7 @@
  * $Revision: 1.92 $
  * $Date: 2005/12/02 12:42:27 $
  * ------------------------------------------------------------------------*/
-#ifndef __CONNECT_H__
-#define __CONNECT_H__
+#pragma once
 
 #include "prelude.h"
 #include "storage.h"
@@ -412,5 +411,3 @@ extern  Void   charOps          (Int);
 extern	Void   pushString	(String);
 
 /*-------------------------------------------------------------------------*/
-
-#endif /* __CONNECT_H__ */

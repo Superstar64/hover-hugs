@@ -7,8 +7,8 @@
  * the license in the file "License", which is included in the distribution.
  *
  * ------------------------------------------------------------------------*/
-#ifndef __MACHDEP_H__
-#define __MACHDEP_H__
+#pragma once
+
 #include "prelude.h"
 
 # include <time.h>
@@ -57,5 +57,3 @@ extern  String fromEnv		(String,String);
 extern  Bool   initSystem       (Void);
 
 extern	String dirname		(String);
-
-#endif /* __MACHDEP_H__ */
