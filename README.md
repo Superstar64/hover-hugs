@@ -1,0 +1,42 @@
+# Hover Hugs
+Hover Hugs is a heavily striped down version of Hugs98. It's an attempt to make
+the codebase more palpable.
+
+# Changes
+* Removal of all platforms except Linux
+* Removal of all packages except `hugsbase`
+* Complete rewrite of the build system to use standard `make`
+* The Hugs path is now relative to the executable
+* Various other clean ups
+
+# Status
+Hover Hugs is still not is a good shape. There's still lots of unneeded
+preprocessor conditionals, awful macro usage, and K&R definitions. A lot of
+comments are outdated too, now that a lot of platform support has been removed.
+
+Some modules in `hugsbase` don't work because they depend on `base` modules.
+Eventually, those modules need to be removed or the original base definitions
+need to supplied somehow. At least the `Prelude` seems to work.
+
+Both `ffihugs` and `runhugs` seem to depend on these unsupported files, so this
+needs to be fixed before they can work properly.
+
+Everything under `demos/`, `tests/`, `lib/`, `docs/` and some other files
+ace complete untested and may be scrapped.
+
+Long term, it would be nice if Hugs could be gradually ported to a C compatible
+language that has garbage collection. Something like D or Go.
+
+# Building
+Edit `src/config.h` manually to change the build configuration. As mentioned
+before Linux is currently the only supported platform.
+
+Running `make` should build a `dist` folder which contains the `bin` for the
+associated executables. These executable are portable so they can be moved
+anyware.
+
+# Copyright
+The Hugs 98 system is Copyright (c) Mark P Jones, Alastair Reid, the
+Yale Haskell Group, and the OGI School of Science & Engineering at OHSU,
+1994-2005, All rights reserved.  It is distributed as free software under
+the license in the file "License", which is included in the distribution.
