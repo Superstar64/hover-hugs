@@ -10,15 +10,13 @@
 static const char HUGSPATH[] = ".:{Home}/lib/hugs/packages/*:{Hugs}/packages/*";
 static const char HUGSSUFFIXES[] = ".hs:.lhs";
 
+/* Define to true if you want the small startup banner. */
 enum { SMALL_BANNER = false };
 
 /* Define to true if you want filenames to be converted to normal form by
    replacing relative pathnames with absolute pathnames and eliminating .. and
    . where possible. */
-
 enum { PATH_CANONICALIZATION = false };
-
-// Flags that were preserved from the autoconf script (hopefully at least)
 
 /* If you get really desperate to understand why your Hugs programs keep
    crashing or running out of stack, you might like to set this flag and
@@ -26,15 +24,14 @@ enum { PATH_CANONICALIZATION = false };
    the objects currently under evaluation. The information isn't perfect and
    can be pretty hard to understand but it's better than a poke in the eye
    with a blunt stick. This is a very experimental feature! */
-
 enum { GIMME_STACK_DUMPS = false };
 
 
-/* Define to 1 if heap profiler can (and should) automatically invoke hp2ps to
+/* Define to true if heap profiler can (and should) automatically invoke hp2ps to
    convert heap profile (in "profile.hp") to PostScript. */
 enum { HAVE_HP2PS = false };
 
-/* Define to 1 if heap profiling should be used. */
+/* Define to true if heap profiling should be used. */
 enum { PROFILING = false };
 
 
