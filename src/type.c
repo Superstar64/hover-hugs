@@ -3814,11 +3814,11 @@ Name s; {				/* particular selector, s.	   */
     Int  o;
     Int  m;
 
-#if DEBUG_SELS
+if (DEBUG_SELS) {
     Printf("Selector %s, cns=",textToStr(name(s).text));
     printExp(stdout,cns);
     Putchar('\n');
-#endif
+}
 
     emptySubstitution();
     preds = NIL;
@@ -3903,11 +3903,11 @@ Name s; {				/* particular selector, s.	   */
     name(s).arity = 1 + length(preds);
     map1Proc(qualify,preds,alts);
 
-#if DEBUG_SELS
+if (DEBUG_SELS) {
     Printf("Inferred arity = %d, type = ",name(s).arity);
     printType(stdout,name(s).type);
     Putchar('\n');
-#endif
+}
 
     return pair(s,alts);
 }
