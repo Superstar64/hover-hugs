@@ -1763,14 +1763,14 @@ Heap    heapTopSnd;
 #endif
 Bool    consGC = TRUE;                  /* Set to FALSE to turn off gc from*/
 					/* C stack; use with extreme care! */
-#if     PROFILING
+
 Heap    heapThd, heapTopThd;            /* to keep record of producers     */
 Int     sysCount;                       /* record unattached cells         */
 Name    producer;                       /* current producer, if any        */
 Bool    profiling = FALSE;              /* should profiling be performed   */
 Int     profInterval = MAXPOSINT;       /* interval between samples        */
 FILE    *profile = 0;                   /* pointer to profiler log, if any */
-#endif
+
 Long    numCells;
 Int     numGcs;				/* number of garbage collections   */
 Int     cellsRecovered;                 /* number of cells recovered       */
@@ -1865,9 +1865,9 @@ Cell l, r; {                            /* heap, garbage collecting first  */
     freeList = snd(freeList);
     fst(c)   = l;
     snd(c)   = r;
-#if PROFILING
+if (PROFILING) {
     thd(c)   = producer;
-#endif
+}
     numCells++;
     return c;
 }
@@ -2170,13 +2170,13 @@ Void garbageCollect()     {             /* Run garbage collector ...       */
     place     = 0;
     recovered = 0;
     j         = 0;
-#if PROFILING
+if (PROFILING) {
     if (profile) {
 	sysCount = 0;
 	for (i=NAMEMIN; i<nameHw; i++)
 	    name(i).count = 0;
     }
-#endif
+}
     freeList = NIL;
     for (i=1; i<=heapSize; i++) {
 	if ((marks[place] & mask) == 0) {
@@ -2185,12 +2185,10 @@ Void garbageCollect()     {             /* Run garbage collector ...       */
 	    freeList = -i;
 	    recovered++;
 	}
-#if PROFILING
-	else if (nonNull(thd(-i)))
+	else if (PROFILING && nonNull(thd(-i)))
 	    name(thd(-i)).count++;
-	else
+	else if (PROFILING)
 	    sysCount++;
-#endif
 	mask <<= 1;
 	if (++j == bitsPerWord) {
 	    place++;
@@ -2202,7 +2200,7 @@ Void garbageCollect()     {             /* Run garbage collector ...       */
     gcRecovered(recovered);
     breakOn(breakStat);                 /* restore break trapping if nec.  */
 
-#if PROFILING
+if (PROFILING) {
     if (profile) {
 	fprintf(profile,"BEGIN_SAMPLE %ld.00\n",numReductions);
 /* For the time being, we won't include the system count in the output:
@@ -2243,7 +2241,7 @@ Void garbageCollect()     {             /* Run garbage collector ...       */
 		}
 	fprintf(profile,"END_SAMPLE %ld.00\n",numReductions);
     }
-#endif
+}
 
     /* can only return if freeList is nonempty on return. */
     if (recovered<minRecovery || isNull(freeList)) {
@@ -2254,7 +2252,6 @@ Void garbageCollect()     {             /* Run garbage collector ...       */
     cellsRecovered = recovered;
 }
 
-#if PROFILING
 Void profilerLog(s)                     /* turn heap profiling on, saving log*/
 String s; {                             /* in specified file                 */
     if ((profile=fopen(s,"w")) != NULL) {
@@ -2268,7 +2265,6 @@ String s; {                             /* in specified file                 */
 	EEND;
     }
 }
-#endif
 
 /* --------------------------------------------------------------------------
  * Code for saving last expression entered:
@@ -3332,7 +3328,7 @@ Int what; {
 			*/
 		       heapTopFst = heapFst + heapSize;
 		       heapTopSnd = heapSnd + heapSize;
-#if PROFILING
+if (PROFILING) {
 		       heapTopThd = heapThd + heapSize;
 		       if (profile) {
 			   garbageCollect();
@@ -3342,7 +3338,7 @@ Int what; {
 #endif
 			   profile = 0;
 		       }
-#endif
+}
 		       handles[HSTDIN].hmode  = HREAD;
 		       handles[HSTDIN].hbufMode = HUNKNOWN_BUFFERING;
 		       handles[HSTDOUT].hmode = HAPPEND;
@@ -3466,7 +3462,7 @@ Int what; {
 
 		       heapTopFst = heapFst + heapSize;
 		       heapTopSnd = heapSnd + heapSize;
-#if PROFILING
+if (PROFILING) {
 		       heapThd = heapAlloc(heapSize);
 		       if (heapThd==(Heap)0) {
 			   ERRMSG(0) "Cannot allocate profiler storage space"
@@ -3476,7 +3472,7 @@ Int what; {
 		       profile      = 0;
 		       if (0 == profInterval)
 			   profInterval = heapSize / DEF_PROFINTDIV;
-#endif
+}
 		       for (i=1; i<heapSize; ++i) {
 			   fst(-i) = FREECELL;
 			   snd(-i) = -(i+1);
@@ -3575,9 +3571,9 @@ Int what; {
 	               /* Let go of dynamic storage */
 	               if (heapFst) free(heapFst);
 	               if (heapSnd) free(heapSnd);
-#if PROFILING
+if (PROFILING) {
 		       if (heapThd) free(heapThd);
-#endif
+}
 		       if (dynTabClass)   freeDynTable(dynTabClass);
 		       if (dynTabInst)    freeDynTable(dynTabInst);
 		       if (dynTabHandles) freeDynTable(dynTabHandles);

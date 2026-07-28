@@ -1213,16 +1213,12 @@ Int   whnfInt;                          /* value of INTCELL (in whnf)      */
 Float whnfFloat;                        /* value of FLOATCELL (in whnf)    */
 Double whnfDouble;                      /* value of DOUBLECELL (in whnf)   */
 Long  numReductions;                    /* number of reductions counted    */
-#if PROFILING
-#define saveProducer(n)                 { Name old = producer; producer = n
-#define restoreProducer()               producer = old;                      \
+
+#define saveProducer(n)                 { Name old = producer; if(PROFILING) { producer = n; }
+#define restoreProducer()               if(PROFILING) {producer = old;                      \
 					if ((numReductions%profInterval)==0) \
 					    garbageCollect();                \
-					}
-#else
-#define saveProducer(n)                 /* nothing */
-#define restoreProducer()               /* nothing */
-#endif
+					}}
 
 static Cell    exception;               /* Exception thrown                */
 static jmp_buf *evalError = 0;          /* jump buffer for eval errors     */

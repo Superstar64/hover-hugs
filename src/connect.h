@@ -378,9 +378,7 @@ extern  String findPathname     (String);
 extern  String findMPathname    (String);
 extern  String findMInDir       (String,String);
 extern  Bool   readable         (String,Bool);
-#if PROFILING
 extern  String timeString	(Void);
-#endif
 extern  String hugsdir          (Void);
 extern  String mkFFIFilename    (String);
 extern  String mkFFIFilename2   (String);

@@ -56,10 +56,9 @@ extern Int    hpSize;                  /* Desired heap size               */
 extern String hugsEdit;                /* String for editor command       */
 
 /* The rest are conditionally supported flags: */
-#if PROFILING
+
 extern Bool profiling;                 /* TRUE => perform profiling.      */
 extern Int  profInterval;              /* interval between samples        */
-#endif
 
 extern Bool  showInstRes;              /* TRUE => show instance resolution */
 extern Bool  debugCode;		        /* TRUE => print G-code to screen  */

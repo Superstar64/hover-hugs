@@ -476,13 +476,11 @@ String def; {                   /* or: default value given by def          */
  * Get time/date stamp for inclusion in compiled files:
  * ------------------------------------------------------------------------*/
 
-#if PROFILING
 String timeString() {                   /* return time&date string         */
     time_t clock;                       /* must end with '\n' character    */
     time(&clock);
     return(ctime(&clock));
 }
-#endif
 
 /* --------------------------------------------------------------------------
  * Garbage collection notification:

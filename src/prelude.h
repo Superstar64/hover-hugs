@@ -242,9 +242,7 @@ typedef void*    Pointer;
 #define NUM_LAT1_CHARS     256
 #define NUM_EXT		   100
 
-#if PROFILING
 #define DEF_PROFINTDIV	   10		/* hpsize/this cells between samples*/
-#endif
 
 #define Pick(s,r,l)	   l
 

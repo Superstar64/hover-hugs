@@ -35,7 +35,7 @@ enum { GIMME_STACK_DUMPS = false };
 // #define HAVE_HP2PS 1
 
 /* Define to 1 if heap profiling should be used. */
-/* #undef PROFILING */
+enum { PROFILING = false };
 
 
 // Debug Options

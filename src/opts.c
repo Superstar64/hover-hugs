@@ -154,9 +154,9 @@ Void optionInfo(Void) {                 /* Print information about command */
     Printf(fmts,"Estr","Use editor setting given by str");
     Printf(fmts,"cnum","Set constraint cutoff limit");
     Printf(fmts,"Fstr","Set preprocessor filter to str");
-#if PROFILING
+if (PROFILING) {
     Printf(fmts,"dnum","Gather profiling statistics every <num> reductions\n");
-#endif
+}
 
     Printf("\nCurrent settings: ");
     togglesIn(TRUE);
@@ -175,9 +175,9 @@ Void optionInfo(Void) {                 /* Print information about command */
     printString(hugsEdit);
     Printf("\nPreprocessor    : -F");
     printString(preprocessor);
-#if PROFILING
+if (PROFILING) {
     Printf("\nProfile interval: -d%d", profiling ? profInterval : 0);
-#endif
+}
     Printf("\nCompatibility   : %s", haskell98 ? "Haskell 98 (+98)"
 					       : "Hugs Extensions (-98)");
     Putchar('\n');
@@ -284,9 +284,9 @@ String optionsToStr() {          /* convert options to string */
     PUTStr('E',hugsEdit);
     PUTInt('c',cutoff);  PUTC(' ');
     PUTStr('F',preprocessor);
-#if PROFILING
+if (PROFILING) {
     PUTInt('d',profiling ? profInterval : 0);
-#endif
+}
     TRIMSPC();
     PUTC('\0');
 
@@ -354,8 +354,8 @@ String s; {              /* return FALSE if none found.     */
 		       }
 		       return TRUE;
 
-#if PROFILING
 	    case 'd' : {                /* random choice of letter - ADR   */
+if (PROFILING) {
 			   Int i = argToInt(s+1);
 			   if (i > 0) {
 			       profiling = TRUE;
@@ -369,10 +369,9 @@ String s; {              /* return FALSE if none found.     */
 				*/
 			       profInterval = MAXPOSINT;
 			   }
+}
 		       }
 		       return TRUE;
-#endif
-
 	    case 'P' : {
                            String prelLoc;
  	                   String savedPath;

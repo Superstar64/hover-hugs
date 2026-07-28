@@ -81,12 +81,12 @@ Module m; {        /* evaluate expr and print value    */
 	EEND;
     }
   
-#if PROFILING
+if (PROFILING) {
     if (profiling)
 	profilerLog("profile.hp");
     numReductions = 0;
     garbageCollect();
-#endif
+}
 
 #if WANT_TIMER
     updateTimers();

@@ -189,14 +189,13 @@ extern   Int	     cellsRecovered;	/* cells recovered by last gc	   */
 
 #define fst(c)	     heapTopFst[c]
 #define snd(c)	     heapTopSnd[c]
-#if PROFILING
+
 extern   Heap	     heapThd, heapTopThd;
 #define thd(c)	     heapTopThd[c]
 extern   Name	     producer;
 extern   Bool        profiling;
 extern   Int 	     profInterval;
 extern   Void	     profilerLog     (String);
-#endif
 
 extern	Pair	     pair	     (Cell,Cell);
 extern  Void         garbageCollect  (Void);
@@ -661,9 +660,9 @@ struct strName {
     Int  foreignFlags;                  /* encoding safety + calling conv  */
     Prim primDef;
     Name nextNameHash;
-#if PROFILING
+// #if PROFILING
     Int  count;
-#endif
+// #endif
     List clashes;
 };
 
