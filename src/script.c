@@ -243,17 +243,6 @@ Int argc;
 String argv[]; {
     Int i;
 
-#if USE_PREFERENCES_FILE
-    extern Int     iniArgc;
-    extern String* iniArgv;
-
-    if (iniArgc > 0) {
-        /* load additional files found in the preferences file */
-        for (i=0; i<iniArgc; i++) {
-	    addScriptName(iniArgv[i],TRUE);
-        }
-    }
-#endif
     for (i=1; i<argc; ++i) {
       if (argv[i] && argv[i][0] && !isOption(argv[i])) {
 	    addScriptName(argv[i],TRUE);

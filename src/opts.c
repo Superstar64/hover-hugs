@@ -35,16 +35,6 @@ Bool showInstRes = FALSE;
 Bool printTypeUseDefaults = FALSE;
 
 
-#if USE_PREFERENCES_FILE
-/* --------------------------------------------------------------------------
- * Decls for MacOS preference file support:
- * ------------------------------------------------------------------------*/
-static Void    readPrefsFile          (FILE *);
-typedef char GVarname[2000];
-static GVarname hugsFlags = "";
-int  iniArgc;
-char iniArgv[10][33];
-#endif
 
 /* --------------------------------------------------------------------------
  * Keeping track of current file:
@@ -596,64 +586,7 @@ String argv[]; {
  *
  */
 Void readOptionSettings() {
-#if USE_PREFERENCES_FILE
-    FILE *f;
-    FileName hugsPrefsFile = "\0";
-#endif
 
-#if USE_PREFERENCES_FILE
-    if (f=fopen(PREFS_FILE_NAME,"r")) {
-           /* is preferences file in the {Current} folder? */
-	  readPrefsFile(f);
-	} else {
-          /* is preferences file in the {Hugs} folder? */
-        strcpy(hugsPrefsFile,macHugsDir);
-        strcat(hugsPrefsFile,":");
-        strcat(hugsPrefsFile,PREFS_FILE_NAME);
-        if (f=fopen(hugsPrefsFile,"r"))
-          readPrefsFile(f);
-	  } /* else: take default preferences */
-    readOptions(hugsFlags,FALSE);
-#else
     readOptions(fromEnv("HUGSFLAGS",""),FALSE);
-#endif
 }
 
-#if USE_PREFERENCES_FILE
-static Void readPrefsFile(FILE *f)
-{ GVarname line  = "";
-  int      linep = 0;
-
-  char c;
-      
-  while ( (c=fgetc(f)) != EOF && c != '\n') {     /* read HUGSFLAGS          */
-    if ((c != '\t') && (c != '\r')) {             /* skip some control chars */
-      line[linep++] = c;
-      line[linep]   = '\0';
-    }
-  }
-  strcpy(hugsFlags,line);
-    
-  iniArgc = 0;
-  do  {                                  /* read input command line files   */
-    while ((c == '\n') || (c == '\t') || (c == ' '))  /* skip blank spaces  */
-      c=fgetc(f);    
-    if (c == '"') {                      /* filename found                  */
-      linep = 0;
-      iniArgv[iniArgc][0] = '\0';
-      while ((c=fgetc(f)) != EOF && c != '"') {
-        if (linep <= 32) {              /* filename limit on a mac 32 chars */
-          iniArgv[iniArgc][linep++] = c;
-          iniArgv[iniArgc][linep]   = '\0';
-        }
-      }
-      if (c == EOF) {
-        ERRMSG(0) "Incorrect name specification in preferences file"
-		EEND;
-      } else {
-		  iniArgc++;
-	    }
-    }
-  } while ( (c = fgetc(f)) != EOF );
-}
-#endif
