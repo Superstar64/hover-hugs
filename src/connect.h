@@ -349,7 +349,6 @@ extern  Cell   evalWithNoError  (Cell);
 extern  Void   evalFails        (StackPtr);
 extern  Void   throwException   (Cell) HUGS_noreturn;
 
-#if BYTECODE_PRIMS
 extern Int     IntAt            (Addr);
 extern Float   FloatAt          (Addr);
 extern Double  DoubleAt         (Addr);
@@ -357,7 +356,6 @@ extern Cell    CellAt           (Addr);
 extern Text    TextAt           (Addr);
 extern Addr    AddrAt           (Addr);
 extern Int     InstrAt          (Addr);
-#endif /* BYTECODE_PRIMS */
 
 extern  Void   builtIn          (Int);
 extern  Void   abandon		(String,Cell);

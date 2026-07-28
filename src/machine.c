@@ -88,7 +88,6 @@ growMemory(void)
 #define instrAt(m)  memory[m].instr
 #define labAt(m)    memory[m].lab
 
-#if BYTECODE_PRIMS
 
 Int IntAt(m)
 Addr m; {
@@ -129,7 +128,6 @@ Addr m; {
     return instrAt(m);
 }
 
-#endif /* BYTECODE_PRIMS */
 
 /* --------------------------------------------------------------------------
  * Local function prototypes:

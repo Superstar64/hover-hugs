@@ -5119,7 +5119,6 @@ primFun(primGetModTime) { /* FilePath -> IO Int{-time_t-} - get the mod. time of
  * (not standard Haskell but jolly useful)
  * ------------------------------------------------------------------------*/
 
-#if INTERNAL_PRIMS
 /* --------------------------------------------------------------------------
  * Implementation of primitives which provide access to internal Hugs
  * data structures and representations from within Haskell.
@@ -5142,9 +5141,6 @@ primFun(primGetModTime) { /* FilePath -> IO Int{-time_t-} - get the mod. time of
  * ------------------------------------------------------------------------*/
 
 static Void linkInternals (Void);
-
-static Name nameLeft;			/* standard data constructors      */
-static Name nameRight;			
 
 static Void local internalControl (Int);
 static Void local internalControl(what)
@@ -5171,7 +5167,6 @@ PROTO_PRIM(primNameInfo);
 PROTO_PRIM(primNameEq);
 PROTO_PRIM(primNameString);
 
-#if BYTECODE_PRIMS
 PROTO_PRIM(primNameCode);
 PROTO_PRIM(primIntAt);
 PROTO_PRIM(primFloatAt);
@@ -5181,7 +5176,6 @@ PROTO_PRIM(primNameAt);
 PROTO_PRIM(primBytecodeAt);
 PROTO_PRIM(primTextAt);
 PROTO_PRIM(primAddrAt);
-#endif /* BYTECODE_PRIMS */
 
 static struct primitive internalPrimTable[] = {
   {"getCell",       1, primGetCell},
@@ -5192,7 +5186,6 @@ static struct primitive internalPrimTable[] = {
   {"nameInfo",      1, primNameInfo},
   {"nameEq",        2, primNameEq},
 
-#if BYTECODE_PRIMS
   {"nameCode",      1, primNameCode},
   {"intAt",         1, primIntAt},
   {"floatAt",       1, primFloatAt},
@@ -5202,7 +5195,6 @@ static struct primitive internalPrimTable[] = {
   {"bytecodeAt",    1, primBytecodeAt},
   {"textAt",        1, primTextAt},
   {"addrAt",        1, primAddrAt},
-#endif /* BYTECODE_PRIMS */
 
   {0,		    0, 0}
 };
@@ -5476,7 +5468,6 @@ primFun(primNameEq) {                  /* Compare names                    */
   BoolResult(nm1==nm2);
 }
 
-#if BYTECODE_PRIMS
 
 primFun(primNameCode) {                /* Obtain address of first bytecode */
   Name nm;                             /*  :: Name -> Addr                 */
@@ -5484,13 +5475,11 @@ primFun(primNameCode) {                /* Obtain address of first bytecode */
   IntResult(name(nm).code);
 }
 
-#endif /* BYTECODE_PRIMS */
 
 /* --------------------------------------------------------------------------
  * Operations on Addresses/Bytecodes
  * ------------------------------------------------------------------------*/
 
-#if BYTECODE_PRIMS
 
 primFun(primIntAt) {                  /* Obtain Int at address             */
   Addr m;                             /*  :: Addr -> Int                   */
@@ -5540,10 +5529,8 @@ primFun(primAddrAt) {                 /* Obtain address at address         */
   IntResult(AddrAt(m));
 }
 
-#endif /* BYTECODE_PRIMS */
 
 /*-------------------------------------------------------------------------*/
-#endif
 
 /* --------------------------------------------------------------------------
  * Array primitives:
@@ -6648,9 +6635,7 @@ Int what; {
 		       registerPrims(&iomonadPrims);
 		       registerPrims(&timePrims);
 		       registerPrims(&dirPrims);
-#if INTERNAL_PRIMS
 		       registerPrims(&internalPrims);
-#endif
 		       setCurrModule(modulePrelude);
 #define pFun(n,s,t)    addPrim(0,n=newName(findText(s),NIL),t,modulePrelude,NIL)
 		       pFun(nameFatbar,    "_FATBAR",  "fatbar");

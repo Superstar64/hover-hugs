@@ -20,10 +20,6 @@ enum { PATH_CANONICALIZATION = false };
 
 // Flags that were preserved from the autoconf script (hopefully at least)
 
-/* Define to 1 if you want to use the primitives which let you examine Hugs
-   bytecodes (requires INTERNAL_PRIMS). */
-/* #undef BYTECODE_PRIMS */
-
 /* If you get really desperate to understand why your Hugs programs keep
    crashing or running out of stack, you might like to set this flag and
    recompile Hugs. When you hit a stack error, it will print out a list of all
@@ -35,11 +31,6 @@ enum { PATH_CANONICALIZATION = false };
 /* Define to 1 if heap profiler can (and should) automatically invoke hp2ps to
    convert heap profile (in "profile.hp") to PostScript. */
 // #define HAVE_HP2PS 1
-
-/* Define to 1 if you want to use the primitives which let you examine Hugs
-   internals. */
-/* #undef INTERNAL_PRIMS */
-
 
 /* Define to 1 if heap profiling should be used. */
 /* #undef PROFILING */
