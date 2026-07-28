@@ -648,13 +648,9 @@ Void setBuffTerminal(Int fd, Bool buffered) {
 }
 
 Int getTerminalWidth() {                /* determine width of terminal     */
-#ifdef TIOCGWINSZ
     static struct winsize terminalSize;
     ioctl(fileno(stdout),TIOCGWINSZ,&terminalSize);
     return (terminalSize.ws_col==0)? 80 : terminalSize.ws_col;
-#else
-    return 80;
-#endif
 }
 
 /* --------------------------------------------------------------------------
