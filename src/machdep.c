@@ -909,16 +909,8 @@ static void* local getDLL(dll)  /* load dll */
 String dll; {
     void *instance = dlopen(dll,
 			    0
-#if defined(RTLD_LAZY) /* eg SunOS4 doesn't have RTLD_NOW */
 			    | RTLD_LAZY 
-# if defined(RTLD_GLOBAL)
 			    | RTLD_GLOBAL
-# endif
-#elif defined(RTLD_NOW)
-			    | RTLD_NOW
-#else /* eg FreeBSD doesn't have RTLD_LAZY */
-			    | 1
-#endif
 			    );
 
     if (NULL == instance) {
