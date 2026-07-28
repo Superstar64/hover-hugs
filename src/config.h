@@ -9,7 +9,6 @@
 
 #define HUGSPATH ".:{Home}/lib/hugs/packages/*:{Hugs}/packages/*"
 #define HUGSSUFFIXES ".hs:.lhs"
-#define HUGSDIR "/usr/local/lib/hugs"
 
 enum { SMALL_BANNER = false };
 
