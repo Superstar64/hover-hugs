@@ -870,9 +870,9 @@ Int  o; {
 	case TYCON     : return tycon(c).kind;
 	case EXT    : return extKind;
     }
-#if DEBUG_KINDS
+if (DEBUG_KINDS) {
     Printf("getKind c = %d, whatIs=%d\n",c,whatIs(c));
-#endif
+}
     internal("getKind");
     return STAR;/* not reached */
 }
@@ -1713,9 +1713,9 @@ Tyvar *tyv1, *tyv2; {			  /* for kind variable bindings	   */
     if (tyv1!=tyv2) {
 	tyv1->bound = aVar;
 	tyv1->offs  = tyvNum(tyv2);
-#if DEBUG_KINDS
+if (DEBUG_KINDS) {
 	Printf("vv binding kvar: _%d to _%d\n",tyvNum(tyv1),tyvNum(tyv2));
-#endif
+}
     }
     return TRUE;
 }
@@ -1727,11 +1727,11 @@ Int   o; {				/* have synonym as outermost constr*/
     if (doesntOccurIn(tyv,t,o)) {
 	tyv->bound = t;
 	tyv->offs  = o;
-#if DEBUG_KINDS
+if (DEBUG_KINDS) {
 	Printf("vt binding kind variable: _%d to ",tyvNum(tyv));
 	printType(stdout,debugType(t,o));
 	Putchar('\n');
-#endif
+}
 	return TRUE;
     }
     unifyFails = "unification would give infinite kind";
@@ -1755,13 +1755,13 @@ Int  o1,o2; {
 	if (kyv2)
 	    return kvarToTypeBind(kyv2,k1,o1);	    /* k2 variable, k1 not */
 	else {
-#if DEBUG_KINDS
+if (DEBUG_KINDS) {
 	    Printf("unifying kinds: ");
 	    printType(stdout,debugType(k1,o1));
 	    Printf(" with ");
 	    printType(stdout,debugType(k2,o2));
 	    Putchar('\n');
-#endif
+}
 	    if (k1==STAR && k2==STAR)		    /* k1, k2 not vars	   */
 		return TRUE;
 	    else if (k1==ROW && k2==ROW)

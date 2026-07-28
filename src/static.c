@@ -2090,11 +2090,11 @@ Cell c; {
     Cell h = getHead(c);
     Int  n = argCount;
 
-#if DEBUG_KINDS
+if (DEBUG_KINDS) {
     Printf("kindConstr: alpha=%d, m=%d, c=",alpha,m);
     printType(stdout,c);
     Printf("\n");
-#endif
+}
 
     switch (whatIs(h)) {
 	case POLYTYPE : if (n!=0) {
@@ -2183,11 +2183,11 @@ Cell c; {
 			 }
 	case EXT       : return extKind;
     }
-#if DEBUG_KINDS
+if (DEBUG_KINDS) {
     Printf("kindAtom(%d,whatIs(%d)) on ",alpha,whatIs(c));
     printType(stdout,c);
     Printf("\n");
-#endif
+}
     internal("kindAtom");
     return STAR;/* not reached */
 }
@@ -2245,13 +2245,13 @@ static Void local fixKinds() {		/* add kind annotations to types   */
 		break;
 	    }
 	}
-#if DEBUG_KINDS
+if (DEBUG_KINDS) {
 	Printf("Type expression: ");
 	printType(stdout,snd(pr));
 	Printf(" :: ");
 	printKind(stdout,polySigOf(snd(pr)));
 	Printf("\n");
-#endif
+}
     }
 }
 
@@ -2336,21 +2336,21 @@ static Void local genTC(c)		/* generalise kind inferred for	   */
 Cell c; {				/* given tycon/class		   */
     if (isTycon(c)) {
 	tycon(c).kind = copyKindvar(intOf(tycon(c).kind));
-#if DEBUG_KINDS
+if (DEBUG_KINDS) {
 	Printf("%s :: ",textToStr(tycon(c).text));
 	printKind(stdout,tycon(c).kind);
 	Putchar('\n');
-#endif
+}
     } else {
 	Kinds ks = cclass(c).kinds;
 	for (; nonNull(ks); ks=tl(ks)) {
 	    hd(ks) = copyKindvar(intOf(hd(ks)));
 	}
-#if DEBUG_KINDS
+if (DEBUG_KINDS) {
 	Printf("%s :: ",textToStr(cclass(c).text));
 	printKinds(stdout,cclass(c).kinds);
 	Putchar('\n');
-#endif
+}
     }
 }
 
@@ -2634,13 +2634,13 @@ Int  freedom; {
     for (inst(in).kinds = NIL; 0<freedom--; ) {
 	inst(in).kinds = cons(copyKindvar(beta+freedom),inst(in).kinds);
     }
-#if DEBUG_KINDS
+if (DEBUG_KINDS) {
     Printf("instance ");
     printPred(stdout,inst(in).head);
     Printf(" :: ");
     printKinds(stdout,inst(in).kinds);
     Putchar('\n');
-#endif
+}
     emptySubstitution();
 }
 

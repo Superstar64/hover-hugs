@@ -1465,7 +1465,7 @@ Int    o; {			      /* type inferred is (typeIs,typeOff) */
 
     clearMarks();		      /* types printed here are monotypes  */
 				      /* use marking to give sensible names*/
-#if DEBUG_KINDS
+if (DEBUG_KINDS)
 { List vs = genericVars;
   for (; nonNull(vs); vs=tl(vs)) {
      Int v = intOf(hd(vs));
@@ -1474,7 +1474,6 @@ Int    o; {			      /* type inferred is (typeIs,typeOff) */
      Putchar('\n');
   }
 }
-#endif
 
     reportTypeError(l,e,in,wh,copyType(typeIs,typeOff),copyType(t,o));
 }
@@ -3644,13 +3643,13 @@ Type t; {				/* with qualifying preds qs	   */
 	    k = ap(ka,k);
 	}
 	t = mkPolyType(k,t);
-#if DEBUG_KINDS
+if (DEBUG_KINDS) {
 	Printf("Generalized type: ");
 	printType(stdout,t);
 	Printf(" ::: ");
 	printKind(stdout,k);
 	Printf("\n");
-#endif
+}
     }
     return t;
 }

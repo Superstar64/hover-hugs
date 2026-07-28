@@ -16,7 +16,6 @@
 #include "prelude.h"
 #include "storage.h"
 
-/* #define DEBUG_KINDS    1 */
 /* #define DEBUG_DEFAULTS 1 */
 /* #define DEBUG_SELS     1 */
 /* #define DEBUG_DEPENDS  1 */
