@@ -7,8 +7,8 @@
 // {Home} gets substituted for the user's home directory
 // {Hugs} gets substituted for the `<executable folder>/../lib/hugs`
 
-#define HUGSPATH ".:{Home}/lib/hugs/packages/*:{Hugs}/packages/*"
-#define HUGSSUFFIXES ".hs:.lhs"
+static const char HUGSPATH[] = ".:{Home}/lib/hugs/packages/*:{Hugs}/packages/*";
+static const char HUGSSUFFIXES[] = ".hs:.lhs";
 
 enum { SMALL_BANNER = false };
 
