@@ -1173,13 +1173,13 @@ Bool interactive; {			/* constraints in preds		*/
     List qs        = preds;
     Bool defaulted = FALSE;
 
-#if DEBUG_DEFAULTS
+if (DEBUG_DEFAULTS) {
     Printf("Attempt to resolve variables ");
     printExp(stdout,vs);
     Printf(" with context ");
     printContext(stdout,copyPreds(preds));
     Printf("\n");
-#endif
+}
 
     resetGenerics();			/* find type variables in ps	*/
     for (; nonNull(qs); qs=tl(qs)) {
@@ -1192,18 +1192,16 @@ Bool interactive; {			/* constraints in preds		*/
     for (; nonNull(pvs); pvs=tl(pvs)) {	/* now try defaults		*/
 	Int vn = intOf(hd(pvs));
 
-#if DEBUG_DEFAULTS
+if (DEBUG_DEFAULTS) {
 	Printf("is var %d included in ",vn);
 	printExp(stdout,vs);
 	Printf("?\n");
-#endif
+}
 
 	if (!intIsMember(vn,vs))
 	    defaulted |= resolveVar(vn,interactive);
-#if DEBUG_DEFAULTS
-	else
+	else if (DEBUG_DEFAULTS)
 	    Printf("Yes, so no ambiguity!\n");
-#endif
     }
 
     return defaulted;
@@ -1228,9 +1226,9 @@ Bool interactive; {			/* by default in the context of */
      * appears only in predicates of the form (Class var).
      */
 
-#if DEBUG_DEFAULTS
+if (DEBUG_DEFAULTS) {
     Printf("Trying to default variable %d\n",vn);
-#endif
+}
 
     for (; nonNull(ps); ps=tl(ps)) {
 	Cell  pi = hd(ps);
@@ -1267,28 +1265,28 @@ Bool interactive; {			/* by default in the context of */
 
     if (aNumClass) {
 	List ds = defaultDefns;		/* N.B. guaranteed to be monotypes */
-#if DEBUG_DEFAULTS
+if (DEBUG_DEFAULTS) {
 	Printf("Default conditions met, looking for type\n");
-#endif
+}
 	for (; nonNull(ds); ds=tl(ds)) {
 	    List cs1 = cs;
 	    while (nonNull(cs1) && nonNull(entail(NIL,ap(hd(cs1),hd(ds)),0,0)))
 		cs1 = tl(cs1);
 	    if (isNull(cs1)) {
 		bindTv(vn,hd(ds),0);
-#if DEBUG_DEFAULTS
+if (DEBUG_DEFAULTS) {
 		Printf("Default type for variable %d is ",vn);
 		printType(stdout,hd(ds));
 		Printf("\n");
-#endif
+}
 		return TRUE;
 	    }
 	}
     }
 
-#if DEBUG_DEFAULTS
+if (DEBUG_DEFAULTS) {
     Printf("No default permitted/found\n");
-#endif
+}
     return FALSE;
 }
 

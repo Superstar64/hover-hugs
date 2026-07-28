@@ -67,3 +67,4 @@ enum { CHECK_TAGS = false };
 
 enum { DEBUG_TYPES = false };
 enum { DEBUG_KINDS = false };
+enum { DEBUG_DEFAULTS = false };
