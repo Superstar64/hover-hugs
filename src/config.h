@@ -64,3 +64,5 @@ enum { VERBOSE_PRINT = false };
    consistency check. This makes Hugs run very slowly - but is very effective
    at detecting and locating subtle bugs. */
 enum { CHECK_TAGS = false };
+
+enum { DEBUG_TYPES = false };

@@ -11,6 +11,7 @@
  * $Date: 2005/12/10 11:25:13 $
  * ------------------------------------------------------------------------*/
 
+#include "config.h"
 #include "prelude.h"
 #include "storage.h"
 #include "connect.h"
@@ -390,11 +391,11 @@ static Int local newVarsBind(v)        /* make new assump for pattern var  */
 Cell v; {
     Int beta = newTyvars(1);
     addVarAssump(v,mkInt(beta));
-#if DEBUG_TYPES
+if (DEBUG_TYPES) {
     Printf("variable, assume ");
     printExp(stdout,v);
     Printf(" :: _%d\n",beta);
-#endif
+}
     return beta;
 }
 
@@ -407,11 +408,11 @@ Type type; {
     if (nonNull(type) && isPolyType(type))
 	ta = pair(POLYREC,pair(ta,type));
     hd(defnBounds) = cons(pair(v,ta), hd(defnBounds));
-#if DEBUG_TYPES
+if (DEBUG_TYPES) {
     Printf("definition, assume ");
     printExp(stdout,v);
     Printf(" :: _%d\n",beta);
-#endif
+}
     bindTv(beta,typeIs,typeOff);       /* Bind beta to new type skeleton   */
 }
 
@@ -1540,30 +1541,31 @@ Type dt, it; {
 #define OLD_PATTERN 2			/* pattern, involving bound vars   */
 static int tcMode = EXPRESSION;
 
-#if DEBUG_TYPES
 static Cell local mytypeExpr	(Int,Cell);
 static Cell local typeExpr(l,e)
 Int l;
 Cell e; {
     static int number = 0;
+	int mynumber;
     Cell retv;
-    int  mynumber = number++;
+if(DEBUG_TYPES) {
+    mynumber = number++;
     STACK_CHECK
     Printf("%d) to check: ",mynumber);
     printExp(stdout,e);
     Putchar('\n');
+}
     retv = mytypeExpr(l,e);
-    Printf("%d) result: ",mynumber);
+if(DEBUG_TYPES) {
+	Printf("%d) result: ",mynumber);
     printType(stdout,debugType(typeIs,typeOff));
     Printf("\n%d) preds: ",mynumber);
     printContext(stdout,debugContext(preds));
     Putchar('\n');
+}
     return retv;
 }
 static Cell local mytypeExpr(l,e)	/* Determine type of expr/pattern  */
-#else
-static Cell local typeExpr(l,e)		/* Determine type of expr/pattern  */
-#endif
 Int  l;
 Cell e; {
     static String cond	  = "conditional";
@@ -3376,7 +3378,7 @@ Int    beta; {
     List qs;
     Type rt;
 
-#if DEBUG_TYPES
+if (DEBUG_TYPES) {
     Printf("Type check member: ");
     printExp(stdout,mem);
     Printf(" :: ");
@@ -3384,7 +3386,7 @@ Int    beta; {
     Printf("\nfor the instance: ");
     printPred(stdout,head);
     Printf("\n");
-#endif
+}
 
     instantiate(name(mem).type);	/* Find required type		   */
     o  = typeOff;
@@ -3397,11 +3399,11 @@ Int    beta; {
     qs = copyPreds(ps);
     rt = generalize(qs,liftRank2(t,o,m));
 
-#if DEBUG_TYPES
+if (DEBUG_TYPES) {
     Printf("Required type is: ");
     printType(stdout,rt);
     Printf("\n");
-#endif
+}
 
     hd(defnBounds) = NIL;		/* Type check each alternative	   */
     hd(depends)    = NODEPENDS;
@@ -3433,11 +3435,11 @@ Int    beta; {
     resetGenerics();			/* Make sure we're general enough  */
     ps = copyPreds(ps);
     t  = generalize(ps,liftRank2(t,o,m));
-#if DEBUG_TYPES
+if (DEBUG_TYPES) {
     Printf("Inferred type is: ");
     printType(stdout,t);
     Printf("\n");
-#endif
+}
     if (!sameSchemes(t,rt))
 	tooGeneral(line,mem,rt,t);
     if (nonNull(preds)) {
@@ -3593,12 +3595,12 @@ Type dt; {
 
     snd(ass) = genTest(l,v,ps,dt,aVar,intOf(defType(snd(ass))));
 
-#if DEBUG_TYPES
+if (DEBUG_TYPES) {
     printExp(stdout,v);
     Printf(" :: ");
     printType(stdout,snd(ass));
     Printf("\n");
-#endif
+}
 }
 
 static Type local genTest(l,v,ps,dt,t,o)/* Generalize and test inferred	   */

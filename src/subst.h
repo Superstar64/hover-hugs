@@ -16,7 +16,6 @@
 #include "prelude.h"
 #include "storage.h"
 
-/* #define DEBUG_TYPES    1 */
 /* #define DEBUG_KINDS    1 */
 /* #define DEBUG_DEFAULTS 1 */
 /* #define DEBUG_SELS     1 */
@@ -88,12 +87,12 @@ extern Type  dropRank1		(Type,Int,Int);
 extern Void  liftRank2Args	(List,Int,Int);
 extern Type  liftRank2		(Type,Int,Int);
 extern Type  liftRank1		(Type,Int,Int);
-#if DEBUG_TYPES
+
 extern Type  debugTyvar		(Int);
 extern Type  debugType		(Type,Int);
 extern List  debugContext	(List);
 extern Cell  debugPred		(Cell,Int);
-#endif
+
 extern Kind  copyKindvar	(Int);
 extern Kind  copyKind		(Kind,Int);
 
