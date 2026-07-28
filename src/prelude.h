@@ -200,20 +200,7 @@
 /*---------------------------------------------------------------------------
  * Preprocessor support
  *-------------------------------------------------------------------------*/
-
-/*
- * Note: initially defined as
- *   #define SUPPORT_PREPROCESSOR USE_PREPROCESSOR && (defined(HAVE_POPEN) || defined(HAVE__POPEN))
- *
- * which worked OK with GNU cpp, but MSVC didn't expand the 'defined' correctly.
- *
- */
-#if USE_PREPROCESSOR
-#  define SUPPORT_PREPROCESSOR 1
-#else
-# define SUPPORT_PREPROCESSOR 0
-#endif
-
+ 
 /*---------------------------------------------------------------------------
  * Environment variables and the registry
  *-------------------------------------------------------------------------*/

@@ -153,9 +153,7 @@ Void optionInfo(Void) {                 /* Print information about command */
     Printf(fmts,"Sstr","Set list of source file suffixes to str");
     Printf(fmts,"Estr","Use editor setting given by str");
     Printf(fmts,"cnum","Set constraint cutoff limit");
-#if SUPPORT_PREPROCESSOR
     Printf(fmts,"Fstr","Set preprocessor filter to str");
-#endif
 #if PROFILING
     Printf(fmts,"dnum","Gather profiling statistics every <num> reductions\n");
 #endif
@@ -175,10 +173,8 @@ Void optionInfo(Void) {                 /* Print information about command */
     printString(hugsSuffixes);
     Printf("\nEditor setting  : -E");
     printString(hugsEdit);
-#if SUPPORT_PREPROCESSOR
     Printf("\nPreprocessor    : -F");
     printString(preprocessor);
-#endif
 #if PROFILING
     Printf("\nProfile interval: -d%d", profiling ? profInterval : 0);
 #endif
@@ -287,9 +283,7 @@ String optionsToStr() {          /* convert options to string */
     PUTStr('S',hugsSuffixes);
     PUTStr('E',hugsEdit);
     PUTInt('c',cutoff);  PUTC(' ');
-#if SUPPORT_PREPROCESSOR
     PUTStr('F',preprocessor);
-#endif
 #if PROFILING
     PUTInt('d',profiling ? profInterval : 0);
 #endif
@@ -421,7 +415,6 @@ String s; {              /* return FALSE if none found.     */
 		       hugsEdit = strCopy(s+1);
 		       return TRUE;
 
-#if SUPPORT_PREPROCESSOR
 	    case 'F' : if (preprocessor) free(preprocessor);
 		       preprocessor = strCopy(s+1);
 		       if (preprocessor && strlen(preprocessor) == 0) {
@@ -429,7 +422,6 @@ String s; {              /* return FALSE if none found.     */
 			   preprocessor = NULL;
 		       }
 		       return TRUE;
-#endif
 
 	    case 'i' : ffiAddCppInclude(s+1);
 		       return TRUE;

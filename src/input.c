@@ -52,9 +52,7 @@ Bool literateScripts = FALSE;           /* TRUE => default to lit scripts  */
 
 String repeatStr     = 0;               /* Repeat last expr                */
 
-#if SUPPORT_PREPROCESSOR
 String preprocessor  = 0;
-#endif
 
 /* --------------------------------------------------------------------------
  * Local function prototypes:
@@ -256,7 +254,6 @@ String prompt; {                       /* standard in (i.e. console/kbd)   */
 static Bool local fileInput(nm,len)     /* prepare to input characters from*/
 String nm;                              /* named file (specified length is */
 Long   len; {                           /* used to set target for reading) */
-#if SUPPORT_PREPROCESSOR
     if (!readable(nm,FALSE)) { /* file not there */
 	inputStream = NULL;
     } else if (preprocessor) {
@@ -279,12 +276,6 @@ Long   len; {                           /* used to set target for reading) */
     } else {
 	inputStream = fopen(nm,FOPEN_MODE);
     }
-#else
-    if (nm[0] == '\0')
-	inputStream = NULL;
-    else
-	inputStream = fopen(nm,FOPEN_MODE);
-#endif
     if (inputStream) {
 	reading      = SCRIPTFILE;
 	c0           = ' ';
@@ -543,15 +534,11 @@ static Void local newlineSkip() {      /* skip `\n' (supports lit scripts) */
 static Void local closeAnyInput() {    /* Close input stream, if open,     */
     switch (reading) {                 /* or skip to end of console line   */
 	case SCRIPTFILE : if (inputStream) {
-#if SUPPORT_PREPROCESSOR
 			      if (preprocessor) {
 				  pclose(inputStream);
 			      } else {
 				  fclose(inputStream);
 			      }
-#else
-			      fclose(inputStream);
-#endif
 			      inputStream = 0;
 			  }
 			  break;

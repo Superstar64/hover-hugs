@@ -68,9 +68,7 @@ extern Bool   rootOpt;                  /* TRUE => enable root optimisation*/
 extern Bool  hereDocs;                  /* TRUE => enable `here documents' */
 
 
-#if SUPPORT_PREPROCESSOR
 extern String preprocessor;             /* preprocessor command            */
-#endif
 
 extern Bool   printing;                 /* TRUE => currently printing value*/
 
