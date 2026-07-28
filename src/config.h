@@ -12,6 +12,11 @@
 
 enum { SMALL_BANNER = false };
 
+/* Define to true if you want filenames to be converted to normal form by
+   replacing relative pathnames with absolute pathnames and eliminating .. and
+   . where possible. */
+
+enum { PATH_CANONICALIZATION = false };
 
 // Flags that were preserved from the autoconf script (hopefully at least)
 
@@ -45,12 +50,6 @@ enum { SMALL_BANNER = false };
 /* Define to 1 if you want to use the primitives which let you examine Hugs
    internals. */
 /* #undef INTERNAL_PRIMS */
-
-/* Define to 1 if you want filenames to be converted to normal form by: (a)
-   replacing relative pathnames with absolute pathnames and eliminating .. and
-   . where possible. (b) converting to lower case (only in case-insensitive
-   filesystems) */
-/* #undef PATH_CANONICALIZATION */
 
 
 /* Define to 1 if heap profiling should be used. */

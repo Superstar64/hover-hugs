@@ -127,12 +127,12 @@ String s; {
 
 static String local normPath(s) /* Try, as much as possible, to normalize  */
 String s; {                     /* a pathname in some appropriate manner.  */
-#if PATH_CANONICALIZATION
+if (PATH_CANONICALIZATION) {
     String path = RealPath(s);
     return path;
-#else /* ! PATH_CANONICALIZATION */
+} else { 
     return s;
-#endif /* ! PATH_CANONICALIZATION */
+}
 }
 
 static char   searchBuf[FILENAME_MAX+1];
