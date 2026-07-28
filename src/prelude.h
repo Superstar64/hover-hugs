@@ -129,12 +129,6 @@
 			}
 # define allowBreak()   doNothing()
 
-
-
-#ifndef SIGBREAK /* Sigh, not defined in cygwin32 beta release 16 */
-# define SIGBREAK 21
-#endif
-
 /*---------------------------------------------------------------------------
  * Floating point support
  *-------------------------------------------------------------------------*/
