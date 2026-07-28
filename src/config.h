@@ -2,7 +2,7 @@
 
 #include <stdbool.h>
 
-// Refurbished Hugs configuration file
+// Hover Hugs configuration file
 
 // {Home} gets substituted for the user's home directory
 // {Hugs} gets substituted for the `<executable folder>/../lib/hugs`
