@@ -11,6 +11,8 @@
 #define HUGSSUFFIXES ".hs:.lhs"
 #define HUGSDIR "/usr/local/lib/hugs"
 
+enum { SMALL_BANNER = false };
+
 
 // Flags that were preserved from the autoconf script (hopefully at least)
 
