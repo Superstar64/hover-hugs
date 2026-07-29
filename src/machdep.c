@@ -24,8 +24,6 @@
 #include "char.h"
 #include "evaluator.h" /* everybody() proto only */
 
-/*#define DEBUG_SEARCH*/
-
 # include <signal.h>
 # include <sys/types.h>
 # include <sys/param.h>
@@ -167,9 +165,9 @@ static Bool local tryEndings()  /* Try each of the listed endings          */
 	    if (searchPos<FILENAME_MAX)
 		searchBuf[searchPos++] = *sp;
 	searchBuf[searchPos] = '\0';
-#if DEBUG_SEARCH
+if (DEBUG_SEARCH) {
 	Printf("trying '%s'\n", searchBuf);
-#endif
+}
 	if (readable(searchBuf,TRUE))
 	    return TRUE;
 	if (*sp)
@@ -242,9 +240,9 @@ String findPathname(filename)   /* Look for a file, trying various extensions */
 String filename; {              /* Return ***input name*** if no file was found */
     searchReset(0);
     searchStr(filename);
-#if DEBUG_SEARCH
+if (DEBUG_SEARCH) {
     Printf("trying '%s'\n", searchBuf);
-#endif
+}
     if (!readable(searchBuf,TRUE) && !tryEndings())
 	searchStr("");
     return normPath(searchBuf);
