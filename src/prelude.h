@@ -139,18 +139,9 @@
 				   /* but breaks data hiding :-(	   */
 #define FloatFMT	   "%.7g"
 
-/* Is double too big for two ints?  (if so, use float instead) */
-#define DOUBLE_IS_FLOAT (__SIZEOF_DOUBLE__ > 2*__SIZEOF_INT__)
-
-#if DOUBLE_IS_FLOAT
-#define DoubleImpType	   FloatImpType
-#define DoublePro	   FloatPro
-#define DoubleFMT          FloatFMT
-#else
 #define DoubleImpType	   double
 #define DoublePro	   double
 #define DoubleFMT          "%.15g"
-#endif
 
 #include <float.h>
 
@@ -159,15 +150,9 @@
 # define HUGS_FLT_MIN_EXP  FLT_MIN_EXP
 # define HUGS_FLT_MAX_EXP  FLT_MAX_EXP
 
-#if DOUBLE_IS_FLOAT
-# define HUGS_DBL_MANT_DIG HUGS_FLT_MANT_DIG
-# define HUGS_DBL_MIN_EXP  HUGS_FLT_MIN_EXP
-# define HUGS_DBL_MAX_EXP  HUGS_FLT_MAX_EXP
-#else
 # define HUGS_DBL_MANT_DIG DBL_MANT_DIG
 # define HUGS_DBL_MIN_EXP  DBL_MIN_EXP
 # define HUGS_DBL_MAX_EXP  DBL_MAX_EXP
-#endif
 
 
 
