@@ -133,10 +133,6 @@
  * Floating point support
  *-------------------------------------------------------------------------*/
 
-/* Can we fit floats into ints? */
-#define BREAK_FLOATS (__SIZEOF_FLOAT__ > __SIZEOF_INT__)
-
-
 #define FloatImpType	   float
 #define FloatPro	   double  /* type to use in prototypes		   */
 				   /* strictly ansi (i.e. gcc) conforming  */

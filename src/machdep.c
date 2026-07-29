@@ -731,35 +731,6 @@ Bool   useShell; {
  * Floating point support:
  * ------------------------------------------------------------------------*/
 
-#if BREAK_FLOATS
-static union {
-    Float  flVal;
-    struct {
-	Cell flPart1,flPart2;
-    }      clVal;
-} fudgeCoerce;
-
-Cell bfTemp = NIL;
-
-Cell mkFloat(fl)
-FloatPro fl; {
-    Cell p1,p2;
-    fudgeCoerce.flVal = fl;
-    bfTemp = mkInt(fudgeCoerce.clVal.flPart1);
-    p2     = mkInt(fudgeCoerce.clVal.flPart2);
-    p1     = bfTemp;
-    bfTemp = NIL;
-    return pair(FLOATCELL,pair(p1,p2));
-}
-
-FloatPro floatOf(c)
-Cell c; {
-    fudgeCoerce.clVal.flPart1 = intOf(fst(snd(c)));
-    fudgeCoerce.clVal.flPart2 = intOf(snd(snd(c)));
-    return fudgeCoerce.flVal;
-}
-
-#else /* !BREAK_FLOATS */
 static union {
     Float flVal;
     Cell  clVal;
@@ -776,7 +747,6 @@ Cell c; {
     fudgeCoerce.clVal = snd(c);
     return fudgeCoerce.flVal;
 }
-#endif /* !BREAK_FLOATS */
 
 String floatToString(fl)                     /* Make sure that floating    */
 FloatPro fl; {                               /* point values print out in  */
@@ -1191,17 +1161,11 @@ Void machdep(what)                      /* Handle machine specific         */
 Int what; {                             /* initialisation etc..            */
     switch (what) {
 	case MARK    :
-#if BREAK_FLOATS
-		       mark(bfTemp);
-#endif
 		       mark(bdTemp);
 		       break;
 	case INSTALL : installHandlers();
 		       break;
 	case RESET   :
-#if BREAK_FLOATS
-		       bfTemp = NIL;
-#endif
 		       bdTemp = NIL;
 	case BREAK   :
 	case EXIT    : normalTerminal();

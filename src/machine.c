@@ -54,9 +54,7 @@ typedef Int Label;
 
 typedef union {
     Int   mint;
-#if !BREAK_FLOATS
     Float mfloat;
-#endif
     Cell  cell;
     Text  text;
     Addr  addr;
@@ -79,9 +77,7 @@ growMemory(void)
 }
 
 #define intAt(m)    memory[m].mint
-#if !BREAK_FLOATS
 #define floatAt(m)  memory[m].mfloat
-#endif
 #define cellAt(m)   memory[m].cell
 #define textAt(m)   memory[m].text
 #define setAddrAt(m,a) memory[m].addr = ((a)-(m))
@@ -97,11 +93,7 @@ Addr m; {
 
 Float FloatAt(m)
 Addr m; {
-#if BREAK_FLOATS
-    return floatFromParts(cellAt(m),cellAt(m+1));
-#else
     return floatAt(m);
-#endif
 }
 
 Double DoubleAt(m)

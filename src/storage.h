@@ -232,9 +232,7 @@ extern unsigned char whatCode[];
 #define HANDCELL     12		  /* IO monad Handle:	      snd :: Int   */
 #define WEAKCELL     13		  /* WeakPtr Cell:	      snd::(Cell,List)*/
 #define WEAKFIN	     14		  /* Weak pointer with fin:   snd::(k,(v,f))*/
-#if !BREAK_FLOATS
 #define FLOATCELL    15		  /* Floating pt number:      snd :: Float */
-#endif
 #define EXTCOPY	     16		  /* Copy of an Ext:	      snd :: Text  */
 #define MPCELL       17		  /* Malloc Ptr Cell:         snd :: Int   */
 #if __SIZEOF_POINTER__ == __SIZEOF_INT__
@@ -343,9 +341,6 @@ extern void growDynTable       (DynTable*);
 #define FATBAR	     42 	  /* FATBAR	snd :: (Exp,Exp)	   */
 #define LAZYPAT      43 	  /* LAZYPAT	snd :: Exp		   */
 #define DERIVE	     45		  /* DERIVE	snd :: Cell		   */
-#if BREAK_FLOATS
-#define FLOATCELL    46		  /* FLOATCELL  snd :: (Int,Int)	   */
-#endif
 
 #define POSNUM	     47		  /* POSNUM	snd :: [Int]		   */
 #define NEGNUM	     48		  /* NEGNUM	snd :: [Int]		   */
