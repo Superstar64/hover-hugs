@@ -97,9 +97,6 @@
 #define strCompare strcmp
 
 # include <ctype.h>
-#ifndef isascii
-#define  isascii(c)	(((unsigned)(c))<128)
-#endif
 
 /*---------------------------------------------------------------------------
  * Printf-related operations:
