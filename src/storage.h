@@ -919,11 +919,7 @@ extern  Cell	     applyToArgs (Cell,List);
  * ------------------------------------------------------------------------*/
 
 extern  Cell DECTABLE(cellStack);
-#ifdef  GLOBALsp
-register StackPtr    sp GLOBALsp;
-#else
 extern	StackPtr sp;
-#endif
 
 #define clearStack() sp=(-1)
 #define stackEmpty() (sp==(-1))

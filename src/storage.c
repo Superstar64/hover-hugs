@@ -1168,9 +1168,7 @@ Type tc; {
  * ------------------------------------------------------------------------*/
 
 Cell DEFTABLE(cellStack,NUM_STACK); /* Storage for cells on stack          */
-#ifndef  GLOBALsp
 StackPtr sp;                        /* stack pointer                       */
-#endif
 
 #define UPPER_DISP  5               /* # display entries on top of stack   */
 #define LOWER_DISP  5               /* # display entries on bottom of stack*/
