@@ -519,7 +519,6 @@ String s; {
 	s++;
     }
 
-#if MAXPOSINT > 1000000                 /* waste of time on 16 bit systems */
     if (*s=='M' || *s=='m') {
 	if (n > (MAXPOSINT/1000000)) {
 	    ERRMSG(0) "Option setting \"%s\" is too large", t
@@ -528,9 +527,7 @@ String s; {
 	n *= 1000000;
 	s++;
     }
-#endif
 
-#if MAXPOSINT > 1000000000
     if (*s=='G' || *s=='g') {
 	if (n > (MAXPOSINT/1000000000)) {
 	    ERRMSG(0) "Option setting \"%s\" is too large", t
@@ -539,7 +536,6 @@ String s; {
 	n *= 1000000000;
 	s++;
     }
-#endif
 
     if (*s!='\0') {
 	ERRMSG(0) "Unwanted characters after option setting \"%s\"", t
