@@ -205,11 +205,9 @@ typedef void*    Pointer;
 
 #define doNothing() do { } while (0) /* Null statement */
 
-#ifndef STD_PRELUDE
 #define STD_PRELUDE	      "Prelude"
 #define STD_PRELUDE_HUGS      "Hugs.Prelude"
 #define STD_EMPTY_MODULE      "Hugs"
-#endif
 
 #define NUM_HANDLES	   40
 #define NUM_TUPLES         100
