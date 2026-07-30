@@ -6798,7 +6798,6 @@ Cell e; {				/* to make construction and update */
  * $Date: 2003/10/14 13:56:24 $
  * ------------------------------------------------------------------------*/
 
-#ifndef SCC_C
 #define SCC_C
 #define visited(d) (isInt(DEPENDS(d)))		/* binding already visited?*/
 
@@ -6811,7 +6810,6 @@ static Int local sccMin(x,y)		/* calculate minimum of x,y	   */
 Int x, y; {				/* (unless y is zero)		   */
     return (x<=y || y==0) ? x : y;
 }
-#endif
 
 /* --------------------------------------------------------------------------
  * A couple of parts of this program require an algorithm for sorting a list
@@ -6857,21 +6855,6 @@ Cell v; {
     return low;
 }
 
-#ifdef SCC
-static List local SCC(bs)		/* sort list with added dependency */
-List bs; {				/* info into SCCs		   */
-    clearStack();
-    daSccs = NIL;			/* clear current list of SCCs	   */
-
-    for (daCount=1; nonNull(bs); bs=tl(bs))	 /* visit each binding	   */
-	if (!visited(hd(bs)))
-	    LOWLINK(hd(bs));
-
-    return rev(daSccs);			/* reverse to obtain correct order */
-}
-#endif
-
-#ifdef SCC2				/* Two argument version		   */
 static List local SCC2(bs,cs)		/* sort lists with added dependency*/
 List bs, cs; {				/* info into SCCs		   */
     clearStack();
@@ -6886,7 +6869,6 @@ List bs, cs; {				/* info into SCCs		   */
 
     return rev(daSccs);			/* reverse to obtain correct order */
 }
-#endif
 
 /*-------------------------------------------------------------------------*/
 #undef   SETDEPENDS
@@ -6911,21 +6893,6 @@ List bs, cs; {				/* info into SCCs		   */
  * $Date: 2003/10/14 13:56:24 $
  * ------------------------------------------------------------------------*/
 
-#ifndef SCC_C
-#define SCC_C
-#define visited(d) (isInt(DEPENDS(d)))		/* binding already visited?*/
-
-static Cell daSccs = NIL;
-static Int  daCount;
-
-static Int local sccMin	(Int,Int);
-
-static Int local sccMin(x,y)		/* calculate minimum of x,y	   */
-Int x, y; {				/* (unless y is zero)		   */
-    return (x<=y || y==0) ? x : y;
-}
-#endif
-
 /* --------------------------------------------------------------------------
  * A couple of parts of this program require an algorithm for sorting a list
  * of values (with some added dependency information) into a list of strongly
@@ -6970,7 +6937,6 @@ Cell v; {
     return low;
 }
 
-#ifdef SCC
 static List local SCC(bs)		/* sort list with added dependency */
 List bs; {				/* info into SCCs		   */
     clearStack();
@@ -6982,24 +6948,6 @@ List bs; {				/* info into SCCs		   */
 
     return rev(daSccs);			/* reverse to obtain correct order */
 }
-#endif
-
-#ifdef SCC2				/* Two argument version		   */
-static List local SCC2(bs,cs)		/* sort lists with added dependency*/
-List bs, cs; {				/* info into SCCs		   */
-    clearStack();
-    daSccs = NIL;			/* clear current list of SCCs	   */
-
-    for (daCount=1; nonNull(bs); bs=tl(bs))	 /* visit each binding	   */
-	if (!visited(hd(bs)))
-	    LOWLINK(hd(bs));
-    for (; nonNull(cs); cs=tl(cs))
-	if (!visited(hd(cs)))
-	    LOWLINK(hd(cs));
-
-    return rev(daSccs);			/* reverse to obtain correct order */
-}
-#endif
 
 /*-------------------------------------------------------------------------*/
 #undef   SETDEPENDS
