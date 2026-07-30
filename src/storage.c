@@ -1122,16 +1122,6 @@ Inst newInst() {                       /* Add new instance to table        */
     return instHw++;
 }
 
-#if DEBUG_DICTS
-extern Void printInst (Inst);
-
-Void printInst(in)
-Inst in; {
-    Class cl = inst(in).c;
-    Printf("%s-", textToStr(cclass(cl).text));
-    printType(stdout,inst(in).t);
-}
-#endif /* DEBUG_DICTS */
 
 Inst findFirstInst(tc)                  /* look for 1st instance involving */
 Tycon tc; {                             /* the type constructor tc         */
