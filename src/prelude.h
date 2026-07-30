@@ -219,41 +219,39 @@ typedef void*    Pointer;
 
 #define DEF_PROFINTDIV	   10		/* hpsize/this cells between samples*/
 
-#define Pick(s,r,l)	   l
+#define NUM_OBS_TAGS       1000
+#define NUM_BRKPTS         200
 
-#define NUM_OBS_TAGS       Pick(100,    200,        1000)
-#define NUM_BRKPTS         Pick(100,    200,        200)
-
-#define NUM_SCRIPTS        Pick(64,     200,        800)
-#define NUM_FIXUPS         Pick(400,    400,        1000)
-#define NUM_TYCON          Pick(60,     320,        2000)
-#define NUM_NAME           Pick(1000,   4000,       32000)
-#define NUM_CLASSES        Pick(30,     240,        1000)
-#define NUM_INSTS          Pick(200,    400,        4000)
-#define NUM_TEXT           Pick(12000,  20000,      320000)
-#define NUM_TEXTH	   Pick(1,      10,         10)
-#define NUM_TYVARS         Pick(800,    2000,       8000)
-#define NUM_STACK          Pick(1800,   16000,      160000)
-#define NUM_ADDRS          Pick(28000,  120000,     1280000)
-#define MINIMUMHEAP	   Pick(7500,   19000,      19000)
-#define MAXIMUMHEAP	   Pick(32765,  0,          0)
-#define DEFAULTHEAP        Pick(28000,  100000,      1000000)
-#define MAXPOSINT          Pick(0x7fff, 0x7fffffff, 0x7fffffff)
-#define MAXHUGSWORD        Pick(0xffffU, 0xffffffffU, 0xffffffffU)
-#define NUM_STABLEPTRS	   Pick(10,     100,        10000)
-#define NUM_MALLOCPTRS	   Pick(10,     100,        10000)
-#define NUM_DTUPLES	   Pick(3,      5,          5)
+#define NUM_SCRIPTS        800
+#define NUM_FIXUPS         1000
+#define NUM_TYCON          2000
+#define NUM_NAME           32000
+#define NUM_CLASSES        1000
+#define NUM_INSTS          4000
+#define NUM_TEXT           320000
+#define NUM_TEXTH	       10
+#define NUM_TYVARS         8000
+#define NUM_STACK          160000
+#define NUM_ADDRS          1280000
+#define MINIMUMHEAP	       19000
+#define MAXIMUMHEAP	   	   0
+#define DEFAULTHEAP        1000000
+#define MAXPOSINT          0x7fffffff
+#define MAXHUGSWORD        0xffffffffU
+#define NUM_STABLEPTRS	   10000
+#define NUM_MALLOCPTRS	   10000
+#define NUM_DTUPLES	       5
 
 /* Some infinite computations generate an infinite depth of alternations
  * between eval() and run().  If they don't use the Hugs stack or heap,
  * they will overrun the C stack, crashing the interpreter.  To protect
  * against this, we place a limit on the depth of recursion of eval().
  */
-#define MAX_EVAL_DEPTH	   Pick(1024,	4096,	    16384)
+#define MAX_EVAL_DEPTH	   16384
 
 /* Representation of Integer: requires BIGBASE == 10^BIGEXP */
-#define BIGBASE		   Pick(100,    10000,      10000)
-#define BIGEXP		   Pick(2,      4,          4)
+#define BIGBASE		       10000
+#define BIGEXP		       4
 
 #define MINNEGINT          (-MAXPOSINT-1)
 
@@ -264,10 +262,10 @@ typedef void*    Pointer;
 #define DYNDECTABLE(tab)   far *tab
 #define DEFTABLE(tab,sz)   tab[sz]
 
-#define minRecovery	   Pick(1000,  1000,       1000)
-#define bitsPerWord	   Pick(16,    32,         32)
-#define wordShift	   Pick(4,     5,          5)
-#define wordMask	   Pick(15,    31,         31)
+#define minRecovery	       1000
+#define bitsPerWord	       32
+#define wordShift	       5
+#define wordMask	       31
 
 #define bitArraySize(n)    ((n)/bitsPerWord + 1)
 #define placeInSet(n)      ((-(n)-1)>>wordShift)
