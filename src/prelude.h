@@ -133,14 +133,14 @@
  * Floating point support
  *-------------------------------------------------------------------------*/
 
-#define FloatImpType	   float
-#define FloatPro	   double  /* type to use in prototypes		   */
+typedef float FloatImpType;
+typedef double FloatPro;  /* type to use in prototypes		   */
 				   /* strictly ansi (i.e. gcc) conforming  */
 				   /* but breaks data hiding :-(	   */
 #define FloatFMT	   "%.7g"
 
-#define DoubleImpType	   double
-#define DoublePro	   double
+typedef double DoubleImpType;
+typedef double DoublePro;
 #define DoubleFMT          "%.15g"
 
 #include <float.h>
@@ -190,10 +190,10 @@ enum { HUGS_DBL_MAX_EXP = DBL_MAX_EXP };
  * General settings:
  *-------------------------------------------------------------------------*/
 
-#define Void     void   /* older compilers object to: typedef void Void;   */
+typedef void Void;
 typedef unsigned Bool;
-#define TRUE     1
-#define FALSE    0
+enum { TRUE = 1 };
+enum { FALSE = 0 };
 typedef char    *String;
 typedef int      Int;
 typedef signed char Int8;
