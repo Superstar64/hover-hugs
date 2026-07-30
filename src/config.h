@@ -52,3 +52,4 @@ enum { DEBUG_SELS = false };
 enum { DEBUG_DEPENDS = false };
 enum { DEBUG_DERIVING = false };
 enum { DEBUG_SEARCH = false };
+enum { DEBUG_SHOWUSE = false };

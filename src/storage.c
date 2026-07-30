@@ -23,8 +23,6 @@
 #include "output.h"	/* needed for DEBUG_PRINTER|PROFILING */
 #include <setjmp.h>
 
-/*#define DEBUG_SHOWUSE*/
-
 /* --------------------------------------------------------------------------
  * local function prototypes:
  * ------------------------------------------------------------------------*/
@@ -1545,13 +1543,11 @@ typedef struct strScriptStorage {      /* record of storage state prior to */
     struct primInfoDef* prims;
 } script;
 
-#ifdef  DEBUG_SHOWUSE
 static Void local showUse(msg,val,mx)
 String msg;
 Int val, mx; {
     Printf("%6s : %d of %d (%d%%)\n",msg,val,mx,(100*val)/mx);
 }
-#endif
 
 static Script scriptHw;                 /* next unused script number       */
 static script* scripts = NULL;
@@ -1563,7 +1559,7 @@ String f; {                             /* of status for later restoration  */
       growDynTable(dynTabScripts);
       scripts = (script*)(dynTabScripts->data);
     }
-#if DEBUG_SHOWUSE
+if (DEBUG_SHOWUSE) {
     showUse("Text",   textHw,           NUM_TEXT);
     showUse("Addr",   addrHw,           NUM_ADDRS);
     showUse("Module", moduleHw-MODMIN,  NUM_MODULE);
@@ -1572,7 +1568,7 @@ String f; {                             /* of status for later restoration  */
     showUse("Class",  classHw-CLASSMIN, dynTabClass->maxIdx);
     showUse("Inst",   instHw-INSTMIN,   dynTabInst->maxIdx);
     showUse("Ext",    extHw-EXTMIN,     NUM_EXT);
-#endif
+}
 
     scripts[scriptHw].file         = findText( f ? f : "<nofile>" );
     scripts[scriptHw].textHw       = textHw;
