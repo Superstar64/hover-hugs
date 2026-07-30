@@ -945,12 +945,7 @@ Bool doCommand()		    /* read and execute a command      */
 			  setModule();
 			  break;
 	    case EVAL   : 
-#if USE_THREADS
-                          startEvaluatorThread();
-			  loopInBackground();
-#else
 			  evaluator(findEvalModule());
-#endif
 			  break;
 	    case TYPEOF : 
                           showtype();

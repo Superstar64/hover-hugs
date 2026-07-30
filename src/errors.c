@@ -77,9 +77,6 @@ Int l; {
 Void errFail() {                        /* terminate error message and     */
     Putc('\n',errorStream);             /* produce exception to return to  */
     FFlush(errorStream);                /* main command loop               */
-#if USE_THREADS
-    stopEvaluatorThread();
-#endif /* USE_THREADS */
     longjmp(catch_error,1);
 }
 
@@ -100,9 +97,6 @@ String msg; {
     Printf("\n");
 
     FlushStdout();
-#if USE_THREADS
-    stopEvaluatorThread();
-#endif /* USE_THREADS */
     longjmp(catch_error,1);
 }
 
@@ -128,9 +122,6 @@ sigHandler(breakHandler) {              /* respond to break interrupt      */
     stopAnyPrinting();
     FlushStdout();
     clearerr(stdin);
-#if USE_THREADS
-    stopEvaluatorThread();
-#endif /* USE_THREADS */
     longjmp(catch_error,1);
     sigResume;/*NOTREACHED*/
 }
