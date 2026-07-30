@@ -134,11 +134,11 @@ typedef float FloatImpType;
 typedef double FloatPro;  /* type to use in prototypes		   */
 				   /* strictly ansi (i.e. gcc) conforming  */
 				   /* but breaks data hiding :-(	   */
-#define FloatFMT	   "%.7g"
+static const char FloatFMT[] =	   "%.7g";
 
 typedef double DoubleImpType;
 typedef double DoublePro;
-#define DoubleFMT          "%.15g"
+static const char DoubleFMT[] =          "%.15g";
 
 #include <float.h>
 
@@ -202,9 +202,9 @@ typedef void*    Pointer;
 
 #define doNothing() do { } while (0) /* Null statement */
 
-#define STD_PRELUDE	      "Prelude"
-#define STD_PRELUDE_HUGS      "Hugs.Prelude"
-#define STD_EMPTY_MODULE      "Hugs"
+static const char STD_PRELUDE[] = "Prelude";
+static const char STD_PRELUDE_HUGS[] = "Hugs.Prelude";
+static const char STD_EMPTY_MODULE[] = "Hugs";
 
 enum { NUM_HANDLES = 40 };
 enum { NUM_TUPLES = 100 };
