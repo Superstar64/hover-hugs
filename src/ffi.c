@@ -440,13 +440,24 @@ Int  line;
 Text e;
 List argTys;
 Type resultTy; {
-    Int  i;
+    fprintf(out,"    ");
+    foreignType(line, resultTy);
+    fprintf(out, " %s(", textToStr(e));
+    List argTys2 = argTys;
+    for(int i=1; nonNull(argTys2); argTys2=tl(argTys2),++i) {
+        foreignType(line, hd(argTys2));
+        if (nonNull(tl(argTys2))) {
+            fprintf(out,", ");
+        }
+    }
+    fprintf(out, ");\n");
+
     fprintf(out,"    ");
     if (resultTy != typeUnit) {
         fprintf(out,"res1 = ");
     }
     fprintf(out,"%s(", textToStr(e));
-    for(i=1; nonNull(argTys); argTys=tl(argTys),++i) {
+    for(int i=1; nonNull(argTys); argTys=tl(argTys),++i) {
         fprintf(out,"arg%d",i);
         if (nonNull(tl(argTys))) {
             fprintf(out,", ");

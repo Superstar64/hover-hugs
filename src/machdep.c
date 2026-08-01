@@ -1072,6 +1072,9 @@ String flags; {
  
     used    = 0;
 
+    /* Use the default c compiler */
+    /* Just assume it takes GCC flags */
+    insert("cc -shared -fPIC");
     
     /* Identify ourselves */
     insert(" -D__HUGS__");
