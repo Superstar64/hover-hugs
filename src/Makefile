@@ -17,7 +17,7 @@
 
 OPTFLAGS	= -O2
 
-LIBS		= -lreadline -lncurses -lm -ldl 
+LIBS		= -lreadline -lm -ldl 
 
 .SUFFIXES	:
 .SUFFIXES	: .c .h .o
