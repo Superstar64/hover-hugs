@@ -59,15 +59,8 @@ hugs	: $(IOBJECTS)
 		  $(CC) $(LDFLAGS) $(IOBJECTS) $(LIBS) -o hugs
 
 SERVER_OBJECTS	= server.o $(OBJECTS) 
-runhugs : runhugs.o $(SERVER_OBJECTS)
-		  $(CC) $(LDFLAGS) runhugs.o $(SERVER_OBJECTS) $(LIBS) -o runhugs
-
-ffihugs : ffihugs.o $(SERVER_OBJECTS)
-		  $(CC) $(LDFLAGS) ffihugs.o $(SERVER_OBJECTS) $(LIBS) -o ffihugs
-
-ffihugs.o : runhugs.o
-		  $(CC) -c $(CFLAGS) $(OPTFLAGS) -DFFI_COMPILER runhugs.c -o ffihugs.o
-
+runhugs : runhugs.c $(SERVER_OBJECTS)
+		  $(CC) $(LDFLAGS) runhugs.c $(SERVER_OBJECTS) $(LIBS) -o runhugs
 
 ################################################################
 # C and Yacc rules

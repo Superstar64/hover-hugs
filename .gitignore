@@ -5,5 +5,4 @@ src/unitable.c
 *.o
 src/hugs
 src/runhugs
-src/ffihugs
 dist/

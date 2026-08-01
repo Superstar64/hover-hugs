@@ -64,15 +64,17 @@ char* argv[]; {
     char*  progname;
 
     progname = argv ? argv[0] : "runhugs";
+
     if (!initSystem()) {
       fprintf(stderr,"%s: failed to initialize, exiting\n", progname);
       fflush(stderr);
       exit(1);
     }
 
-#if defined(FFI_COMPILER)
-    generateFFI = TRUE;
-#endif
+    bool ffi = argc >= 1 && strcmp(argv[1], "--ffi") == 0;
+    if(ffi) {
+        generateFFI = TRUE;
+    }
 
     /* skip over any option flags before the program name */
     {
@@ -85,6 +87,10 @@ char* argv[]; {
 	}
 	hugs_argv = argv;
 	hugs_argc = i;
+    if(ffi) {
+        hugs_argv++;
+        hugs_argc--;
+    }
 
 	argv += i;
 	argc -= i;
@@ -99,7 +105,7 @@ char* argv[]; {
 
     loadHugs(hugs_argc, hugs_argv);
 
-#if defined(FFI_COMPILER)
+    if(ffi) {
     /* all arguments following the module name are passed to the C compiler */
     {
 	int i;
@@ -109,7 +115,7 @@ char* argv[]; {
 
     hugs->loadFile(argv[0]);
     check();
-#else
+    } else {
     /* all arguments following the module name are available via getArgs */
     hugs->loadFile(argv[0]);
     check();
@@ -118,7 +124,7 @@ char* argv[]; {
     hugs->pushHVal(hugs->compileExpr("Main","main >> return () :: IO ()"));
     exitCode = hugs->doIO();
     check();
-#endif
+    }
 
 
     shutdownHugsServer(hugs);
