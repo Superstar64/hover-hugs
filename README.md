@@ -18,9 +18,6 @@ Some modules in `hugsbase` don't work because they depend on `base` modules.
 Eventually, those modules need to be removed or the original base definitions
 need to supplied somehow. At least the `Prelude` seems to work.
 
-Both `ffihugs` and `runhugs` seem to depend on these unsupported files, so this
-needs to be fixed before they can work properly.
-
 Everything under `demos/`, `tests/`, `lib/`, `docs/` and some other files
 ace complete untested and may be scrapped.
 
