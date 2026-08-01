@@ -10,7 +10,7 @@ edit.o: edit.c prelude.h config.h storage.h HsFFI.h connect.h errors.h \
  opts.h strutil.h machdep.h
 observe.o: observe.c prelude.h config.h storage.h HsFFI.h connect.h \
  command.h errors.h machdep.h builtin.h output.h observe.h
-builtin.o: builtin.c prelude.h config.h storage.h HsFFI.h connect.h \
+builtin.o: builtin.c config.h prelude.h storage.h HsFFI.h connect.h \
  errors.h machdep.h char.h builtin.h
 char.o: char.c prelude.h config.h storage.h HsFFI.h connect.h errors.h \
  char.h unitable.h
@@ -28,26 +28,26 @@ input.o: input.c prelude.h config.h storage.h HsFFI.h connect.h command.h \
  errors.h module.h script.h opts.h goal.h machdep.h char.h parser.c
 machdep.o: machdep.c prelude.h config.h storage.h HsFFI.h connect.h \
  errors.h opts.h strutil.h machdep.h char.h evaluator.h
-machine.o: machine.c prelude.h config.h storage.h HsFFI.h connect.h \
- errors.h char.h opts.h
+machine.o: machine.c config.h prelude.h storage.h HsFFI.h connect.h \
+ errors.h char.h opts.h output.h
 module.o: module.c prelude.h config.h storage.h HsFFI.h connect.h \
  errors.h module.h output.h
 opts.o: opts.c prelude.h config.h storage.h HsFFI.h connect.h errors.h \
  machdep.h strutil.h opts.h char.h
-output.o: output.c prelude.h config.h storage.h HsFFI.h connect.h \
+output.o: output.c opts.h prelude.h config.h storage.h HsFFI.h connect.h \
  errors.h output.h char.h
 plugin.o: plugin.c prelude.h config.h storage.h HsFFI.h connect.h
 script.o: script.c prelude.h config.h storage.h HsFFI.h connect.h \
  errors.h machdep.h opts.h strutil.h script.h
 static.o: static.c prelude.h config.h storage.h HsFFI.h connect.h \
  machdep.h errors.h output.h subst.h module.h opts.h goal.h
-storage.o: storage.c prelude.h config.h storage.h HsFFI.h connect.h \
+storage.o: storage.c config.h prelude.h storage.h HsFFI.h connect.h \
  opts.h errors.h machdep.h evaluator.h strutil.h output.h
 strutil.o: strutil.c prelude.h config.h storage.h HsFFI.h connect.h \
  errors.h strutil.h char.h
 subst.o: subst.c prelude.h config.h storage.h HsFFI.h connect.h errors.h \
  output.h opts.h subst.h
-type.o: type.c prelude.h config.h storage.h HsFFI.h connect.h errors.h \
+type.o: type.c config.h prelude.h storage.h HsFFI.h connect.h errors.h \
  output.h subst.h goal.h opts.h
 version.o: version.c prelude.h config.h
 parser.o: parser.c

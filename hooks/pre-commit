@@ -1,0 +1,6 @@
+#!/bin/bash
+
+set -e
+
+make -C src depend
+git add src/MkDepend.mk
