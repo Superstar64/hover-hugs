@@ -7,6 +7,14 @@ the codebase more palpable.
 * Removal of all packages except `hugsbase`
 * Complete rewrite of the build system to use standard `make`
 * The Hugs path is now relative to the executable
+
+# Internal Changes
+* Unicode table is now generated at build time
+* `ffihugs` is now a wrapper over `runhugs`
+* Header files have been made properly independent
+* Including source files no longer include other source files (TODO: `parser.c`)
+* Delete lots of unneed `#if` branches (TODO: still incomplete)
+* Convert `#define` into proper c constructors (BIG TODO: very incomplete)
 * Various other clean ups
 
 # Status
