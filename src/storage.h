@@ -72,18 +72,18 @@ extern  Text         subText            (String,Int);
  * Specification of syntax (i.e. default written form of application)
  * ------------------------------------------------------------------------*/
 
-#define MIN_PREC  0		       /* weakest binding operator	   */
-#define MAX_PREC  9		       /* strongest binding operator	   */
-#define FUN_PREC  (MAX_PREC+2)	       /* binding of function symbols	   */
-#define DEF_PREC  MAX_PREC
-#define APPLIC	  0	 	       /* written applicatively 	   */
-#define LEFT_ASS  1	 	       /* left associative infix	   */
-#define RIGHT_ASS 2	 	       /* right associative infix	   */
-#define NON_ASS   3	 	       /* non associative infix 	   */
-#define DEF_ASS   LEFT_ASS
+enum { MIN_PREC =  0 };		       /* weakest binding operator	   */
+enum { MAX_PREC =  9 };		       /* strongest binding operator	   */
+enum { FUN_PREC =  (MAX_PREC+2) };	       /* binding of function symbols	   */
+enum { DEF_PREC =  MAX_PREC };
+enum { APPLIC =	  0 };	 	       /* written applicatively 	   */
+enum { LEFT_ASS =  1 };	 	       /* left associative infix	   */
+enum { RIGHT_ASS = 2 };	 	       /* right associative infix	   */
+enum { NON_ASS =   3 };	 	       /* non associative infix 	   */
+enum { DEF_ASS =   LEFT_ASS };
 
-#define UMINUS_PREC  6			/* Change these settings at your   */
-#define UMINUS_ASSOC LEFT_ASS		/* own risk; they may not work!	   */
+enum { UMINUS_PREC =  6 };			/* Change these settings at your   */
+enum { UMINUS_ASSOC = LEFT_ASS };		/* own risk; they may not work!	   */
 
 #define assocOf(x)	((x)&NON_ASS)
 #define precOf(x)	((x)>>2)
@@ -91,38 +91,38 @@ extern  Text         subText            (String,Int);
 #define DEF_OPSYNTAX	mkSyntax(DEF_ASS,DEF_PREC)
 #define NO_SYNTAX	((Syntax)(-1))
 
-#define FFI_NOSAFETY   0
-#define FFI_SAFE       1
-#define FFI_UNSAFE     2
-#define FFI_THREADSAFE 4
+enum { FFI_NOSAFETY =   0 };
+enum { FFI_SAFE =       1 };
+enum { FFI_UNSAFE =     2 };
+enum { FFI_THREADSAFE = 4 };
 
 /* Note: cconv flags are combined with the above safety flags,
  * so need to be disjoint.
  */
-#define FFI_CCONV_UNKNOWN  0
-#define FFI_CCONV_CCALL    8
-#define FFI_CCONV_STDCALL 16
-#define FFI_CCONV_DOTNET  32
+enum { FFI_CCONV_UNKNOWN =  0 };
+enum { FFI_CCONV_CCALL =    8 };
+enum { FFI_CCONV_STDCALL = 16 };
+enum { FFI_CCONV_DOTNET =  32 };
 
-#define FFI_TYPE_UNIT      0
-#define FFI_TYPE_CHAR      1
-#define FFI_TYPE_INT       2
-#define FFI_TYPE_INT8      3
-#define FFI_TYPE_INT16     4
-#define FFI_TYPE_INT32     5
-#define FFI_TYPE_INT64     6
-#define FFI_TYPE_WORD8     7
-#define FFI_TYPE_WORD16    8
-#define FFI_TYPE_WORD32    9
-#define FFI_TYPE_WORD64   10
-#define FFI_TYPE_FLOAT    11
-#define FFI_TYPE_DOUBLE   12
-#define FFI_TYPE_BOOL     13
-#define FFI_TYPE_ADDR     14
-#define FFI_TYPE_PTR      15
-#define FFI_TYPE_FUNPTR   16
-#define FFI_TYPE_FOREIGN  17
-#define FFI_TYPE_STABLE   18
+enum { FFI_TYPE_UNIT =      0 };
+enum { FFI_TYPE_CHAR =      1 };
+enum { FFI_TYPE_INT =       2 };
+enum { FFI_TYPE_INT8 =      3 };
+enum { FFI_TYPE_INT16 =     4 };
+enum { FFI_TYPE_INT32 =     5 };
+enum { FFI_TYPE_INT64 =     6 };
+enum { FFI_TYPE_WORD8 =     7 };
+enum { FFI_TYPE_WORD16 =    8 };
+enum { FFI_TYPE_WORD32 =    9 };
+enum { FFI_TYPE_WORD64 =   10 };
+enum { FFI_TYPE_FLOAT =    11 };
+enum { FFI_TYPE_DOUBLE =   12 };
+enum { FFI_TYPE_BOOL =     13 };
+enum { FFI_TYPE_ADDR =     14 };
+enum { FFI_TYPE_PTR =      15 };
+enum { FFI_TYPE_FUNPTR =   16 };
+enum { FFI_TYPE_FOREIGN =  17 };
+enum { FFI_TYPE_STABLE =   18 };
 
 
 
@@ -211,40 +211,40 @@ extern unsigned char whatCode[];
  * and string text etc.
  * ------------------------------------------------------------------------*/
 
-#define TAGMIN	     1		  /* Box and constructor cell tag values   */
-#define BCSTAG	     30 	  /* Box=TAGMIN..BCSTAG-1		   */
+enum { TAGMIN =	     1 };		  /* Box and constructor cell tag values   */
+enum { BCSTAG =     30 };	  /* Box=TAGMIN..BCSTAG-1		   */
 #define isTag(c)     (TAGMIN<=(c) && (c)<SPECMIN) /* Tag cell values	   */
 #define isBoxTag(c)  (TAGMIN<=(c) && (c)<BCSTAG)  /* Box cell tag values   */
 #define isConTag(c)  (BCSTAG<=(c) && (c)<SPECMIN) /* Constr cell tag values*/
 #define TAG_MASK     (~0x7f)	  /* This masks 0..SPECMIN-1		   */
 
-#define INDIRECT     1		  /* Indirection node:	      snd :: Cell  */
-#define INDIRECT1    2		  /* Temporary indirection:   snd :: Cell  */
-#define FREECELL     3		  /* Free list cell:	      snd :: Cell  */
-#define VARIDCELL    4		  /* Identifier variable:     snd :: Text  */
-#define VAROPCELL    5		  /* Operator variable:       snd :: Text  */
-#define DICTVAR	     6		  /* Dictionary variable:     snd :: Text  */
-#define CONIDCELL    7		  /* Identifier constructor:  snd :: Text  */
-#define CONOPCELL    8		  /* Operator constructor:    snd :: Text  */
-#define STRCELL      9		  /* String literal:	      snd :: Text  */
-#define INTCELL	     10		  /* Int literal:	      snd :: Int   */
-#define ADDPAT	     11		  /* (_+k) pattern discr:     snd :: Int   */
-#define HANDCELL     12		  /* IO monad Handle:	      snd :: Int   */
-#define WEAKCELL     13		  /* WeakPtr Cell:	      snd::(Cell,List)*/
-#define WEAKFIN	     14		  /* Weak pointer with fin:   snd::(k,(v,f))*/
-#define FLOATCELL    15		  /* Floating pt number:      snd :: Float */
-#define EXTCOPY	     16		  /* Copy of an Ext:	      snd :: Text  */
-#define MPCELL       17		  /* Malloc Ptr Cell:         snd :: Int   */
+enum { INDIRECT =     1 };		  /* Indirection node:	      snd :: Cell  */
+enum { INDIRECT1 =    2 };		  /* Temporary indirection:   snd :: Cell  */
+enum { FREECELL =     3 };		  /* Free list cell:	      snd :: Cell  */
+enum { VARIDCELL =    4 };		  /* Identifier variable:     snd :: Text  */
+enum { VAROPCELL =    5 };		  /* Operator variable:       snd :: Text  */
+enum { DICTVAR =	     6 };		  /* Dictionary variable:     snd :: Text  */
+enum { CONIDCELL =    7 };		  /* Identifier constructor:  snd :: Text  */
+enum { CONOPCELL =    8 };		  /* Operator constructor:    snd :: Text  */
+enum { STRCELL =      9 };		  /* String literal:	      snd :: Text  */
+enum { INTCELL =	     10 };		  /* Int literal:	      snd :: Int   */
+enum { ADDPAT =	     11 };		  /* (_+k) pattern discr:     snd :: Int   */
+enum { HANDCELL =     12 };		  /* IO monad Handle:	      snd :: Int   */
+enum { WEAKCELL =     13 };		  /* WeakPtr Cell:	      snd::(Cell,List)*/
+enum { WEAKFIN =	     14 };		  /* Weak pointer with fin:   snd::(k,(v,f))*/
+enum { FLOATCELL =    15 };		  /* Floating pt number:      snd :: Float */
+enum { EXTCOPY =	     16 };		  /* Copy of an Ext:	      snd :: Text  */
+enum { MPCELL =       17 };		  /* Malloc Ptr Cell:         snd :: Int   */
 #if __SIZEOF_POINTER__ == __SIZEOF_INT__
-#define PTRCELL      18           /* C Heap Pointer:          snd ::Pointer*/
+enum { PTRCELL =      18 };           /* C Heap Pointer:          snd ::Pointer*/
 #endif
-#define IPCELL       19		  /* Imp Param Cell:	      snd :: Text  */
-#define IPVAR	     20		  /* ?x:		      snd :: Text  */
+enum { IPCELL =       19 };		  /* Imp Param Cell:	      snd :: Text  */
+enum { IPVAR =	     20 };		  /* ?x:		      snd :: Text  */
 /* CHARCELL is the whatIs code for chars; if UNICODE_CHARS is set, it
  * is also used for box cells representing character values greater than
  * or equal to NUM_SMALL_CHARS, in the same way as INTCELL.
  */
-#define CHARCELL     22		  /* Char literal:	      snd :: Char  */
+enum { CHARCELL =     22 };		  /* Char literal:	      snd :: Char  */
 
 #define textOf(c)	((Text)(snd(c)))         /* c ::  (VAR|CON)(ID|OP) */
 #define qmodOf(c)       (textOf(fst(snd(c))))    /* c ::  QUALIDENT        */
@@ -323,79 +323,79 @@ extern void growDynTable       (DynTable*);
  * element is a special cell will be treated as an application node.
  * ------------------------------------------------------------------------*/
 
-#define LETREC	     30 	  /* LETREC	snd :: ([Decl],Exp)	   */
-#define COND	     31 	  /* COND	snd :: (Exp,Exp,Exp)	   */
-#define LAMBDA	     32 	  /* LAMBDA	snd :: Alt		   */
-#define FINLIST      33 	  /* FINLIST	snd :: [Exp]		   */
-#define DOCOMP       34 	  /* DOCOMP	snd :: (Exp,[Qual])	   */
+enum { LETREC =	     30 };	  /* LETREC	snd :: ([Decl],Exp)	   */
+enum { COND =	     31 };	  /* COND	snd :: (Exp,Exp,Exp)	   */
+enum { LAMBDA =	     32 };	  /* LAMBDA	snd :: Alt		   */
+enum { FINLIST =      33 };	  /* FINLIST	snd :: [Exp]		   */
+enum { DOCOMP =       34 };	  /* DOCOMP	snd :: (Exp,[Qual])	   */
 
-#define MDOCOMP	     44		  /* MDOCOMP	snd :: (Exp,[Qual])	   */
+enum { MDOCOMP =	     44 };		  /* MDOCOMP	snd :: (Exp,[Qual])	   */
 
-#define BANG	     35		  /* BANG	snd :: Type		   */
-#define COMP         36 	  /* COMP	snd :: (Exp,[Qual])	   */
-#define ASPAT	     37 	  /* ASPAT	snd :: (Var,Exp)	   */
-#define ESIGN	     38 	  /* ESIGN	snd :: (Exp,Type)	   */
-#define RSIGN	     39 	  /* RSIGN	snd :: (Rhs,Type)	   */
-#define CASE	     40 	  /* CASE	snd :: (Exp,[Alt])	   */
-#define NUMCASE	     41		  /* NUMCASE	snd :: (Exp,Disc,Rhs)	   */
-#define FATBAR	     42 	  /* FATBAR	snd :: (Exp,Exp)	   */
-#define LAZYPAT      43 	  /* LAZYPAT	snd :: Exp		   */
-#define DERIVE	     45		  /* DERIVE	snd :: Cell		   */
+enum { BANG =	     35 };		  /* BANG	snd :: Type		   */
+enum { COMP =         36 }; 	  /* COMP	snd :: (Exp,[Qual])	   */
+enum { ASPAT =	     37 }; 	  /* ASPAT	snd :: (Var,Exp)	   */
+enum { ESIGN =	     38 }; 	  /* ESIGN	snd :: (Exp,Type)	   */
+enum { RSIGN =	     39 }; 	  /* RSIGN	snd :: (Rhs,Type)	   */
+enum { CASE =	     40 }; 	  /* CASE	snd :: (Exp,[Alt])	   */
+enum { NUMCASE =	     41 };		  /* NUMCASE	snd :: (Exp,Disc,Rhs)	   */
+enum { FATBAR =	     42 }; 	  /* FATBAR	snd :: (Exp,Exp)	   */
+enum { LAZYPAT =      43 }; 	  /* LAZYPAT	snd :: Exp		   */
+enum { DERIVE =	     45 };		  /* DERIVE	snd :: Cell		   */
 
-#define POSNUM	     47		  /* POSNUM	snd :: [Int]		   */
-#define NEGNUM	     48		  /* NEGNUM	snd :: [Int]		   */
+enum { POSNUM =	     47 };		  /* POSNUM	snd :: [Int]		   */
+enum { NEGNUM =	     48 };		  /* NEGNUM	snd :: [Int]		   */
 
-#define BOOLQUAL     49 	  /* BOOLQUAL	snd :: Exp		   */
-#define QWHERE	     50 	  /* QWHERE	snd :: [Decl]		   */
-#define FROMQUAL     51 	  /* FROMQUAL	snd :: (Exp,Exp)	   */
-#define DOQUAL	     52		  /* DOQUAL	snd :: Exp		   */
-#define MONADCOMP    53 	  /* MONADCOMP	snd :: ((m,m0),(Exp,[Qual])*/
+enum { BOOLQUAL =     49 }; 	  /* BOOLQUAL	snd :: Exp		   */
+enum { QWHERE =	     50 }; 	  /* QWHERE	snd :: [Decl]		   */
+enum { FROMQUAL =     51 }; 	  /* FROMQUAL	snd :: (Exp,Exp)	   */
+enum { DOQUAL =	     52 };		  /* DOQUAL	snd :: Exp		   */
+enum { MONADCOMP =    53 }; 	  /* MONADCOMP	snd :: ((m,m0),(Exp,[Qual])*/
 
-#define GUARDED      54 	  /* GUARDED	snd :: [guarded exprs]	   */
+enum { GUARDED =      54 }; 	  /* GUARDED	snd :: [guarded exprs]	   */
 
-#define ARRAY        55		  /* Array	snd :: (Bounds,[Values])   */
-#define MUTVAR	     56		  /* Mutvar	snd :: Cell		   */
-#define HUGSOBJECT   57		  /* HUGSOBJECT	snd :: Cell	           */
+enum { ARRAY =        55 };		  /* Array	snd :: (Bounds,[Values])   */
+enum { MUTVAR =	     56 };		  /* Mutvar	snd :: Cell		   */
+enum { HUGSOBJECT =   57 };		  /* HUGSOBJECT	snd :: Cell	           */
 
-#define STABLENAME   58		  /* Stable Nm  snd :: Cell		   */
+enum { STABLENAME =   58 };		  /* Stable Nm  snd :: Cell		   */
 
-#define WITHEXP      59 	  /* WITH	snd :: [(Var,Exp)]	   */
+enum { WITHEXP =      59 }; 	  /* WITH	snd :: [(Var,Exp)]	   */
 
-#define POLYTYPE     60		  /* POLYTYPE	snd :: (Kind,Type)	   */
-#define QUAL	     61		  /* QUAL	snd :: ([Classes],Type)	   */
-#define RANK2	     62		  /* RANK2	snd :: (Int,Type)	   */
-#define EXIST	     63		  /* EXIST	snd :: (Int,Type)	   */
-#define POLYREC	     64		  /* POLYREC	snd :: (Int,Type)	   */
-#define BIGLAM	     65		  /* BIGLAM	snd :: (vars,patterns)	   */
-#define CDICTS	     66		  /* CDICTS	snd :: ([Pred],Type)	   */
+enum { POLYTYPE =     60 };		  /* POLYTYPE	snd :: (Kind,Type)	   */
+enum { QUAL =	     61 };		  /* QUAL	snd :: ([Classes],Type)	   */
+enum { RANK2 =	     62 };		  /* RANK2	snd :: (Int,Type)	   */
+enum { EXIST =	     63 };		  /* EXIST	snd :: (Int,Type)	   */
+enum { POLYREC =	     64 };		  /* POLYREC	snd :: (Int,Type)	   */
+enum { BIGLAM =	     65 };		  /* BIGLAM	snd :: (vars,patterns)	   */
+enum { CDICTS =	     66 };		  /* CDICTS	snd :: ([Pred],Type)	   */
 
-#define LABC	     70		  /* LABC	snd :: (con,[(Vars,Type)]) */
-#define CONFLDS	     71		  /* CONFLDS	snd :: (con,[Field])	   */
-#define UPDFLDS	     72		  /* UPDFLDS	snd :: (Exp,[con],[Field]) */
-#define RECORD	     73		  /* RECORD	snd :: [Val]		   */
-#define EXTCASE	     74		  /* EXTCASE	snd :: (Exp,Disc,Rhs)	   */
-#define RECSEL	     75		  /* RECSEL	snd :: Ext		   */
-#define IMPDEPS	     78		  /* IMPDEPS	snd :: [Binding]	   */
+enum { LABC =	     70 };		  /* LABC	snd :: (con,[(Vars,Type)]) */
+enum { CONFLDS =	     71 };		  /* CONFLDS	snd :: (con,[Field])	   */
+enum { UPDFLDS =	     72 };		  /* UPDFLDS	snd :: (Exp,[con],[Field]) */
+enum { RECORD =	     73 };		  /* RECORD	snd :: [Val]		   */
+enum { EXTCASE =	     74 };		  /* EXTCASE	snd :: (Exp,Disc,Rhs)	   */
+enum { RECSEL =	     75 };		  /* RECSEL	snd :: Ext		   */
+enum { IMPDEPS =	     78 };		  /* IMPDEPS	snd :: [Binding]	   */
 
-#define QUALIDENT    80           /* Qualified identifier  snd :: (Id,Id)  */
-#define HIDDEN       81           /* hiding import list    snd :: [Entity] */
-#define MODULEENT    82           /* module in export list snd :: con      */
+enum { QUALIDENT =    80 };           /* Qualified identifier  snd :: (Id,Id)  */
+enum { HIDDEN =       81 };           /* hiding import list    snd :: [Entity] */
+enum { MODULEENT =    82 };           /* module in export list snd :: con      */
 
-#define OBSERVEHEAD  83           /* obs. list; snd ::(first,last)         */
-#define OBSERVE      84           /* observe marker; snd :: (Cell,observe) */
-#define OBSERVESTK   85           /* observe marker on stack               */
+enum { OBSERVEHEAD =  83 };           /* obs. list; snd ::(first,last)         */
+enum { OBSERVE =      84 };           /* observe marker; snd :: (Cell,observe) */
+enum { OBSERVESTK =   85 };           /* observe marker on stack               */
 
-#define INFIX	     90		  /* INFIX	snd :: (see tidyInfix)	   */
-#define ONLY	     91		  /* ONLY	snd :: Exp		   */
-#define NEG	     92		  /* NEG	snd :: Exp		   */
+enum { INFIX =	     90 };		  /* INFIX	snd :: (see tidyInfix)	   */
+enum { ONLY =	     91 };		  /* ONLY	snd :: Exp		   */
+enum { NEG =	     92 };		  /* NEG	snd :: Exp		   */
 
-#define ZCOMP        93 	  /* ZCOMP	snd :: (Exp,[[Qual]])	   */
+enum { ZCOMP =        93 }; 	  /* ZCOMP	snd :: (Exp,[[Qual]])	   */
 
-#define DOUBLECELL   97		  /* DOUBLECELL snd :: (Int,Int)	   */
-#define I64CELL      98           /* Int/Word64 snd :: (Int,Int)           */
+enum { DOUBLECELL =   97 };		  /* DOUBLECELL snd :: (Int,Int)	   */
+enum { I64CELL =      98 };           /* Int/Word64 snd :: (Int,Int)           */
 
 #if __SIZEOF_POINTER__ != __SIZEOF_INT__
-#define PTRCELL      99           /* C Heap Pointer snd :: (Int,Int)       */
+enum  { PTRCELL =      99 };           /* C Heap Pointer snd :: (Int,Int)       */
 #endif
 
 /* Last constructor tag must be less than SPECMIN */
@@ -405,53 +405,53 @@ extern void growDynTable       (DynTable*);
  * ------------------------------------------------------------------------*/
 
 
-#define SPECMIN      129	  /* must be out of TAG_MASK range         */
+enum { SPECMIN =      129 };	  /* must be out of TAG_MASK range         */
 
-#define NONE	     129	  /* Dummy stub				   */
-#define STAR	     130	  /* Representing the kind of types	   */
-#define ROW	     131	  /* Representing the kind of rows	   */
-#define WILDCARD     132	  /* Wildcard pattern			   */
+enum { NONE =	     129 };	  /* Dummy stub				   */
+enum { STAR =	     130 };	  /* Representing the kind of types	   */
+enum { ROW =	     131 };	  /* Representing the kind of rows	   */
+enum { WILDCARD =     132 };	  /* Wildcard pattern			   */
 
-#define SKOLEM	     133	  /* Skolem constant			   */
+enum { SKOLEM =	     133 };	  /* Skolem constant			   */
 
-#define DOTDOT       134          /* ".." in import/export list            */
+enum { DOTDOT =       134 };          /* ".." in import/export list            */
 
-#define ZERONUM      136	  /* The zero bignum (see POSNUM, NEGNUM)  */
+enum { ZERONUM =      136 };	  /* The zero bignum (see POSNUM, NEGNUM)  */
 
-#define NAME	     138	  /* whatIs code for isName		   */
-#define TYCON	     139	  /* whatIs code for isTycon		   */
-#define CLASS	     140	  /* whatIs code for isClass		   */
-#define MODULE       141          /* whatIs code for isModule              */
-#define INSTANCE     142          /* whatIs code for isInst                */
-#define TUPLE	     143	  /* whatIs code for tuple constructor	   */
-#define OFFSET	     144	  /* whatis code for offset		   */
-#define AP	     145	  /* whatIs code for application node	   */
-#define EXT	     147	  /* whatIs code for isExt		   */
+enum { NAME =	     138 };	  /* whatIs code for isName		   */
+enum { TYCON =	     139 };	  /* whatIs code for isTycon		   */
+enum { CLASS =	     140 };	  /* whatIs code for isClass		   */
+enum { MODULE =       141 };          /* whatIs code for isModule              */
+enum { INSTANCE =     142 };          /* whatIs code for isInst                */
+enum { TUPLE =	     143 };	  /* whatIs code for tuple constructor	   */
+enum { OFFSET =	     144 };	  /* whatis code for offset		   */
+enum { AP =	     145 };	  /* whatIs code for application node	   */
+enum { EXT =	     147 };	  /* whatIs code for isExt		   */
 
-#define SIGDECL      148	  /* Signature declaration		   */
-#define FIXDECL      149	  /* Fixity declaration			   */
-#define FUNBIND	     150	  /* Function binding			   */
-#define PATBIND	     151	  /* Pattern binding			   */
+enum { SIGDECL =      148 };	  /* Signature declaration		   */
+enum { FIXDECL =      149 };	  /* Fixity declaration			   */
+enum { FUNBIND =	     150 };	  /* Function binding			   */
+enum { PATBIND =	     151 };	  /* Pattern binding			   */
 
-#define DATATYPE     158	  /* Datatype type constructor		   */
-#define NEWTYPE	     159	  /* Newtype type constructor		   */
-#define SYNONYM	     160	  /* Synonym type constructor		   */
-#define RESTRICTSYN  161	  /* Synonym with restricted scope	   */
+enum { DATATYPE =     158 };	  /* Datatype type constructor		   */
+enum { NEWTYPE =	     159 };	  /* Newtype type constructor		   */
+enum { SYNONYM =	     160 };	  /* Synonym type constructor		   */
+enum { RESTRICTSYN =  161 };	  /* Synonym with restricted scope	   */
 
-#define NODEPENDS    163	  /* Stop calculation of deps in type check*/
-#define PREDEFINED   164	  /* Predefined name, not yet filled       */
+enum { NODEPENDS =    163 };	  /* Stop calculation of deps in type check*/
+enum { PREDEFINED =   164 };	  /* Predefined name, not yet filled       */
 
 
 /* --------------------------------------------------------------------------
  * Tuple data/type constructors:
  * ------------------------------------------------------------------------*/
 
-#define TUPMIN	     201
+enum { TUPMIN =	     201 };
 #define isTuple(c)   (TUPMIN<=(c) && (c)<EXTMIN)
 #define mkTuple(n)   (TUPMIN+(n))
 #define tupleOf(n)   ((Int)((n)-TUPMIN))
 
-#define EXTMIN	     (TUPMIN+NUM_TUPLES)
+enum { EXTMIN =	     (TUPMIN+NUM_TUPLES) };
 #define isExt(c)     (EXTMIN<=(c) && (c)<OFFMIN)
 #define extText(e)   tabExt[(e)-EXTMIN]
 #define extField(c)  arg(fun(c))
@@ -464,7 +464,7 @@ extern Ext           mkExt (Text);
  * Offsets: (generic types/stack offsets)
  * ------------------------------------------------------------------------*/
 
-#define OFFMIN	     (EXTMIN+NUM_EXT)
+enum { OFFMIN =	     (EXTMIN+NUM_EXT) };
 #define isOffset(c)  (OFFMIN<=(c) && (c)<MODMIN)
 #define offsetOf(c)  ((c)-OFFMIN)
 #define mkOffset(o)  (OFFMIN+(o))
@@ -473,7 +473,7 @@ extern Ext           mkExt (Text);
  * Observations
  * ------------------------------------------------------------------------*/
 
-#define OBSMIN	      (OFFMIN+NUM_OFFSETS)
+enum { OBSMIN =	      (OFFMIN+NUM_OFFSETS) };
 #define observe(n)    tabObserve[(n)-OBSMIN]
 
 struct strObserve {
@@ -502,7 +502,7 @@ extern Void      insertAfterObs   (Cell,Cell);
  * Breakpoints
  * ------------------------------------------------------------------------*/
 
-#define BRKMIN	      (OBSMIN+NUM_OBS_TAGS)
+enum { BRKMIN =	      (OBSMIN+NUM_OBS_TAGS) };
 #define breakpt(n)    tabBreakpt[(n)-BRKMIN]
 
 struct strBreakpt {
@@ -520,7 +520,7 @@ extern Void     setBreakCount   (String,Int);
  * Modules:
  * ------------------------------------------------------------------------*/
 
-#define MODMIN        (BRKMIN+NUM_BRKPTS)
+enum { MODMIN =        (BRKMIN+NUM_BRKPTS) };
 
 #define isModule(c)   (MODMIN<=(c) && (c)<TYCMIN)
 #define mkModule(n)   (MODMIN+(n))
@@ -586,7 +586,7 @@ extern List   getModuleImports (Module);
  * Type constructor names:
  * ------------------------------------------------------------------------*/
 
-#define TYCMIN	     (MODMIN+NUM_MODULE)
+enum { TYCMIN =	     (MODMIN+NUM_MODULE) };
 #define isTycon(c)   (TYCMIN<=(c) && (c)<NAMEMIN)
 #define mkTycon(n)   (TCMIN+(n))
 #define tycon(n)     tabTycon[(n)-TYCMIN]
@@ -625,7 +625,7 @@ extern Tycon addPrimTycon (Text,Kind,Int,Cell,Cell);
  * Globally defined name values:
  * ------------------------------------------------------------------------*/
 
-#define NAMEMIN      (TYCMIN+NUM_TYCON)
+enum { NAMEMIN =      (TYCMIN+NUM_TYCON) };
 #define isName(c)    (NAMEMIN<=(c) && (c)<INSTMIN)
 #define mkName(n)    (NAMEMIN+(n))
 #define name(n)      tabName[(n)-NAMEMIN]
@@ -667,10 +667,10 @@ extern struct strName DECTABLE(tabName);
  *		 datatypes with multiple constructors use cfunNo(n), n>=1
  */
 
-#define EXECNAME	0
-#define SELNAME		1
-#define DFUNNAME	2
-#define CFUNNAME	3
+enum { EXECNAME =	0 };
+enum { SELNAME =		1 };
+enum { DFUNNAME =	2 };
+enum { CFUNNAME =	3 };
 
 #define isSfun(n)	(name(n).number==SELNAME)
 #define isDfun(n)	(name(n).number==DFUNNAME)
@@ -700,7 +700,7 @@ extern Bool   setOldDLLFlag (Bool);
  * Type class values:
  * ------------------------------------------------------------------------*/
 
-#define INSTMIN      (NAMEMIN+NUM_NAME)	/* instances			   */
+enum { INSTMIN =      (NAMEMIN+NUM_NAME) };	/* instances			   */
 #define isInst(c)    (INSTMIN<=(c) && (c)<CLASSMIN)
 #define mkInst(n)    (INSTMIN+(n))
 #define instOf(c)    ((Int)((c)-INSTMIN))
@@ -721,7 +721,7 @@ struct strInst {
  * more type expressions
  */
 
-#define CLASSMIN     (INSTMIN+NUM_INSTS)
+enum { CLASSMIN =     (INSTMIN+NUM_INSTS) };
 #define isClass(c)   (CLASSMIN<=(c) && (c)<CHARMIN)
 #define mkClass(n)   (CLASSMIN+(n))
 #define cclass(n)    tabClass[(n)-CLASSMIN]
@@ -767,7 +767,7 @@ extern Text   findModAlias   (Text);
  * Character values:
  * ------------------------------------------------------------------------*/
 
-#define CHARMIN      (CLASSMIN+NUM_CLASSES)
+enum { CHARMIN =      (CLASSMIN+NUM_CLASSES) };
 
 
 /* --------------------------------------------------------------------------
@@ -777,7 +777,7 @@ extern Text   findModAlias   (Text);
  * as integers, with predicate, selector and constructor functions.
  * ------------------------------------------------------------------------*/
 
-#define	NUM_SHORT_CHARS	1280	/* number of one-cell characters           */
+enum {	NUM_SHORT_CHARS =	1280 };	/* number of one-cell characters           */
 				/* (Latin, Greek and Cyrillic)             */
 
 #define isShortChar(c)   ((CHARMIN<=(c))&&(INTMIN>(c)))
@@ -791,7 +791,7 @@ extern	Cell mkChar    (Int);
  * Small Integer values:
  * ------------------------------------------------------------------------*/
 
-#define INTMIN	     (CHARMIN+NUM_SHORT_CHARS)
+enum { INTMIN =	     (CHARMIN+NUM_SHORT_CHARS) };
 
 
 /* All ints out of the range defined below are boxed, so we want the biggest
@@ -799,13 +799,13 @@ extern	Cell mkChar    (Int);
  * We strike a balance by choosing an integer range of 4096.
  */
 
-#define INTMAX	     (INTMIN+4096)
-#define N_WHATCODE   (INTMAX+1)			 /* size of whatCode array */
+enum { INTMAX =	     (INTMIN+4096) };
+enum { N_WHATCODE =   (INTMAX+1) };			 /* size of whatCode array */ 
 
 #define isSmall(c)   (INTMIN<=(c))
-#define INTZERO      (INTMIN/2 + INTMAX/2)
-#define MINSMALLINT  (INTMIN - INTZERO)
-#define MAXSMALLINT  (INTMAX - INTZERO)
+enum { INTZERO =      (INTMIN/2 + INTMAX/2) };
+enum { MINSMALLINT =  (INTMIN - INTZERO) };
+enum { MAXSMALLINT =  (INTMAX - INTZERO) };
 #define mkDigit(c)   ((Cell)((c)+INTMIN))
 #define digitOf(c)   ((Int)((c)-INTMIN))
 
@@ -827,7 +827,7 @@ extern  Bool isBignum (Cell);
  * Implementation of lists:
  * ------------------------------------------------------------------------*/
 
-#define NIL	     0
+enum { NIL =	     0 };
 #define isNull(c)    ((c)==NIL)
 #define nonNull(c)   (c)
 #define cons(x,xs)   pair(x,xs)
@@ -966,9 +966,9 @@ extern Void        setScriptPrims   (void*);
  * I/O Handles:
  * ------------------------------------------------------------------------*/
 
-#define HSTDIN		0	/* Numbers for standard handles		   */
-#define HSTDOUT		1
-#define HSTDERR		2
+enum { HSTDIN =		0 };	/* Numbers for standard handles		   */
+enum { HSTDOUT =		1 };
+enum { HSTDERR =		2 };
 #define IS_STANDARD_HANDLE(h)  ((h) <= 2)
 
 struct strHandle {		/* Handle description and status flags	   */
@@ -983,25 +983,25 @@ struct strHandle {		/* Handle description and status flags	   */
     				/* This is only used in text mode.         */
 };
 
-#define HCLOSED		0000	/* no I/O permitted			   */
-#define HSEMICLOSED     0001	/* semiclosed reads only		   */
-#define HREAD		0002	/* set to enable reads from handle 	   */
-#define HWRITE		0004	/* set to enable writes to handle	   */
-#define HAPPEND		0010	/* opened in append mode		   */
-#define HREADWRITE      0020    /* set to enable both reading and writing  */
+enum { HCLOSED =		0000 };	/* no I/O permitted			   */
+enum { HSEMICLOSED =     0001 };	/* semiclosed reads only		   */
+enum { HREAD =		0002 };	/* set to enable reads from handle 	   */
+enum { HWRITE =		0004 };	/* set to enable writes to handle	   */
+enum { HAPPEND =		0010 };	/* opened in append mode		   */
+enum { HREADWRITE =      0020 };    /* set to enable both reading and writing  */
 
-#define HUNKNOWN_BUFFERING (-1) /* the buffering mode of a handle is lazily
+enum { HUNKNOWN_BUFFERING = (-1) }; /* the buffering mode of a handle is lazily
 				   determined. */
 
-#define HANDLE_NOTBUFFERED    1
-#define HANDLE_LINEBUFFERED   2
-#define HANDLE_BLOCKBUFFERED  3
+enum { HANDLE_NOTBUFFERED =    1 };
+enum { HANDLE_LINEBUFFERED =   2 };
+enum { HANDLE_BLOCKBUFFERED =  3 };
 
-#define RW_NEUTRAL            0 /* r/w stream was just opened/at EOF/seeked */
-#define RW_READING            1 /* last operation on r/w stream was reading */
-#define RW_WRITING            2 /* last operation on r/w stream was writing */
+enum { RW_NEUTRAL =            0 }; /* r/w stream was just opened/at EOF/seeked */
+enum { RW_READING =            1 }; /* last operation on r/w stream was reading */
+enum { RW_WRITING =            2 }; /* last operation on r/w stream was writing */
 
-#define	NO_HANDLE          (-1)
+enum { NO_HANDLE =          (-1) };
 
 extern unsigned long     num_handles;
 extern DynTable*         dynTabHandles;
