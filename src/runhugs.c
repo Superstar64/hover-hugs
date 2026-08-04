@@ -133,8 +133,6 @@ char* argv[]; {
     return 0;/*NOTUSED*/
 }
 
-#if WANT_TIMER
 /* dummy definition: timers are only available in the interpreter */
 void updateTimers (void);
 void updateTimers() {}
-#endif

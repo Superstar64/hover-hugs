@@ -87,10 +87,10 @@ if (PROFILING) {
     numReductions = 0;
     garbageCollect();
 }
-
-#if WANT_TIMER
+    void updateTimers();
+if (WANT_TIMER) {
     updateTimers();
-#endif
+}
     if ((t = getProgType(ks,type)) != 0) {
         if (displayIO) {
             Cell printer = namePrint;

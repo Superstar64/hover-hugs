@@ -58,7 +58,6 @@ static Void   local clearEvalModule   (Void);
 /* --------------------------------------------------------------------------
  * Optional timer hooks:
  * ------------------------------------------------------------------------*/
-#if WANT_TIMER
 /* --------------------------------------------------------------------------
  * This file provides a simple mechanism for measuring elapsed time on Unix
  * machines (more precisely, on any machine with an rusage() function).
@@ -121,7 +120,6 @@ long t; {
 }
 
 /*-------------------------------------------------------------------------*/
-#endif
 
 /* --------------------------------------------------------------------------
  * Local data areas:
@@ -924,9 +922,9 @@ Bool doCommand()		    /* read and execute a command      */
 {				    /* returns TRUE on QUIT (:quit)    */
 	Command cmd;
 	cmd = readCommand(cmds, (Char)':', (Char)'!');
-#if WANT_TIMER
+if (WANT_TIMER) {
 	updateTimers();
-#endif
+}
 	switch (cmd) {
 	    case EDIT   : editor();
 			  break;
@@ -984,11 +982,11 @@ Bool doCommand()		    /* read and execute a command      */
 	    case MAIN: runmain();
 	    	  break;
 	}
-#if WANT_TIMER
+if (WANT_TIMER) {
 	updateTimers();
 	Printf("Elapsed time (ms): %ld (user), %ld (system)\n",
 	       millisecs(userElapsed), millisecs(systElapsed));
-#endif
+}
 	return FALSE;
 }
 

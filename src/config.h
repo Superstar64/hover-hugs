@@ -34,6 +34,8 @@ enum { HAVE_HP2PS = false };
 /* Define to true if heap profiling should be used. */
 enum { PROFILING = false };
 
+/* enable evaluation timing (for benchmarking Hugs) */
+enum { WANT_TIMER = false };
 
 // Debug Options
 
