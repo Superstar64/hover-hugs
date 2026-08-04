@@ -23,35 +23,35 @@ struct cmd {
 
 extern Command readCommand (struct cmd *, Char, Char);
 
-#define EDIT    0
-#define FIND    1
-#define LOAD    2
-#define ALSO    3
-#define RELOAD  4
-#define EVAL    5
-#define TYPEOF  6
-#define HELP    7
-#define NAMES   8
-#define BADCMD  9
-#define SET     10
-#define QUIT    11
-#define SYSTEM  12
-#define CHGDIR  13
-#define INFO    14
-#define COLLECT 15
-#define SETMODULE 16
-#define BROWSE  17
-#define XPLAIN  18
-#define PNTVER  19
-#define NOCMD   20
-#define MAIN    22
+enum { EDIT =    0 };
+enum { FIND =    1 };
+enum { LOAD =    2 };
+enum { ALSO =    3 };
+enum { RELOAD =  4 };
+enum { EVAL =    5 };
+enum { TYPEOF =  6 };
+enum { HELP =    7 };
+enum { NAMES =   8 };
+enum { BADCMD =  9 };
+enum { SET =     10 };
+enum { QUIT =    11 };
+enum { SYSTEM =  12 };
+enum { CHGDIR =  13 };
+enum { INFO =    14 };
+enum { COLLECT = 15 };
+enum { SETMODULE = 16 };
+enum { BROWSE =  17 };
+enum { XPLAIN =  18 };
+enum { PNTVER =  19 };
+enum { NOCMD =   20 };
+enum { MAIN =    22 };
 
 /*-------------------------------------------------------------------------*
  * Commands available after breakpoint                                     *
  *-------------------------------------------------------------------------*/
-#define BRK_DISPLAY     0
-#define BRK_CONTINUE    1
-#define BRK_SET         2
-#define BRK_RESET       3
+enum { BRK_DISPLAY =     0 };
+enum { BRK_CONTINUE =    1 };
+enum { BRK_SET =         2 };
+enum { BRK_RESET =       3 };
 
 /*-------------------------------------------------------------------------*/
