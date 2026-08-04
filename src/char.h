@@ -25,19 +25,19 @@ extern	Bool		charTabBuilt;
 extern  unsigned char   charTable[];
 
 /* cf HS_CHAR_MAX in HsFFI.h */
-#define	MAXCHARVAL	0x10FFFF
+enum {	MAXCHARVAL =	0x10FFFF };
 
 #define isIn(c,x)       (charTable[(unsigned char)(c)]&(x))
 #define isLatin1(c)     (0<=(c) && (c)<NUM_LAT1_CHARS)
 
 /* character classes for lexical analysis */
-#define DIGIT           0x01
-#define SMALL           0x02
-#define LARGE           0x04
-#define SYMBOL          0x08
-#define IDAFTER         0x10
-#define SPACE           0x20
-#define PRINT           0x40
+enum { DIGIT =           0x01 };
+enum { SMALL =           0x02 };
+enum { LARGE =           0x04 };
+enum { SYMBOL =          0x08 };
+enum { IDAFTER =         0x10 };
+enum { SPACE =           0x20 };
+enum { PRINT =           0x40 };
 
 /* predicates for the Char module */
 
@@ -93,9 +93,8 @@ extern	Int	uni_gencat	(Char);
  * There is in general no way to recover from encoding errors.
  * ------------------------------------------------------------------------*/
 
-#define	BAD_CHAR	0xFFFD
-
-#  define MAX_CHAR_ENCODING 6
+enum {	BAD_CHAR = 	0xFFFD };
+enum { MAX_CHAR_ENCODING = 6 };
 
 extern	int	fputc_mb	(Char, FILE *);
 extern	int	fgetc_mb	(FILE *);
