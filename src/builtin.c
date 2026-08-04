@@ -6299,11 +6299,7 @@ int          n; {
      * 
      *  [6/01 --sof]
      */
-    if ( isPair(stack(root))
-#if 0 || DEBUG   
-	 || (whatIs(stack(root)) == AP)
-#endif
-	 ) {
+    if ( isPair(stack(root)) ) {
       updateRoot(top());
     }
 }
