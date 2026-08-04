@@ -227,7 +227,6 @@ static List   local mdoCleanSegment	(Triple);
 static List   local mdoNoLets		(Triple);
 static Void   local mdoComputeExports	(Triple,Cell);
 static Bool   local mdoUsedInAnySeg	(Text,List);
-/*#define DEBUG_MDO_SEGMENTS*/
 
 static List   local tcscc		(List,List);
 static List   local bscc		(List);
@@ -6078,8 +6077,8 @@ List qs; {
       The following code prints it out nicely:
     ****************************************************************/
 
-#if DEBUG_MDO_SEGMENTS
-
+if (DEBUG_MDO_SEGMENTS) {
+	Void printList(List l, Int depth);
 #define DBL(s,w)	printf(s); printList(w,50); printf("\n")
     printf("\nAfter SCC, The segments:\n");
     {   List tmp;
@@ -6102,7 +6101,7 @@ List qs; {
     }
 #undef DBL
 
-#endif
+}
 
     /* 	Now do a real clean up: all we need is rec vars and exp vars
 	for each segment. We also keep def vars.
