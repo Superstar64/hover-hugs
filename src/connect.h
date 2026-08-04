@@ -93,7 +93,7 @@ extern Name   namePermDenied;
 extern Name   nameAlreadyExists, nameAlreadyInUse, nameDoesNotExist, nameIsFull;
 extern Name   nameIllegal;
 
-#define IOArity		1		/* arity of IO actions             */
+enum { IOArity =		1 };		/* arity of IO actions             */
 
 extern Name   nameEOFErr;
 extern Name   nameProtocolError;
@@ -225,11 +225,11 @@ extern Bool  preludeLoaded;		/* TRUE => prelude has been loaded */
 /* --------------------------------------------------------------------------
  * Function prototypes etc...
  * ------------------------------------------------------------------------*/
-#define RESET   1		/* reset subsystem                         */
-#define MARK    2		/* mark parts of graph in use by subsystem */
-#define INSTALL 3		/* install subsystem (executed once only)  */
-#define EXIT	4		/* Take action immediately before exit()   */
-#define BREAK   5		/* Take action after program break	   */
+enum { RESET =   1 };		/* reset subsystem                         */
+enum { MARK =    2 };		/* mark parts of graph in use by subsystem */
+enum { INSTALL = 3 };		/* install subsystem (executed once only)  */
+enum { EXIT =	4 };		/* Take action immediately before exit()   */
+enum { BREAK =   5 };		/* Take action after program break	   */
 
 /* hugs.c exports: */
 extern  Void   shutdownHugs     (Void);
@@ -391,7 +391,7 @@ extern  List   calcFunDepsPreds (List);
 extern  Inst   findInstFor      (Cell,Int);
 
 
-#define NUMARGS         16               /* max num of args; must be 2^n    */
+enum { NUMARGS =         16 };               /* max num of args; must be 2^n    */
 #define appId(seq,arg)  (seq)*NUMARGS+(arg)
 #define argNum(n)       (n)%NUMARGS
 #define seqNum(n)       (n)/NUMARGS
