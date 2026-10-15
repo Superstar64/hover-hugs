@@ -1,6 +1,6 @@
 # Hover Hugs
-Hover Hugs is a heavily striped down version of Hugs98. It's an attempt to make
-the codebase more palpable.
+Hover Hugs is a restoration effort to make the make the Hugs codebase more
+palpable. As of now it's a heavily striped down version of Hugs98.
 
 # Changes
 * Removal of all platforms except Linux
@@ -18,7 +18,7 @@ the codebase more palpable.
 * Various other clean ups
 
 # Status
-Hover Hugs is still not is a good shape. There's still lots of unneeded
+Hugs is still not is a good shape. There's still lots of unneeded
 preprocessor conditionals, awful macro usage, and K&R definitions. A lot of
 comments are outdated too, now that a lot of platform support has been removed.
 
